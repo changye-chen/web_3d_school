@@ -373,6 +373,9 @@
 			else if(weather.snow)
 			renderSnow();
 			else {
+				//更新鼠标控制
+				controls.update();
+
 				renderer.render(scene, camera);
 				requestAnimationFrame(animate);
 			    }
@@ -388,6 +391,9 @@
                   sprite.position.y = 200;
                 }
               });
+              //更新鼠标控制
+				controls.update();
+
               renderer.render(scene, camera); //执行渲染操作
               requestAnimationFrame(renderRain);//请求再次执行渲染函数render，渲染下一帧
             var controls = new THREE.OrbitControls(camera, renderer.domElement); //创建鼠标控制对象
@@ -413,6 +419,9 @@
 			        //重要：渲染时需要更新位置（如果没有设为true,则无法显示动画）
 			        points.geometry.verticesNeedUpdate = true;
 				});
+				//更新鼠标控制
+				controls.update();
+
 				renderer.render(scene, camera);
 				requestAnimationFrame(animate);
 			}
