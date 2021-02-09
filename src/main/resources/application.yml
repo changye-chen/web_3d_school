@@ -1,0 +1,14 @@
+spring:
+  mvc:
+   static-path-pattern: /static/**
+  #开始thymeleaf设置
+  thymeleaf:
+    #禁用模板缓存
+   cache: false
+  #设置文字消息
+  messages:
+   encoding: UTF-8
+   basename: message_zh_CN
+  web:
+   resources:
+    static-locations: classpath:/static/
