@@ -170,9 +170,9 @@
 			//将模型克隆到网络中
 			meshes["school"]=models.school.mesh.clone();
 			//不知道为什么，使用这种方法，必须要有loadingManager，不然mesh为null值
-			meshes["school"].position.set(0,0,0);
-			meshes["school"].scale.set(0.001,0.001,0.001);
-			//meshes["school"],rotation.y+=Math.PI/100;
+			meshes["school"].position.set(-2.5,-10,25);
+			meshes["school"].scale.set(0.005,0.005,0.005);
+			meshes["school"].rotation.y+=Math.PI/2;
 			scene.add(meshes["school"]);
 			
             
@@ -181,13 +181,19 @@
             // meshes["Garen"].scale.set(10000,10000,10000);
             // scene.add(meshes["Garen"]);
 		}
-			
-		
+
+		//camera大小随窗口变化
+		function onResize() {
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+		}
 		
 		init();
 		function init(){
 			initLight();
 			CreatePanl();
+			initControls();
 		}
 		
 		
@@ -204,6 +210,9 @@
 				renderer.render(loadingScreen.scene,loadingScreen.camera);
 				return;
 			}
+
+			//更新鼠标控制
+			controls.update();
 
 		   	requestAnimationFrame(animate);
 			  //mesh.rotation.x += 0.01;
@@ -252,7 +261,32 @@
 							}
 
 		   }
-		   
+
+			//初始化鼠标控制
+			function initControls() {
+
+				controls = new THREE.OrbitControls(camera, renderer.domElement);
+				//设置控制器的中心点
+				//controls.target.set( 0, 5, 0 );
+				// 如果使用animate方法时，将此函数删除
+				//controls.addEventListener( 'change', render );
+				// 使动画循环使用时阻尼或自转 意思是否有惯性
+				controls.enableDamping = true;
+				//动态阻尼系数 就是鼠标拖拽旋转灵敏度
+				//controls.dampingFactor = 0.25;
+				//是否可以缩放
+				controls.enableZoom = true;
+				//是否自动旋转
+				controls.autoRotate = false;
+				controls.autoRotateSpeed = 0.5;
+				//设置相机距离原点的最远距离
+				controls.minDistance = 1;
+				//设置相机距离原点的最远距离
+				controls.maxDistance = 2000;
+				//是否开启右键拖拽
+				controls.enablePan = true;
+			}
+
 		   function keyDown(event){ //当按下键时触发
 		   	keyboard[event.keyCode]=true;
 		   }
@@ -263,6 +297,7 @@
 		   
 		   window.addEventListener('keydown',keyDown);
 		   window.addEventListener('keyup',keyUp);
+		   window.addEventListener('resize', onResize, false);
 		</script>
 	</body>
 </html>
