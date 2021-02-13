@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class RoomController {
     @RequestMapping("/room")
     public String room(){
-        return "room1";
+        return "room";
     }
 
 }
