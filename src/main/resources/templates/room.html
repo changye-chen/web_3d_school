@@ -18,7 +18,7 @@
 		</div>
 
 
-		<video id="video" ><!--autoplay controls--><!--loop crossOrigin="anonymous" playsinline style="display:none"-->
+		<video id="video" autoplay controls><!--loop crossOrigin="anonymous" playsinline style="display:none"-->
 			<source src="static/video/4.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
 		</video>
 
@@ -158,13 +158,14 @@
             //移除video标签的显示
 			document.getElementById('video').style.display = 'none';
 
+			var vedioTime=0;
 			window.onload=function() { //等所有都加载完了再执行function后面的
 				var startButton = document.getElementById('startButton');
 				startButton.addEventListener('click', function () {
 					video = document.getElementById('video');
 					video.play();
 					video.addEventListener('play', function () {
-						this.currentTime = 0.01;//从几秒开始播放
+						this.currentTime = videoTime;//从几秒开始播放
 					});
 				});
 
@@ -173,14 +174,15 @@
 				pauseButton.addEventListener('click', function () {
 					video = document.getElementById('video');
 					video.pause();
-					// video.addEventListener( 'play', function () {
-					// 	this.currentTime = 0.01;//从几秒开始播放
-					// } );
+					vedioTime=video.currentTime;
 				});
-					requestAnimationFrame(animate);
-					renderer.render(scene,camera);
+
+				video.play();//加载完后自动播放
+				requestAnimationFrame(animate);
+				renderer.render(scene,camera);
 
 			}
+
 		}
 
 
