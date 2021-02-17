@@ -8,6 +8,20 @@
 		<script th:src="@{static/libs/MTLLoader.js}"></script>
 		<script th:src="@{static/libs/OBJLoader.js}"></script>
 		<script th:src="@{static/libs/OrbitControls.js}"></script>
+
+		<div id="overlay">
+			<button id="startButton">Play</button>
+		</div>
+
+		<div id="overlay1">
+			<button id="pauseButton">Pause</button>
+		</div>
+
+
+		<video id="video" autoplay controls><!--loop crossOrigin="anonymous" playsinline style="display:none"-->
+			<source src="static/video/4.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+		</video>
+
 	</head>
 	<body>
 		<script>
@@ -65,7 +79,7 @@
 		loadingManager.onLoad=function(){  //必须是onLoad才行，不能是onload！！！
 			console.log("已下载所有资源！");
 			Resource_Loaded=true;
-			onResourceLoaded();
+			//onResourceLoaded();
 		}
 		
 		
@@ -73,8 +87,8 @@
 		//模型索引  
 		var models={
 			school:{
-				obj:"static/room2/School.obj",
-				mtl:"static/room2/School.mtl",
+				obj:"static/room/room.obj",
+				mtl:"static/room/room.mtl",
 				mesh:null,
 				receiveShadow:true,
 				castShadow:true,
@@ -87,26 +101,91 @@
 		}
 		//网格索引
 		var meshes={};
-		
-		
+
+		init();
+		function init(){
+		    initLight();
+			CreatePanl();
+			initControls();
+			initVideo();
+		}
+
+
+
+
 		//光源
 		function initLight(){ 
 		ambientLight=new THREE.AmbientLight(0xfcffbc,0.8);//浅蓝色
 		pointLight=new THREE.PointLight(0x000000,0.8,1);
 		pointLight.position.set(0,60,0);
 		pointLight.castShadow=true;
-		//pointLight.receiveShadow=true;
 		scene.add(ambientLight);
 		scene.add(pointLight);
 		}
 			
 		
 		camera.position.x = 0;
-		camera.position.y = 0;
-		camera.position.z = -70;
-		camera.lookAt(scene.position);
-	
-		
+		camera.position.y = -1.3;
+		camera.position.z = -10;
+		camera.lookAt({x:0,y:0,z:0});
+		scene.add(camera);
+
+
+
+		//加载视频
+		initVideo();
+		function initVideo() {
+
+			//辅助工具
+			var helper = new THREE.AxesHelper(50);
+			scene.add(helper);
+
+			//添加立方体
+			var geometry = new THREE.PlaneGeometry(100,150);
+
+			//获取到video对象
+			var video = document.querySelector("#video");
+			//通过video对象实例化纹理
+			var texture = new THREE.VideoTexture(video);
+			texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;//使用平铺，因为视频尺寸不一定都是标准的
+			texture.minFilter = THREE.LinearFilter;
+			material = new THREE.MeshBasicMaterial( { map: texture } );
+			var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
+
+			mesh.rotation.y=Math.PI;
+			mesh.position.set(0,0,50);
+			scene.add(mesh);
+            //移除video标签的显示
+			document.getElementById('video').style.display = 'none';
+
+			var vedioTime=0;
+			window.onload=function() { //等所有都加载完了再执行function后面的
+				var startButton = document.getElementById('startButton');
+				startButton.addEventListener('click', function () {
+					video = document.getElementById('video');
+					video.play();
+					video.addEventListener('play', function () {
+						this.currentTime = videoTime;//从几秒开始播放
+					});
+				});
+
+
+				var pauseButton = document.getElementById('pauseButton');
+				pauseButton.addEventListener('click', function () {
+					video = document.getElementById('video');
+					video.pause();
+					vedioTime=video.currentTime;
+				});
+
+				video.play();//加载完后自动播放
+				requestAnimationFrame(animate);
+				renderer.render(scene,camera);
+
+			}
+
+		}
+
+
 		//创建地平面
 		function CreatePanl() {
 		            // var floor_1 = THREE.ImageUtils.loadTexture("textures/ground/grasslight-big.jpg");
@@ -188,13 +267,6 @@
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();
 			renderer.setSize(window.innerWidth, window.innerHeight);
-		}
-		
-		init();
-		function init(){
-			initLight();
-			CreatePanl();
-			initControls();
 		}
 		
 		
@@ -295,10 +367,33 @@
 		   function keyUp(event){ //当按键结束时触发
 		   	keyboard[event.keyCode]=false;
 		   }
-		   
+
+			//鼠标点击事件
+			// function mouseClickEvent(event){
+			// 	if (!this.raycaster)
+			// 		this.raycaster = new THREE.Raycaster();
+			// 	if (!this.mouse)
+			// 		this.mouse = new THREE.Vector2();
+			//
+			// 	// 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
+			// 	this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+			// 	this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+			//
+			// 	// 通过摄像机和鼠标位置更新射线
+			// 	this.raycaster.setFromCamera(this.mouse, this.camera);
+			//
+			// 	// 计算物体和射线的焦点
+			// 	const intersects = this.raycaster.intersectObjects(this.scene.children,true);
+			//
+			// 	window.location.assign("room");
+			//
+			// }
+
+
 		   window.addEventListener('keydown',keyDown);
 		   window.addEventListener('keyup',keyUp);
 		   window.addEventListener('resize', onResize, false);
+		  // window.addEventListener('click', mouseClickEvent);
 		</script>
 	</body>
 </html>
