@@ -12,3 +12,13 @@ spring:
   web:
    resources:
     static-locations: classpath:/static/
+  datasource:
+    username: root
+    password: changye
+    url: jdbc:mysql://localhost:3306/web3dschool?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+mybatis:
+  mapper-locations: classpath:Mapper/*.xml
+  type-aliases-package: com.zytc.web_3d_school.pojo
+  configuration:
+    map-underscore-to-camel-case: true
