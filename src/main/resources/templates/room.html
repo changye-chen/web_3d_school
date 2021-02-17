@@ -8,6 +8,11 @@
 		<script th:src="@{static/libs/MTLLoader.js}"></script>
 		<script th:src="@{static/libs/OBJLoader.js}"></script>
 		<script th:src="@{static/libs/OrbitControls.js}"></script>
+		<script th:src="@{static/libs/DRACOLoader.js}"></script>
+		<script th:src="@{static/libs/draco_decoder.js}"></script>
+		<script th:src="@{static/libs/geometry_helper.js}"></script>
+		<script th:src="@{static/libs/draco_wasm_wrapper.js}"></script>
+		<script th:src="@{static/libs/draco_decoder.wasm}"></script>
 
 		<div id="overlay">
 			<button id="startButton">Play</button>
@@ -44,7 +49,7 @@
 		document.body.appendChild(renderer.domElement);
 		var pointLight;
 		var ambientLight;
-		var loadingManager=null,Resource_Loaded=false;
+		var loadingManager=null,Resource_Loaded=true;
 		var loadingScreen={  //“加载中”的场景
 				scene:new THREE.Scene(),
 				camera:new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1,100),
@@ -79,25 +84,32 @@
 		loadingManager.onLoad=function(){  //必须是onLoad才行，不能是onload！！！
 			console.log("已下载所有资源！");
 			Resource_Loaded=true;
-			//onResourceLoaded();
+			window.onload=function(){
+				//onResourceLoaded();
+			}
 		}
+
+		var modelList=[
+				{ url: "static/room/computer_room.drc", material: THREE.MeshBasicMaterial }
+			];
 		
-		
-		
-		//模型索引  
-		var models={
-			school:{
-				obj:"static/room/room.obj",
+		//模型索引
+		var model= {
+			computer_room: {
+				// obj:"static/room/room.obj",
 				mtl:"static/room/room.mtl",
-				mesh:null,
-				receiveShadow:true,
-				castShadow:true,
+				url: "static/room/computer_room.drc",
+				mesh: null,
+				material: new THREE.MeshBasicMaterial,
+				// receiveShadow:true,
+				// castShadow:true,
+				textureUrl: "static/room/computer_room.mtl",
 			},
-		// 	Garen:{    
-		// 	 	obj:"Shool/Garen.obj",
-		// 	 	mtl:"Shool/Garen_base_TX_CM.mtl",
-		// 	 	mesh:null
-		// },
+			// 	Garen:{
+			// 	 	obj:"Shool/Garen.obj",
+			// 	 	mtl:"Shool/Garen_base_TX_CM.mtl",
+			// 	 	mesh:null
+			// },
 		}
 		//网格索引
 		var meshes={};
@@ -108,6 +120,8 @@
 			CreatePanl();
 			initControls();
 			initVideo();
+			//dracoLoad();
+			//loadDrc(model['computer_room'].url);
 		}
 
 
@@ -140,8 +154,22 @@
 			var helper = new THREE.AxesHelper(50);
 			scene.add(helper);
 
+			var play=new THREE.Mesh(
+					new THREE.BoxGeometry(5,5,5),
+					new THREE.MeshBasicMaterial({color:0x00ff00})//绿色
+			)
+			play.position.set(-10,-15,20);
+			scene.add(play);
+
+			var pause=new THREE.Mesh(
+					new THREE.BoxGeometry(5,5,5),
+					new THREE.MeshBasicMaterial({color:0xff0000})//红色
+			)
+			pause.position.set(10,-15,20);
+			scene.add(pause);
+
 			//添加立方体
-			var geometry = new THREE.PlaneGeometry(100,150);
+			var geometry = new THREE.PlaneGeometry(100,100);
 
 			//获取到video对象
 			var video = document.querySelector("#video");
@@ -158,7 +186,7 @@
             //移除video标签的显示
 			document.getElementById('video').style.display = 'none';
 
-			var vedioTime=0;
+			var videoTime=0;
 			window.onload=function() { //等所有都加载完了再执行function后面的
 				var startButton = document.getElementById('startButton');
 				startButton.addEventListener('click', function () {
@@ -174,7 +202,7 @@
 				pauseButton.addEventListener('click', function () {
 					video = document.getElementById('video');
 					video.pause();
-					vedioTime=video.currentTime;
+					videoTime=video.currentTime;
 				});
 
 				video.play();//加载完后自动播放
@@ -207,53 +235,114 @@
 		        }
 		
 		 
-		//加载模型,只调用一次就够了，无论加载几个模型
-		for(var _key in models){
-		    (function(key){    
-			    //加载模型和材质---->女模特
-			    var mtlLoader=new THREE.MTLLoader(loadingManager);
-			    mtlLoader.load(models[key].mtl,function(materials){
-				    materials.preload();
-				    var objLoader=new THREE.OBJLoader(loadingManager);
-				    objLoader.setMaterials(materials);
-				    objLoader.load(models[key].obj,function(mesh){
-					    //给加载的人物模型加上阴影
-					    mesh.traverse(function(node){
-						    if(node instanceof THREE.Mesh){
-								//不给枪加阴影，给其他模型加阴影
-								node.material.transparent=true;//透明材质，可以显示树枝丫
-								if("castShadow" in models[key]) 
-								    node.castShadow=models[key].castShadow;
-								else
-								    node.castShadow=false;
-								if("receiveShadow" in models[key]) 
-								    node.receiveShadow=models[key].receiveShadow;
-								else
-								    node.receiveShadow=false;
-							    //node.castShadow=true;
-							    //node.receiveShadow=true;
-						    }//, onProgress, onError 
-					    });
-						models[key].mesh=mesh;
-				    });
-			    });
-		    })(_key)
-		}
-		
-		// // 加载 obj 文件
-		//     var loader = new THREE.OBJMTLLoader();
-		//     loader.load('MQ-9.obj', 'MQ-9.mtl', function(object) {
-		//             scene.add(object);
-		//     });
-		
+		// //加载模型,只调用一次就够了，无论加载几个模型
+		// for(var _key in modelList){
+		//     (function(key){
+		// 	    //加载模型和材质---->女模特
+		// 	    var mtlLoader=new THREE.MTLLoader(loadingManager);
+		// 	    mtlLoader.load(modelList[key].mtl,function(materials){
+		// 		    materials.preload();
+		// 		    var objLoader=new THREE.DRACOLoader(loadingManager);
+		// 		    //objLoader.setMaterials(materials);
+		// 		    objLoader.load(modelList[key].url,function(mesh){
+		// 			    //给加载的人物模型加上阴影
+		// 			    mesh.traverse(function(node){
+		// 				    if(node instanceof THREE.Mesh){
+		// 						//不给枪加阴影，给其他模型加阴影
+		// 						node.material.transparent=true;//透明材质，可以显示树枝丫
+		// 						if("castShadow" in models[key])
+		// 						    node.castShadow=models[key].castShadow;
+		// 						else
+		// 						    node.castShadow=false;
+		// 						if("receiveShadow" in models[key])
+		// 						    node.receiveShadow=models[key].receiveShadow;
+		// 						else
+		// 						    node.receiveShadow=false;
+		// 					    //node.castShadow=true;
+		// 					    //node.receiveShadow=true;
+		// 				    }//, onProgress, onError
+		// 			    });
+		// 				models[key].mesh=mesh;
+		// 		    });
+		// 	    });
+		//     })(_key)
+		// }
+
+
+
+				// function loadDrc(url) {
+				// 	var dracoLoader=new THREE.DRACOLoader(loadingManager);
+				// 	dracoLoader.load(url, function (geometry) {
+				// 		geometry.computeVertexNormals();
+				//
+				// 		var material = new THREE.MeshStandardMaterial( { vertexColors: THREE.VertexColors } );
+				// 		var mesh = new THREE.Mesh(geometry, material);
+				// 		mesh.castShadow = true;
+				// 		mesh.receiveShadow = true;
+				// 		mesh.scale.set(1, 1, 1);
+				// 		scene.add(mesh);
+				// 		camera.lookAt(mesh.position);
+				// 	})
+				// }
+
+			 var dracoLoader=new THREE.DRACOLoader(loadingManager);
+			 dracoLoader.load( 'static/room/computer_room.drc', function ( geometry ) {
+
+				geometry.computeVertexNormals();
+
+				var material = new THREE.MeshStandardMaterial( { vertexColors: THREE.VertexColors } );
+				var mesh = new THREE.Mesh( geometry, material );
+				mesh.castShadow = true;
+				mesh.receiveShadow = true;
+				scene.add( mesh );
+
+			} );
+
+			// function dracoLoad() {
+			// 	this.dracoLoader = new THREE.DRACOLoader()
+			// 	this.dracoLoader.setDecoderPath('./static/libs/')
+			// 	this.dracoLoader.setDecoderConfig({type: 'js'})
+			// 	// 加载材质
+			// 	new THREE.MTLLoader().load('/static/School/School.mtl', materialCreater => {
+			// 		materialCreater.preload()
+			// 		this.modelList.forEach(model => {
+			// 			if (model.textureUrl) { //指定纹理图片
+			// 				let uniforms =
+			// 						new THREE.TextureLoader().load(model.textureUrl)
+			// 				materialCreater.materials[model.material].map = uniforms
+			// 			}
+			// 			// 加载模型
+			// 			loadDrc(model.url, materialCreater.materials[model.material])
+			// 		})
+			// 	})
+			//
+			// 	// 加载模型
+			// 	function loadDrc(url, material) {
+			// 		let self = this
+			// 		this.dracoLoader.load(url, function (geometry) {
+			// 			geometry.computeVertexNormals()
+			//
+			// 			let mesh = new THREE.Mesh(geometry, material)
+			// 			mesh.castShadow = true
+			// 			mesh.receiveShadow = true
+			// 			mesh.scale.set(0.13, 0.13, 0.13)
+			// 			self.scene.add(mesh)
+			//
+			// 			self.camera.lookAt(mesh.position)
+			// 		})
+			// 	}
+			// }
+
+
+
 		function onResourceLoaded(){
 			//将模型克隆到网络中
-			meshes["school"]=models.school.mesh.clone();
+			meshes["computer_room"]=modelList.computer_room.mesh.clone();
 			//不知道为什么，使用这种方法，必须要有loadingManager，不然mesh为null值
-			meshes["school"].position.set(-2.5,-10,25);
-			meshes["school"].scale.set(0.005,0.005,0.005);
-			meshes["school"].rotation.y+=Math.PI/2;
-			scene.add(meshes["school"]);
+			meshes["computer_room"].position.set(-2.5,-10,80);
+			meshes["computer_room"].scale.set(0.5,0.5,0.5);
+			meshes["computer_room"].rotation.y+=Math.PI/2;
+			scene.add(meshes["computer_room"]);
 			
             
             // meshes["Garen"]=models.Garen.mesh.clone();
@@ -287,6 +376,7 @@
 			//更新鼠标控制
 			controls.update();
 
+			renderer.setClearColor(new THREE.Color(0x55aaff));
 		   	requestAnimationFrame(animate);
 			  //mesh.rotation.x += 0.01;
 			  //mesh.rotation.y += 0.02;
