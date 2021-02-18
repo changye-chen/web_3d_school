@@ -113,6 +113,21 @@
 				 	mtl:"static/room/room_profile.mtl",
 				 	mesh:null
 			},
+			desk: {
+				obj: "static/room/desk.obj",
+				mtl: "static/room/desk.mtl",
+				mesh: null
+			},
+			bookshelf: {
+				obj: "static/room/bookshelf.obj",
+				mtl: "static/room/bookshelf.mtl",
+				mesh: null
+			},
+			person: {
+				obj: "static/room/person.obj",
+				mtl: "static/room/person.mtl",
+				mesh: null
+			}
 		}
 		//网格索引
 		var meshes={};
@@ -120,8 +135,8 @@
 		init();
 		function init(){
 		    initLight();
-			CreatePanl();
-			initControls();
+			//CreatePanl();
+			//initControls();
 			initVideo();
 			//var name="static/room/computer_room.drc";
 			//addModeldrc(name);
@@ -146,9 +161,9 @@
 			
 		
 		camera.position.x = 0;
-		camera.position.y = -1.3;
+		camera.position.y = 50;
 		camera.position.z = -10;
-		camera.lookAt({x:0,y:0,z:0});
+		camera.lookAt(0,50,100);
 		scene.add(camera);
 
 
@@ -162,19 +177,19 @@
 			//scene.add(helper);
 
 			var play=new THREE.Mesh(
-					new THREE.BoxGeometry(5,5,5),
+					new THREE.BoxGeometry(10,10,10),
 					new THREE.MeshBasicMaterial({color:0x00ff00})//绿色
 			)
 			play.name = 'play';
-			play.position.set(-10,-15,20);
+			play.position.set(120,100,240);
 			scene.add(play);
 
 			var pause=new THREE.Mesh(
-					new THREE.BoxGeometry(5,5,5),
+					new THREE.BoxGeometry(10,10,10),
 					new THREE.MeshBasicMaterial({color:0xff0000})//红色
 			)
 			pause.name = 'pause';
-			pause.position.set(10,-15,20);
+			pause.position.set(120,80,240);
 			scene.add(pause);
 
 			//添加立方体
@@ -382,10 +397,20 @@
 			scene.add(meshes["computer_room"]);
 			
             
-            // meshes["Garen"]=models.Garen.mesh.clone();
-            // meshes["Garen"].position.set(0,0,0);
-            // meshes["Garen"].scale.set(10000,10000,10000);
-            // scene.add(meshes["Garen"]);
+            meshes["desk"]=model.desk.mesh.clone();
+            meshes["desk"].position.set(0,-10,150);
+            meshes["desk"].scale.set(0.03,0.03,0.03);
+            scene.add(meshes["desk"]);
+
+			meshes["bookshelf"]=model.bookshelf.mesh.clone();
+			meshes["bookshelf"].position.set(-10,-10,140);
+			meshes["bookshelf"].scale.set(0.05,0.05,0.05);
+			scene.add(meshes["bookshelf"]);
+
+			meshes["person"]=model.person.mesh.clone();
+			meshes["person"].position.set(0,-10,100);
+			meshes["person"].scale.set(0.05,0.05,0.05);
+			scene.add(meshes["person"]);
 		}
 
 		//camera大小随窗口变化
@@ -411,7 +436,7 @@
 			}
 
 			//更新鼠标控制
-			controls.update();
+			//controls.update();
 
 			renderer.setClearColor(new THREE.Color(0x55aaff));
 		   	requestAnimationFrame(animate);
@@ -496,25 +521,25 @@
 		   }
 
 			//鼠标点击事件
-			// function mouseClickEvent(event){
-			// 	if (!this.raycaster)
-			// 		this.raycaster = new THREE.Raycaster();
-			// 	if (!this.mouse)
-			// 		this.mouse = new THREE.Vector2();
-			//
-			// 	// 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
-			// 	this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-			// 	this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-			//
-			// 	// 通过摄像机和鼠标位置更新射线
-			// 	this.raycaster.setFromCamera(this.mouse, this.camera);
-			//
-			// 	// 计算物体和射线的焦点
-			// 	const intersects = this.raycaster.intersectObjects(this.scene.children,true);
-			//
-			// 	window.location.assign("room");
-			//
-			// }
+			function mouseClickEvent(event){
+				if (!this.raycaster)
+					this.raycaster = new THREE.Raycaster();
+				if (!this.mouse)
+					this.mouse = new THREE.Vector2();
+
+				// 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
+				this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+				this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+				// 通过摄像机和鼠标位置更新射线
+				this.raycaster.setFromCamera(this.mouse, this.camera);
+
+				// 计算物体和射线的焦点
+				const intersects = this.raycaster.intersectObjects(this.scene.children,true);
+
+				window.location.assign("room");
+
+			}
 			function mouseClickEvent(event){
 				if (!this.raycaster)
 					this.raycaster = new THREE.Raycaster();
