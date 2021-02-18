@@ -4,15 +4,18 @@
 		
 		<meta charset="utf-8">
 		<title>建筑</title>
+
+<!--		<script th:src="@{static/libs/draco_decoder.js}"></script>-->
+<!--		<script th:src="@{static/libs/geometry_helper.js}"></script>-->
+<!--		<script th:src="@{static/libs/draco_wasm_wrapper.js}"></script>-->
+<!--		<script th:src="@{static/libs/draco_decoder.wasm}"></script>-->
 		<script th:src="@{static/libs/three.js}"></script>
+<!--		<script th:src="@{static/libs/DRACOLoader.js}"></script>-->
+
+
 		<script th:src="@{static/libs/MTLLoader.js}"></script>
 		<script th:src="@{static/libs/OBJLoader.js}"></script>
 		<script th:src="@{static/libs/OrbitControls.js}"></script>
-		<script th:src="@{static/libs/DRACOLoader.js}"></script>
-		<script th:src="@{static/libs/draco_decoder.js}"></script>
-		<script th:src="@{static/libs/geometry_helper.js}"></script>
-		<script th:src="@{static/libs/draco_wasm_wrapper.js}"></script>
-		<script th:src="@{static/libs/draco_decoder.wasm}"></script>
 
 		<div id="overlay">
 			<button id="startButton">Play</button>
@@ -84,9 +87,9 @@
 		loadingManager.onLoad=function(){  //必须是onLoad才行，不能是onload！！！
 			console.log("已下载所有资源！");
 			Resource_Loaded=true;
-			window.onload=function(){
-				//onResourceLoaded();
-			}
+
+			onResourceLoaded();
+
 		}
 
 		var modelList=[
@@ -95,21 +98,21 @@
 		
 		//模型索引
 		var model= {
-			computer_room: {
-				// obj:"static/room/room.obj",
-				mtl:"static/room/room.mtl",
-				url: "static/room/computer_room.drc",
-				mesh: null,
-				material: new THREE.MeshBasicMaterial,
-				// receiveShadow:true,
-				// castShadow:true,
-				textureUrl: "static/room/computer_room.mtl",
-			},
-			// 	Garen:{
-			// 	 	obj:"Shool/Garen.obj",
-			// 	 	mtl:"Shool/Garen_base_TX_CM.mtl",
-			// 	 	mesh:null
+			// computer_room: {
+			// 	// obj:"static/room/room.obj",
+			// 	mtl:"static/room/room.mtl",
+			// 	url: "static/room/computer_room.drc",
+			// 	mesh: null,
+			// 	material: new THREE.MeshBasicMaterial,
+			// 	// receiveShadow:true,
+			// 	// castShadow:true,
+			// 	textureUrl: "static/room/computer_room.mtl",
 			// },
+				room_profile:{
+				 	obj:"static/room/room_profile.obj",
+				 	mtl:"static/room/room_profile.mtl",
+				 	mesh:null
+			},
 		}
 		//网格索引
 		var meshes={};
@@ -120,6 +123,8 @@
 			CreatePanl();
 			initControls();
 			initVideo();
+			//var name="static/room/computer_room.drc";
+			//addModeldrc(name);
 			//dracoLoad();
 			//loadDrc(model['computer_room'].url);
 		}
@@ -152,7 +157,7 @@
 
 			//辅助工具
 			var helper = new THREE.AxesHelper(50);
-			scene.add(helper);
+			//scene.add(helper);
 
 			var play=new THREE.Mesh(
 					new THREE.BoxGeometry(5,5,5),
@@ -169,7 +174,7 @@
 			scene.add(pause);
 
 			//添加立方体
-			var geometry = new THREE.PlaneGeometry(100,100);
+			var geometry = new THREE.PlaneGeometry(200,150);
 
 			//获取到video对象
 			var video = document.querySelector("#video");
@@ -181,7 +186,7 @@
 			var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
 
 			mesh.rotation.y=Math.PI;
-			mesh.position.set(0,0,50);
+			mesh.position.set(0,50,245);
 			scene.add(mesh);
             //移除video标签的显示
 			document.getElementById('video').style.display = 'none';
@@ -235,38 +240,38 @@
 		        }
 		
 		 
-		// //加载模型,只调用一次就够了，无论加载几个模型
-		// for(var _key in modelList){
-		//     (function(key){
-		// 	    //加载模型和材质---->女模特
-		// 	    var mtlLoader=new THREE.MTLLoader(loadingManager);
-		// 	    mtlLoader.load(modelList[key].mtl,function(materials){
-		// 		    materials.preload();
-		// 		    var objLoader=new THREE.DRACOLoader(loadingManager);
-		// 		    //objLoader.setMaterials(materials);
-		// 		    objLoader.load(modelList[key].url,function(mesh){
-		// 			    //给加载的人物模型加上阴影
-		// 			    mesh.traverse(function(node){
-		// 				    if(node instanceof THREE.Mesh){
-		// 						//不给枪加阴影，给其他模型加阴影
-		// 						node.material.transparent=true;//透明材质，可以显示树枝丫
-		// 						if("castShadow" in models[key])
-		// 						    node.castShadow=models[key].castShadow;
-		// 						else
-		// 						    node.castShadow=false;
-		// 						if("receiveShadow" in models[key])
-		// 						    node.receiveShadow=models[key].receiveShadow;
-		// 						else
-		// 						    node.receiveShadow=false;
-		// 					    //node.castShadow=true;
-		// 					    //node.receiveShadow=true;
-		// 				    }//, onProgress, onError
-		// 			    });
-		// 				models[key].mesh=mesh;
-		// 		    });
-		// 	    });
-		//     })(_key)
-		// }
+		//加载模型,只调用一次就够了，无论加载几个模型
+		for(var _key in model){
+		    (function(key){
+			    //加载模型和材质---->女模特
+			    var mtlLoader=new THREE.MTLLoader(loadingManager);
+			    mtlLoader.load(model[key].mtl,function(materials){
+				    materials.preload();
+				    var objLoader=new THREE.OBJLoader(loadingManager);
+				    objLoader.setMaterials(materials);
+				    objLoader.load(model[key].obj,function(mesh){
+					    //给加载的人物模型加上阴影
+					    mesh.traverse(function(node){
+						    if(node instanceof THREE.Mesh){
+								//不给枪加阴影，给其他模型加阴影
+								node.material.transparent=true;//透明材质，可以显示树枝丫
+								if("castShadow" in model[key])
+								    node.castShadow=models[key].castShadow;
+								else
+								    node.castShadow=false;
+								if("receiveShadow" in model[key])
+								    node.receiveShadow=model[key].receiveShadow;
+								else
+								    node.receiveShadow=false;
+							    //node.castShadow=true;
+							    //node.receiveShadow=true;
+						    }//, onProgress, onError
+					    });
+						model[key].mesh=mesh;
+				    });
+			    });
+		    })(_key)
+		}
 
 
 
@@ -285,18 +290,46 @@
 				// 	})
 				// }
 
-			 var dracoLoader=new THREE.DRACOLoader(loadingManager);
-			 dracoLoader.load( 'static/room/computer_room.drc', function ( geometry ) {
+			//  var dracoLoader=new THREE.DRACOLoader(loadingManager);
+			//  dracoLoader.load( 'static/room/computer_room.drc', function ( geometry ) {
+			//
+			// 	geometry.computeVertexNormals();
+			//
+			// 	var material = new THREE.MeshStandardMaterial( { vertexColors: THREE.VertexColors } );
+			// 	var mesh = new THREE.Mesh( geometry, material );
+			// 	mesh.castShadow = true;
+			// 	mesh.receiveShadow = true;
+			// 	scene.add( mesh );
+			//
+			// } );
 
-				geometry.computeVertexNormals();
 
-				var material = new THREE.MeshStandardMaterial( { vertexColors: THREE.VertexColors } );
-				var mesh = new THREE.Mesh( geometry, material );
-				mesh.castShadow = true;
-				mesh.receiveShadow = true;
-				scene.add( mesh );
+			// function addModeldrc(name){//加载drc文件
+			// 	var material;
+			// 	var textureLoader=new THREE.TextureLoader();
+			// 	//var texturePath="static/room/computer_room.drc";
+			// 	var dracoLoader=new THREE.DRACOLoader();
+			// 	//THREE.DRACOLoader.setDecoderConfig( { type: 'js' } );//js类型
+			// 	//dracoLoader.setPath("static/room/computer_room.drc");//drc文件路径
+			// 	dracoLoader.load(name,function(mesh){
+			// 		//var texture=new THREE.ImageUtils.loadTexture(texturePath+"default-fabric.jpg");//获取纹理图
+			// 		material=new THREE.MeshLambertMaterial();//初始化材质
+			// 		//material.map=texture;//设置材质为纹理
+			// 		material.needsUpdate=true;
+			// 		model=new THREE.Mesh(mesh,material);//模型
+			// 		//setModelPosition(0,0,0);//设置模型的位置
+			// 		scene.add(model);
+			// 	},onProgress, onError);
+			//
+			// 	var onProgress = function ( xhr ) {
+			// 		if ( xhr.lengthComputable ) {
+			// 			var percentComplete = xhr.loaded / xhr.total * 100;
+			// 			console.log( Math.round(percentComplete, 2) + '% downloaded' );
+			// 		}
+			// 	};
+			// 	var onError = function ( xhr ) { alert("错误了") ;};
+			// }
 
-			} );
 
 			// function dracoLoad() {
 			// 	this.dracoLoader = new THREE.DRACOLoader()
@@ -337,11 +370,11 @@
 
 		function onResourceLoaded(){
 			//将模型克隆到网络中
-			meshes["computer_room"]=modelList.computer_room.mesh.clone();
+			meshes["computer_room"]=model.room_profile.mesh.clone();
 			//不知道为什么，使用这种方法，必须要有loadingManager，不然mesh为null值
-			meshes["computer_room"].position.set(-2.5,-10,80);
-			meshes["computer_room"].scale.set(0.5,0.5,0.5);
-			meshes["computer_room"].rotation.y+=Math.PI/2;
+			meshes["computer_room"].position.set(0,-15,150);
+			meshes["computer_room"].scale.set(0.05,0.05,0.05);
+			//meshes["computer_room"].rotation.y+=Math.PI/2;
 			scene.add(meshes["computer_room"]);
 			
             
