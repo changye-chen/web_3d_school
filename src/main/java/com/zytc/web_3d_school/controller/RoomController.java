@@ -9,5 +9,8 @@ public class RoomController {
     public String room(){
         return "room";
     }
-
+    @RequestMapping("/room1")
+    public String room1(){
+        return "room1";
+    }
 }
