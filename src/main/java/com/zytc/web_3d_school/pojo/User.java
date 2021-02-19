@@ -39,6 +39,5 @@ public class User {
         this.login_name = login_name;
         this.login_pwd = login_pwd;
     }
-
     public User(){}
 }
