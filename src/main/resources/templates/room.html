@@ -108,7 +108,7 @@
 			// 	// castShadow:true,
 			// 	textureUrl: "static/room/computer_room.mtl",
 			// },
-				room_profile:{
+			room_profile:{
 				 	obj:"static/room/room_profile.obj",
 				 	mtl:"static/room/room_profile.mtl",
 				 	mesh:null
@@ -177,20 +177,22 @@
 			//scene.add(helper);
 
 			var play=new THREE.Mesh(
-					new THREE.BoxGeometry(10,10,10),
+					new THREE.PlaneGeometry(10,10),
 					new THREE.MeshBasicMaterial({color:0x00ff00})//绿色
 			)
 			play.name = 'play';
 			console.log(play);
 			play.position.set(120,100,240);
+			play.rotation.x=Math.PI;
 			scene.add(play);
 
 			var pause=new THREE.Mesh(
-					new THREE.BoxGeometry(10,10,10),
+					new THREE.PlaneGeometry(10,10),
 					new THREE.MeshBasicMaterial({color:0xff0000})//红色
 			)
 			pause.name = 'pause';
 			pause.position.set(120,80,240);
+			pause.rotation.x=Math.PI;
 			scene.add(pause);
 
 			//添加立方体
@@ -568,6 +570,8 @@
 						video.pause();
 					}
 				}
+
+				window.location.assign("room1");
 
 
 			}
