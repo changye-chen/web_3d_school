@@ -29,7 +29,7 @@ public class UserController {
             model.addAttribute("msg", "请输入正确的登录名和密码");
             return "index";
         }else{
-            return "china";
+            return "ChinaMap";
         }
     }
 
