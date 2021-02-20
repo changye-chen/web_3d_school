@@ -133,7 +133,8 @@
           multiPolygon.forEach(polygon => {
             const shape = new THREE.Shape();
             const lineMaterial = new THREE.LineBasicMaterial({
-              color: 'white'
+              color: 'white',
+              opacity: 0.6
             });
             const lineGeometry = new THREE.Geometry();
 
@@ -179,6 +180,32 @@
           const [x, y] = projection(elem.properties.contorid);
           province.properties._centroid = [x, y];
         }
+
+        //绘制光柱
+        if(province.properties.center){
+          const texture = new THREE.TextureLoader().load('../static/image/lightray_yellow.jpg');
+
+          const [x, y] = projection(province.properties.center);
+          const planegeomentry = new THREE.PlaneGeometry(1, 10);
+          var planematerial = new THREE.MeshBasicMaterial({
+            //map: texture,
+            map: texture, ////颜色贴图
+            color: '#ffff00',
+            transparent: true,
+            opacity: 0.7,
+            depthTest: false, //深度测试属性
+            blending: THREE.AdditiveBlending, //滤镜选择
+            side: THREE.DoubleSide
+          })
+          var plane = new THREE.Mesh(planegeomentry, planematerial);
+          plane.position.set(x, -y, 8);
+          plane.rotation.x = Math.PI / 2;
+          province.add(plane);
+          var plane2 = plane.clone();
+          plane2.rotation.y = Math.PI / 2;
+          province.add(plane2);
+        }
+
 
         _this.map.add(province);
 
