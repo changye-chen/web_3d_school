@@ -183,7 +183,7 @@
 
         //绘制光柱
         if(province.properties.center){
-          const texture = new THREE.TextureLoader().load('../static/image/lightray_yellow.jpg');
+          const texture = new THREE.TextureLoader().load("static/images/lightray_yellow.jpg");
 
           const [x, y] = projection(province.properties.center);
           const planegeomentry = new THREE.PlaneGeometry(1, 10);
