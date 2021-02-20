@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html >
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Wed3D Short Video Educate Platform</title>
+    <!-- Meta tag Keywords -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+    <!-- Meta tag Keywords -->
+    <!-- css files -->
+    <link th:href="@{static/css/style.css}" rel="stylesheet" type="text/css" media="all">
+<body>
+
+<!--header-->
+<div class="agileheader">
+    <h1></h1>
+</div>
+<!--//header-->
+<!--main-->
+<div class="main-w3l">
+    <div class="w3layouts-main">
+        <h2>请登录</h2>
+        <p style="color: #ff0000" th:text="${msg}" th:if="${not #strings.isEmpty(msg)}"></p>
+        <form th:action="@{detail}" method="post">
+            <label>
+                <input value="E-MAIL" name="Email" type="email" required onfocus="this.value = '';"
+                       onblur="if (this.value === '') {this.value = 'E-Mail';}"/>
+            </label>
+            <label>
+                <input value="PASSWORD" name="Password" type="password" required onfocus="this.value = '';"
+                       onblur="if (this.value === '') {this.value = 'password';}"/>
+            </label>
+            <span>
+                <label><input type="checkbox"/></label>记住我
+            </span>
+            <h6><a href="#">忘记密码?</a></h6>
+            <div class="clear"></div>
+            <input type="submit" value="登 录" name="login">
+        </form>
+        <p>还没有账号 ?<a href="#">立即注册</a></p>
+    </div>
+</div>
+<!--//main-->
+<!--footer-->
+<div class="footer-w3l">
+    <p>&copy; 2019 Smart Login Form. All rights reserved | Design by <a
+            href="http://www.bootstrapmb.com/">bootstrapmb</a></p>
+</div>
+<!--//footer-->
+
+</body>
+</html>

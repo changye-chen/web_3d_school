@@ -5,6 +5,7 @@ import com.zytc.web_3d_school.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -15,8 +16,14 @@ import javax.servlet.http.HttpSession;
 public class UserController {
     @Autowired
     UserService userService;
+
     @RequestMapping("/login")
-    public String login(
+    public String login(){
+        return "login";
+    }
+
+    @RequestMapping("/detail")
+    public String detail(
             @RequestParam("Email") String email,
             @RequestParam("Password") String password,
             Model model,
@@ -27,9 +34,10 @@ public class UserController {
         User u = userService.CheckUser(user);
         if(u == null) {
             model.addAttribute("msg", "请输入正确的登录名和密码");
-            return "index";
+            return "login";
+
         }else{
-            return "ChinaMap";
+            return "index";
         }
     }
 
