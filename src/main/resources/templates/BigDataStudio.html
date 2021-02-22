@@ -291,6 +291,12 @@
                 // roughnessMipmapper.generateMipmaps( child.material );
             }
         } );
+        console.log(gltf.scene);
+        //去掉多余白色正方体
+        gltf.scene.children.forEach(object =>{
+            if(object.name === 'Cube')
+                gltf.scene.remove(object);
+        })
         scene.add( gltf.scene );
         gltf.scene.scale.set(60,60,60);
         //gltf.scene.rotation.z=Math.PI/2;
