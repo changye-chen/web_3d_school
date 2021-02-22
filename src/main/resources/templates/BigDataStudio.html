@@ -91,8 +91,8 @@
 
     //模型索引
     var model= {
-        bigdata_room:{
-            GLTF:"static/models/gltf/Studio/BigDataStudio/BigDataStudio.gltf",
+        BigDataStudio:{
+            GLTF:"static/models/gltf/BigDataStudio/BigDataStudio.gltf",
             gltfobj:null
         }
     }
@@ -283,8 +283,8 @@
 
         } );
 
-    var loader = new THREE.GLTFLoader(loadingManager).setPath( 'static/room/room_2/' );
-    loader.load( 'room_2.gltf', function ( gltf ) {
+    var loader = new THREE.GLTFLoader(loadingManager).setPath( 'static/models/gltf/BigDataStudio/' );
+    loader.load( 'BigDataStudio.gltf', function ( gltf ) {
         gltf.scene.traverse( function ( child ) {
             if ( child.isMesh ) {
                 // TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
