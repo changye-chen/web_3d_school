@@ -9,8 +9,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/").permitAll()
-                .antMatchers("/templates/*.html").hasRole("Student");
+                .antMatchers("/").permitAll();
+           //     .antMatchers("/templates/*.html").hasRole("Student");
         http.formLogin()
                 .loginPage("/login");
         //关闭了csrf，因为还不太懂

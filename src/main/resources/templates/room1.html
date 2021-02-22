@@ -5,17 +5,12 @@
     <meta charset="utf-8">
     <title>建筑</title>
 
-    <!--		<script th:src="@{static/libs/draco_decoder.js}"></script>-->
-    <!--		<script th:src="@{static/libs/geometry_helper.js}"></script>-->
-    <!--		<script th:src="@{static/libs/draco_wasm_wrapper.js}"></script>-->
-    <!--		<script th:src="@{static/libs/draco_decoder.wasm}"></script>-->
-    <script th:src="@{static/libs/three.js}"></script>
-    <!--		<script th:src="@{static/libs/DRACOLoader.js}"></script>-->
-
-
-    <script th:src="@{static/libs/MTLLoader.js}"></script>
-    <script th:src="@{static/libs/OBJLoader.js}"></script>
-    <script th:src="@{static/libs/OrbitControls.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/three.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/inflate.min.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/FBXLoader.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/GLTFLoader.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/RGBELoader.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/OrbitControls.js}"></script>
 
     <div id="overlay">
         <button id="startButton">Play</button>
@@ -41,6 +36,7 @@
 
     var keyboard={}; //定义数组
     var player={height:1.8,speed:0.2,turnSpeed:Math.PI*0.01};
+    var control;
 
     var scene= new THREE.Scene();
     var camera= new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1, 1000);
@@ -48,10 +44,13 @@
     renderer.setSize(window.innerWidth,window.innerHeight);
     renderer.shadowMap.enabled=true;
     renderer.shadowMap.type=THREE.BasicShadowMap;
-    var plane;
+
+    //场景美化效果
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
     document.body.appendChild(renderer.domElement);
-    var pointLight;
-    var ambientLight;
     var loadingManager=null,Resource_Loaded=true;
     var loadingScreen={  //“加载中”的场景
         scene:new THREE.Scene(),
@@ -85,65 +84,35 @@
     }
     //方法二：加载完成
     loadingManager.onLoad=function(){  //必须是onLoad才行，不能是onload！！！
-        console.log("已下载所有资源！");
+        console.log("已下载所有资源！");  //没有加载完资源
         Resource_Loaded=true;
-
-        onResourceLoaded();
-
+       // onResourceLoaded(); //记得给所有loader加上（loadingManager）
     }
-
-    var modelList=[
-        { url: "static/room/bigdata_room.drc", material: THREE.MeshBasicMaterial }
-    ];
 
     //模型索引
     var model= {
-        // bigdata_room: {
-        // 	// obj:"static/room/room.obj",
-        // 	mtl:"static/room/room.mtl",
-        // 	url: "static/room/bigdata_room.drc",
-        // 	mesh: null,
-        // 	material: new THREE.MeshBasicMaterial,
-        // 	// receiveShadow:true,
-        // 	// castShadow:true,
-        // 	textureUrl: "static/room/bigdata_room.mtl",
-        // },
-        room_profile:{
-            obj:"static/room1/bigdata_room.obj",
-            mtl:"static/room1/bigdata_room.mtl",
-            mesh:null
-        },
-        // desk: {
-        //     obj: "static/room/desk.obj",
-        //     mtl: "static/room/desk.mtl",
-        //     mesh: null
-        // },
-        // bookshelf: {
-        //     obj: "static/room/bookshelf.obj",
-        //     mtl: "static/room/bookshelf.mtl",
-        //     mesh: null
-        // },
-        // person: {
-        //     obj: "static/room/person.obj",
-        //     mtl: "static/room/person.mtl",
-        //     mesh: null
-        // }
+        bigdata_room:{
+            GLTF:"static/room/room_2/room_2.gltf",
+            gltfobj:null
+        }
     }
     //网格索引
     var meshes={};
 
     init();
     function init(){
-        initLight();
+        //initLight();
         //CreatePanl();
-        //initControls();
+        initControls();
         initVideo();
-        //var name="static/room/bigdata_room.drc";
-        //addModeldrc(name);
-        //dracoLoad();
-        //loadDrc(model['bigdata_room'].url);
 
-
+        // control = new THREE.OrbitControls( camera, document.body );
+        // //control.enabled=false;
+        // control.target=new THREE.Vector3(0,0,100);
+        //control.target.set( 0, 0, 0 );
+        // control.autoRotate = true;
+        // control.autoRotateSpeed = - 1.0;
+        //control.update();
     }
 
 
@@ -151,9 +120,9 @@
 
     //光源
     function initLight(){
-        ambientLight=new THREE.AmbientLight(0xfcffbc,0.8);//浅蓝色
-        pointLight=new THREE.PointLight(0x000000,0.8,1);
-        pointLight.position.set(0,60,0);
+        ambientLight=new THREE.AmbientLight(0xfffffff,0.5);//浅蓝色
+        pointLight=new THREE.PointLight(0xfffffff,0.8,0.5);
+        pointLight.position.set(0,0,0);
         pointLight.castShadow=true;
         scene.add(ambientLight);
         scene.add(pointLight);
@@ -161,9 +130,9 @@
 
 
     camera.position.x = 0;
-    camera.position.y = 50;
-    camera.position.z = -10;
-    camera.lookAt(0,50,100);
+    camera.position.y = 100;
+    camera.position.z =-100;
+    camera.lookAt(0,0,100);
     scene.add(camera);
 
 
@@ -174,23 +143,25 @@
 
         //辅助工具
         var helper = new THREE.AxesHelper(50);
-        //scene.add(helper);
+        scene.add(helper);
 
         var play=new THREE.Mesh(
-            new THREE.BoxGeometry(10,10,10),
+            new THREE.PlaneGeometry(10,10),
             new THREE.MeshBasicMaterial({color:0x00ff00})//绿色
         )
         play.name = 'play';
         console.log(play);
-        play.position.set(120,100,240);
+        play.position.set(120,200,90);
+        play.rotation.x=Math.PI;
         scene.add(play);
 
         var pause=new THREE.Mesh(
-            new THREE.BoxGeometry(10,10,10),
+            new THREE.PlaneGeometry(10,10),
             new THREE.MeshBasicMaterial({color:0xff0000})//红色
         )
         pause.name = 'pause';
-        pause.position.set(120,80,240);
+        pause.position.set(120,180,90);
+        pause.rotation.x=Math.PI;
         scene.add(pause);
 
         //添加立方体
@@ -206,7 +177,7 @@
         var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
 
         mesh.rotation.y=Math.PI;
-        mesh.position.set(0,50,245);
+        mesh.position.set(0,150,95);
         scene.add(mesh);
         //移除video标签的显示
         document.getElementById('video').style.display = 'none';
@@ -260,158 +231,90 @@
     }
 
 
-    //加载模型,只调用一次就够了，无论加载几个模型
-    for(var _key in model){
-        (function(key){
-            //加载模型和材质---->女模特
-            var mtlLoader=new THREE.MTLLoader(loadingManager);
-            mtlLoader.load(model[key].mtl,function(materials){
-                materials.preload();
-                var objLoader=new THREE.OBJLoader(loadingManager);
-                objLoader.setMaterials(materials);
-                objLoader.load(model[key].obj,function(mesh){
-                    //给加载的人物模型加上阴影
-                    mesh.traverse(function(node){
-                        if(node instanceof THREE.Mesh){
-                            //不给枪加阴影，给其他模型加阴影
-                            node.material.transparent=true;//透明材质，可以显示树枝丫
-                            if("castShadow" in model[key])
-                                node.castShadow=models[key].castShadow;
-                            else
-                                node.castShadow=false;
-                            if("receiveShadow" in model[key])
-                                node.receiveShadow=model[key].receiveShadow;
-                            else
-                                node.receiveShadow=false;
-                            //node.castShadow=true;
-                            //node.receiveShadow=true;
-                        }//, onProgress, onError
-                    });
-                    model[key].mesh=mesh;
-                });
-            });
-        })(_key)
-    }
 
-
-
-    // function loadDrc(url) {
-    // 	var dracoLoader=new THREE.DRACOLoader(loadingManager);
-    // 	dracoLoader.load(url, function (geometry) {
-    // 		geometry.computeVertexNormals();
-    //
-    // 		var material = new THREE.MeshStandardMaterial( { vertexColors: THREE.VertexColors } );
-    // 		var mesh = new THREE.Mesh(geometry, material);
-    // 		mesh.castShadow = true;
-    // 		mesh.receiveShadow = true;
-    // 		mesh.scale.set(1, 1, 1);
-    // 		scene.add(mesh);
-    // 		camera.lookAt(mesh.position);
-    // 	})
+    // for(var _key in model){
+    //     (function(key){
+    //         var loader = new THREE.FBXLoader(loadingManager);
+    //         loader.load( model[key].FBX, function ( object ) {//加载路径fbx文件
+    //             object.traverse(function (child) {
+    //             if (child.isMesh) {
+    //               child.castShadow = true;
+    //               child.receiveShadow = true;
+    //                 }
+    //             } );
+    //         //scene.add( object );//模型
+    //         model[key].object=object;
+    //     } );
+    //     })(_key)
     // }
 
-    //  var dracoLoader=new THREE.DRACOLoader(loadingManager);
-    //  dracoLoader.load( 'static/room/bigdata_room.drc', function ( geometry ) {
-    //
-    // 	geometry.computeVertexNormals();
-    //
-    // 	var material = new THREE.MeshStandardMaterial( { vertexColors: THREE.VertexColors } );
-    // 	var mesh = new THREE.Mesh( geometry, material );
-    // 	mesh.castShadow = true;
-    // 	mesh.receiveShadow = true;
-    // 	scene.add( mesh );
-    //
-    // } );
-
-
-    // function addModeldrc(name){//加载drc文件
-    // 	var material;
-    // 	var textureLoader=new THREE.TextureLoader();
-    // 	//var texturePath="static/room/bigdata_room.drc";
-    // 	var dracoLoader=new THREE.DRACOLoader();
-    // 	//THREE.DRACOLoader.setDecoderConfig( { type: 'js' } );//js类型
-    // 	//dracoLoader.setPath("static/room/bigdata_room.drc");//drc文件路径
-    // 	dracoLoader.load(name,function(mesh){
-    // 		//var texture=new THREE.ImageUtils.loadTexture(texturePath+"default-fabric.jpg");//获取纹理图
-    // 		material=new THREE.MeshLambertMaterial();//初始化材质
-    // 		//material.map=texture;//设置材质为纹理
-    // 		material.needsUpdate=true;
-    // 		model=new THREE.Mesh(mesh,material);//模型
-    // 		//setModelPosition(0,0,0);//设置模型的位置
-    // 		scene.add(model);
-    // 	},onProgress, onError);
-    //
-    // 	var onProgress = function ( xhr ) {
-    // 		if ( xhr.lengthComputable ) {
-    // 			var percentComplete = xhr.loaded / xhr.total * 100;
-    // 			console.log( Math.round(percentComplete, 2) + '% downloaded' );
-    // 		}
-    // 	};
-    // 	var onError = function ( xhr ) { alert("错误了") ;};
+    //加载 glTF 格式的模型
+    // for(var _key in model) {
+    //     (function (key) {
+    //         var loader = new THREE.GLTFLoader(loadingManager);/*实例化加载器*/
+    //         loader.load(model[key].gltf, function (obj) {
+    //             console.log(obj);
+    //             scene.add(obj.scene);
+    //             console.log("运行了一个模型");
+    //             meshes[key].gltfobj=obj.scene;
+    //             obj.scene.position.set(0,0,50);
+    //             obj.scene.scale.set(10,10,10);
+    //             console.log(obj);
+    //          }//, function (xhr) {
+    //          //    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+    //          //}, function (error) {
+    //          //    console.log('load error!' + error.getWebGLErrorMessage());
+    //          //}
+    //         )
+    //     })(_key)
     // }
 
+    //增强场景的真实感
+    var pmremGenerator = new THREE.PMREMGenerator( renderer );
+    pmremGenerator.compileEquirectangularShader();
+    new THREE.RGBELoader(loadingManager)
+        .setDataType( THREE.UnsignedByteType ) //hdr文件可以渲染出更加真实的场景
+        .load( 'static/libs/texture/royal_esplanade_1k.hdr', function ( texture ) {
 
-    // function dracoLoad() {
-    // 	this.dracoLoader = new THREE.DRACOLoader()
-    // 	this.dracoLoader.setDecoderPath('./static/libs/')
-    // 	this.dracoLoader.setDecoderConfig({type: 'js'})
-    // 	// 加载材质
-    // 	new THREE.MTLLoader().load('/static/School/School.mtl', materialCreater => {
-    // 		materialCreater.preload()
-    // 		this.modelList.forEach(model => {
-    // 			if (model.textureUrl) { //指定纹理图片
-    // 				let uniforms =
-    // 						new THREE.TextureLoader().load(model.textureUrl)
-    // 				materialCreater.materials[model.material].map = uniforms
-    // 			}
-    // 			// 加载模型
-    // 			loadDrc(model.url, materialCreater.materials[model.material])
-    // 		})
-    // 	})
-    //
-    // 	// 加载模型
-    // 	function loadDrc(url, material) {
-    // 		let self = this
-    // 		this.dracoLoader.load(url, function (geometry) {
-    // 			geometry.computeVertexNormals()
-    //
-    // 			let mesh = new THREE.Mesh(geometry, material)
-    // 			mesh.castShadow = true
-    // 			mesh.receiveShadow = true
-    // 			mesh.scale.set(0.13, 0.13, 0.13)
-    // 			self.scene.add(mesh)
-    //
-    // 			self.camera.lookAt(mesh.position)
-    // 		})
-    // 	}
-    // }
+            var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
 
+            scene.background = envMap;
+            scene.environment = envMap;
+
+        } );
+
+    var loader = new THREE.GLTFLoader(loadingManager).setPath( 'static/room/room_2/' );
+    loader.load( 'room_2.gltf', function ( gltf ) {
+        gltf.scene.traverse( function ( child ) {
+            if ( child.isMesh ) {
+                // TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
+                // roughnessMipmapper.generateMipmaps( child.material );
+            }
+        } );
+        scene.add( gltf.scene );
+        gltf.scene.scale.set(60,60,60);
+        //gltf.scene.rotation.z=Math.PI/2;
+        //gltf.scene.position(0,-100,-120);
+        //roughnessMipmapper.dispose();
+        //render();
+    } );
 
 
     function onResourceLoaded(){
         //将模型克隆到网络中
-        meshes["bigdata_room"]=model.room_profile.mesh.clone();
-        //不知道为什么，使用这种方法，必须要有loadingManager，不然mesh为null值
-        meshes["bigdata_room"].position.set(0,-15,150);
-        meshes["bigdata_room"].scale.set(0.05,0.05,0.05);
-        //meshes["bigdata_room"].rotation.y+=Math.PI/2;
-        scene.add(meshes["bigdata_room"]);
+         meshes["bigdata_room"]=model["bigdata_room"].gltfobj;
+         //不知道为什么，使用这种方法，必须要有loadingManager，不然mesh为null值
+         meshes["bigdata_room"].position.set(0,-15,150);
+         meshes["bigdata_room"].scale.set(0.1,0.1,0.1);
+         //meshes["bigdata_room"].rotation.y+=Math.PI;
+         scene.add(meshes["bigdata_room"]);
+
 
 
         // meshes["desk"]=model.desk.mesh.clone();
         // meshes["desk"].position.set(0,-10,100);
         // meshes["desk"].scale.set(0.03,0.03,0.03);
         // scene.add(meshes["desk"]);
-        //
-        // meshes["bookshelf"]=model.bookshelf.mesh.clone();
-        // meshes["bookshelf"].position.set(-10,-10,140);
-        // meshes["bookshelf"].scale.set(0.05,0.05,0.05);
-        // scene.add(meshes["bookshelf"]);
-        //
-        // meshes["person"]=model.person.mesh.clone();
-        // meshes["person"].position.set(0,-10,100);
-        // meshes["person"].scale.set(0.05,0.05,0.05);
-        // scene.add(meshes["person"]);
     }
 
     //camera大小随窗口变化
@@ -436,8 +339,9 @@
             return;
         }
 
+
         //更新鼠标控制
-        //controls.update();
+        controls.update();
 
         renderer.setClearColor(new THREE.Color(0x55aaff));
         requestAnimationFrame(animate);
@@ -493,7 +397,7 @@
 
         controls = new THREE.OrbitControls(camera, renderer.domElement);
         //设置控制器的中心点
-        //controls.target.set( 0, 5, 0 );
+        controls.target=new THREE.Vector3(5, 0, 0 );
         // 如果使用animate方法时，将此函数删除
         //controls.addEventListener( 'change', render );
         // 使动画循环使用时阻尼或自转 意思是否有惯性
@@ -576,5 +480,6 @@
     window.addEventListener('keyup',keyUp);
     window.addEventListener('resize', onResize, false);
 </script>
+
 </body>
 </html>
