@@ -121,19 +121,19 @@
 
 		//光源
 		function initLight(){ 
-		ambientLight=new THREE.AmbientLight(0xfcffbc,0.8);//浅蓝色
-		pointLight=new THREE.PointLight(0x000000,0.8,1);
+		ambientLight=new THREE.AmbientLight(0xffffff,0.8);//浅蓝色
+		pointLight=new THREE.PointLight(0xffffff,0.8,1);
 		pointLight.position.set(0,60,0);
 		pointLight.castShadow=true;
 		scene.add(ambientLight);
 		scene.add(pointLight);
 		}
-			
-		
+
+
 		camera.position.x = 0;
 		camera.position.y = 80;
-		camera.position.z = -10;
-		camera.lookAt(0,50,100);
+		camera.position.z = -80;
+		camera.lookAt(0,0,100);
 		scene.add(camera);
 
 
@@ -152,7 +152,7 @@
 			)
 			play.name = 'play';
 			console.log(play);
-			play.position.set(120,100,240);
+			play.position.set(120,150,90);
 			play.rotation.x=Math.PI;
 			scene.add(play);
 
@@ -161,7 +161,7 @@
 					new THREE.MeshBasicMaterial({color:0xff0000})//红色
 			)
 			pause.name = 'pause';
-			pause.position.set(120,80,240);
+			pause.position.set(120,130,90);
 			pause.rotation.x=Math.PI;
 			scene.add(pause);
 
@@ -178,7 +178,7 @@
 			var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
 
 			mesh.rotation.y=Math.PI;
-			mesh.position.set(0,50,245);
+			mesh.position.set(0,100,95);
 			scene.add(mesh);
             //移除video标签的显示
 			document.getElementById('video').style.display = 'none';
@@ -203,8 +203,7 @@
 				});
 
 				video.play();//加载完后自动播放
-				requestAnimationFrame(animate);
-				renderer.render(scene,camera);
+				camera.lookAt(mesh.position);
 
 			}
 
@@ -232,34 +231,32 @@
 		}
 
 
-			var pmremGenerator = new THREE.PMREMGenerator( renderer );
-			pmremGenerator.compileEquirectangularShader();
-			new THREE.RGBELoader(loadingManager)
-					.setDataType( THREE.UnsignedByteType ) //hdr文件可以渲染出更加真实的场景
-					.load( 'static/libs/texture/royal_esplanade_1k.hdr', function ( texture ) {
-
-						var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
-
-						scene.background = envMap;
-						scene.environment = envMap;
-
-					} );
-
-			var loader = new THREE.GLTFLoader(loadingManager).setPath( model.JavaStudio.GLTF );
-			loader.load( 'JavaStudio.gltf', function ( gltf ) {
-				gltf.scene.traverse( function ( child ) {
-					if ( child.isMesh ) {
-						// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
-						// roughnessMipmapper.generateMipmaps( child.material );
-					}
-				} );
-				scene.add( gltf.scene );
-				gltf.scene.scale.set(60,60,60);
-				//gltf.scene.rotation.z=Math.PI/2;
-				//gltf.scene.position(0,-100,-120);
-				//roughnessMipmapper.dispose();
-				//render();
-			} );
+			// var pmremGenerator = new THREE.PMREMGenerator( renderer );
+			// pmremGenerator.compileEquirectangularShader();
+			// new THREE.RGBELoader(loadingManager)
+			// 		.setDataType( THREE.UnsignedByteType ) //hdr文件可以渲染出更加真实的场景
+			// 		.load( 'static/libs/texture/royal_esplanade_1k.hdr', function ( texture ) {
+			// 			var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
+			// 			scene.background = envMap;
+			// 			scene.environment = envMap;
+			//
+			// 		} );
+			//
+			// var loader = new THREE.GLTFLoader(loadingManager).setPath( model.JavaStudio.GLTF );
+			// loader.load( 'JavaStudio.gltf', function ( gltf ) {
+			// 	gltf.scene.traverse( function ( child ) {
+			// 		if ( child.isMesh ) {
+			// 			// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
+			// 			// roughnessMipmapper.generateMipmaps( child.material );
+			// 		}
+			// 	} );
+			// 	scene.add( gltf.scene );
+			// 	gltf.scene.scale.set(60,60,60);
+			// 	//gltf.scene.rotation.z=Math.PI/2;
+			// 	//gltf.scene.position(0,-100,-120);
+			// 	//roughnessMipmapper.dispose();
+			// 	//render();
+			// } );
 
 			var pmremGenerator = new THREE.PMREMGenerator( renderer );
 			pmremGenerator.compileEquirectangularShader();
@@ -275,7 +272,7 @@
 					} );
 
 			var loader = new THREE.GLTFLoader(loadingManager).setPath( "static/models/gltf/Studio/JavaStudio/" );
-			loader.load( 'BigDataStudio.gltf', function ( gltf ) {
+			loader.load( 'JavaStudio.gltf', function ( gltf ) {
 				gltf.scene.traverse( function ( child ) {
 					if ( child.isMesh ) {
 						// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
@@ -283,9 +280,9 @@
 					}
 				} );
 				scene.add( gltf.scene );
-				gltf.scene.scale.set(60,60,60);
+				gltf.scene.scale.set(40,40,40);
 				//gltf.scene.rotation.z=Math.PI/2;
-				//gltf.scene.position(0,-100,-120);
+				gltf.scene.position.set(-800,0,-1000);
 				//roughnessMipmapper.dispose();
 				//render();
 			} );
