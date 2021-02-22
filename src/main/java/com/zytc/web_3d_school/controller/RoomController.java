@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class RoomController {
     @RequestMapping("/room")
     public String room(){
-        return "room";
+        return "JavaStudio";
     }
     @RequestMapping("/room1")
     public String room1(){
-        return "room1";
+        return "BigDataStudio";
     }
 }
