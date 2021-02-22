@@ -92,7 +92,7 @@
     //模型索引
     var model= {
         BigDataStudio:{
-            GLTF:"static/models/gltf/BigDataStudio/BigDataStudio.gltf",
+            GLTF:"static/models/gltf/Studio/BigDataStudio/",
             gltfobj:null
         }
     }
@@ -103,7 +103,7 @@
     function init(){
         //initLight();
         //CreatePanl();
-        initControls();
+        //initControls();
         initVideo();
 
         // control = new THREE.OrbitControls( camera, document.body );
@@ -130,8 +130,8 @@
 
 
     camera.position.x = 0;
-    camera.position.y = 100;
-    camera.position.z =-100;
+    camera.position.y = 80;
+    camera.position.z =-80;
     camera.lookAt(0,0,100);
     scene.add(camera);
 
@@ -151,7 +151,7 @@
         )
         play.name = 'play';
         console.log(play);
-        play.position.set(120,200,90);
+        play.position.set(120,150,90);
         play.rotation.x=Math.PI;
         scene.add(play);
 
@@ -160,7 +160,7 @@
             new THREE.MeshBasicMaterial({color:0xff0000})//红色
         )
         pause.name = 'pause';
-        pause.position.set(120,180,90);
+        pause.position.set(120,130,90);
         pause.rotation.x=Math.PI;
         scene.add(pause);
 
@@ -177,7 +177,7 @@
         var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
 
         mesh.rotation.y=Math.PI;
-        mesh.position.set(0,150,95);
+        mesh.position.set(0,100,95);
         scene.add(mesh);
         //移除video标签的显示
         document.getElementById('video').style.display = 'none';
@@ -193,18 +193,15 @@
                 });
             });
 
+        var pauseButton = document.getElementById('pauseButton');
+        pauseButton.addEventListener('click', function () {
+            video = document.getElementById('video');
+            video.pause();
+            videoTime=video.currentTime;
+        });
 
-            var pauseButton = document.getElementById('pauseButton');
-            pauseButton.addEventListener('click', function () {
-                video = document.getElementById('video');
-                video.pause();
-                videoTime=video.currentTime;
-            });
-
-            video.play();//加载完后自动播放
-            requestAnimationFrame(animate);
-            renderer.render(scene,camera);
-
+        video.play();//加载完后自动播放
+        camera.lookAt(mesh.position);
         }
 
     }
@@ -283,7 +280,7 @@
 
         } );
 
-    var loader = new THREE.GLTFLoader(loadingManager).setPath( 'static/models/gltf/BigDataStudio/' );
+    var loader = new THREE.GLTFLoader(loadingManager).setPath( model.BigDataStudio.GLTF );
     loader.load( 'BigDataStudio.gltf', function ( gltf ) {
         gltf.scene.traverse( function ( child ) {
             if ( child.isMesh ) {
@@ -341,7 +338,7 @@
 
 
         //更新鼠标控制
-        controls.update();
+        //controls.update();
 
         renderer.setClearColor(new THREE.Color(0x55aaff));
         requestAnimationFrame(animate);
