@@ -84,13 +84,13 @@
     loadingManager.onLoad=function(){  //必须是onLoad才行，不能是onload！！！
         console.log("已下载所有资源！");  //没有加载完资源
         Resource_Loaded=true;
-        // onResourceLoaded(); //记得给所有loader加上（loadingManager）
+       // onResourceLoaded(); //记得给所有loader加上（loadingManager）
     }
 
     //模型索引
     var model= {
         BigDataStudio:{
-            GLTF:"static/models/gltf/Studio/BigDataStudio/",
+            GLTF:"static/models/gltf/Studio/BigDataStudio/BigDataStudio.gltf",
             gltfobj:null
         }
     }
@@ -101,7 +101,7 @@
     function init(){
         //initLight();
         //CreatePanl();
-        //initControls();
+        initControls();
         initVideo();
 
         // control = new THREE.OrbitControls( camera, document.body );
@@ -128,8 +128,8 @@
 
 
     camera.position.x = 0;
-    camera.position.y = 80;
-    camera.position.z =-60;
+    camera.position.y = 100;
+    camera.position.z =-100;
     camera.lookAt(0,0,100);
     scene.add(camera);
 
@@ -149,7 +149,7 @@
         )
         play.name = 'play';
         console.log(play);
-        play.position.set(120,120,90);
+        play.position.set(120,200,90);
         play.rotation.x=Math.PI;
         scene.add(play);
 
@@ -158,7 +158,7 @@
             new THREE.MeshBasicMaterial({color:0xff0000})//红色
         )
         pause.name = 'pause';
-        pause.position.set(120,130,90);
+        pause.position.set(120,180,90);
         pause.rotation.x=Math.PI;
         scene.add(pause);
 
@@ -175,7 +175,7 @@
         var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
 
         mesh.rotation.y=Math.PI;
-        mesh.position.set(0,100,95);
+        mesh.position.set(0,150,95);
         scene.add(mesh);
         //移除video标签的显示
         document.getElementById('video').style.display = 'none';
@@ -191,6 +191,7 @@
                 });
             });
 
+
             var pauseButton = document.getElementById('pauseButton');
             pauseButton.addEventListener('click', function () {
                 video = document.getElementById('video');
@@ -199,7 +200,9 @@
             });
 
             video.play();//加载完后自动播放
-            camera.lookAt(mesh.position);
+            requestAnimationFrame(animate);
+            renderer.render(scene,camera);
+
         }
 
     }
@@ -278,7 +281,7 @@
 
         } );
 
-    var loader = new THREE.GLTFLoader(loadingManager).setPath( model.BigDataStudio.GLTF );
+    var loader = new THREE.GLTFLoader(loadingManager).setPath( 'static/models/gltf/Studio/BigDataStudio/' );
     loader.load( 'BigDataStudio.gltf', function ( gltf ) {
         gltf.scene.traverse( function ( child ) {
             if ( child.isMesh ) {
@@ -286,6 +289,7 @@
                 // roughnessMipmapper.generateMipmaps( child.material );
             }
         } );
+        console.log(gltf.scene);
         //去掉多余白色正方体
         gltf.scene.children.forEach(object =>{
             if(object.name === 'Cube')
@@ -302,12 +306,12 @@
 
     function onResourceLoaded(){
         //将模型克隆到网络中
-        meshes["bigdata_room"]=model["bigdata_room"].gltfobj;
-        //不知道为什么，使用这种方法，必须要有loadingManager，不然mesh为null值
-        meshes["bigdata_room"].position.set(0,-15,150);
-        meshes["bigdata_room"].scale.set(0.1,0.1,0.1);
-        //meshes["bigdata_room"].rotation.y+=Math.PI;
-        scene.add(meshes["bigdata_room"]);
+         meshes["bigdata_room"]=model["bigdata_room"].gltfobj;
+         //不知道为什么，使用这种方法，必须要有loadingManager，不然mesh为null值
+         meshes["bigdata_room"].position.set(0,-15,150);
+         meshes["bigdata_room"].scale.set(0.1,0.1,0.1);
+         //meshes["bigdata_room"].rotation.y+=Math.PI;
+         scene.add(meshes["bigdata_room"]);
 
 
 
@@ -341,7 +345,7 @@
 
 
         //更新鼠标控制
-        //controls.update();
+        controls.update();
 
         renderer.setClearColor(new THREE.Color(0x55aaff));
         requestAnimationFrame(animate);
