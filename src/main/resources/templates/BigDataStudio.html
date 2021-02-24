@@ -128,9 +128,9 @@
 
 
     camera.position.x = 0;
-    camera.position.y = 80;
-    camera.position.z =-100;
-    camera.lookAt(0,0,100);
+    camera.position.y = 70;
+    camera.position.z =-70;
+    //camera.lookAt(scene.position);
     scene.add(camera);
 
 
@@ -200,6 +200,7 @@
             });
 
             video.play();//加载完后自动播放
+            camera.lookAt(mesh.position);
             requestAnimationFrame(animate);
             renderer.render(scene,camera);
 
