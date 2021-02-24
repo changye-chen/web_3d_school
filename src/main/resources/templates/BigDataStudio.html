@@ -24,7 +24,6 @@
     </video>
 
 </head>
-<body>
 <script>
     //灵感1：资源文件里面有水滴的jpg，可以做一个配合现实天气的天气界面。
     //灵感2：房间贴纸分类：护眼色、经典色等。
@@ -33,7 +32,7 @@
     // 创建一个场景，将我们所有的元素，如物体，相机和灯光。
 
     var keyboard={}; //定义数组
-    var player={height:1.8,speed:0.2,turnSpeed:Math.PI*0.01};
+    var player={height:1.8,speed:2,turnSpeed:Math.PI*0.01};
     var control;
 
     var scene= new THREE.Scene();
@@ -97,24 +96,6 @@
     //网格索引
     var meshes={};
 
-    init();
-    function init(){
-        //initLight();
-        //CreatePanl();
-        //initControls();
-        initVideo();
-
-        // control = new THREE.OrbitControls( camera, document.body );
-        // //control.enabled=false;
-        // control.target=new THREE.Vector3(0,0,100);
-        //control.target.set( 0, 0, 0 );
-        // control.autoRotate = true;
-        // control.autoRotateSpeed = - 1.0;
-        //control.update();
-    }
-
-
-
 
     //光源
     function initLight(){
@@ -126,22 +107,58 @@
         scene.add(pointLight);
     }
 
+    function deskView() {
+        camera.position.x = 0;
+        camera.position.y = 60;
+        camera.position.z = -70;
+        camera.lookAt(0, 70, 95);
+        scene.add(camera);
+    }
 
-    camera.position.x = 0;
-    camera.position.y = 70;
-    camera.position.z =-70;
-    //camera.lookAt(scene.position);
-    scene.add(camera);
+    screenView();
+    function screenView() {
+        camera.position.x = 0;
+        camera.position.y = 80;
+        camera.position.z = 0;
+        camera.lookAt(0, 80, 95);
+        scene.add(camera);
+    }
 
-
+    //加载两个小屏幕
+    initVideo(55,80,90,120,95,"#video");
+    initVideo(55,80,90,40,95,"#video");
 
     //加载视频
-    initVideo();
-    function initVideo() {
+    initVideo(200,160,-40,80,95,"#video");
+    function initVideo(width,height,x,y,z,videoTag) {
+        //添加立方体
+        var geometry = new THREE.PlaneGeometry(width,height);
 
+        //获取到video对象
+        var video = document.querySelector(videoTag);
+
+        //通过video对象实例化纹理
+        var texture = new THREE.VideoTexture(video);
+        texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;//使用平铺，因为视频尺寸不一定都是标准的
+        texture.minFilter = THREE.LinearFilter;
+        material = new THREE.MeshBasicMaterial( { map: texture } );
+        var mainScreen = new THREE.Mesh(geometry, material); //网格模型对象Mesh
+
+        mainScreen.rotation.y=Math.PI;
+        mainScreen.position.set(x,y,z);
+        scene.add(mainScreen);
+        //移除video标签的显示
+        document.getElementById('video').style.display = 'none';
+        // requestAnimationFrame(animate);
+        // renderer.render(scene,camera);
+    }
+
+
+    mainVideoControl(-70,140,50,-85,140,50,"video");
+    function mainVideoControl(playx,playy,playz,pausex,pausey,pausez,videoTag){
         //辅助工具
         var helper = new THREE.AxesHelper(50);
-        scene.add(helper);
+        //scene.add(helper);
 
         var play=new THREE.Mesh(
             new THREE.PlaneGeometry(10,10),
@@ -149,7 +166,7 @@
         )
         play.name = 'play';
         console.log(play);
-        play.position.set(120,200,90);
+        play.position.set(playx,playy,playz);
         play.rotation.x=Math.PI;
         scene.add(play);
 
@@ -158,94 +175,33 @@
             new THREE.MeshBasicMaterial({color:0xff0000})//红色
         )
         pause.name = 'pause';
-        pause.position.set(120,180,90);
+        pause.position.set(pausex,pausey,pausez);
         pause.rotation.x=Math.PI;
         scene.add(pause);
 
-        //添加立方体
-        var geometry = new THREE.PlaneGeometry(200,150);
-
-        //获取到video对象
-        var video = document.querySelector("#video");
-        //通过video对象实例化纹理
-        var texture = new THREE.VideoTexture(video);
-        texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;//使用平铺，因为视频尺寸不一定都是标准的
-        texture.minFilter = THREE.LinearFilter;
-        material = new THREE.MeshBasicMaterial( { map: texture } );
-        var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
-
-        mesh.rotation.y=Math.PI;
-        mesh.position.set(0,100,95);
-        scene.add(mesh);
-        //移除video标签的显示
-        document.getElementById('video').style.display = 'none';
-
         var videoTime=0;
-        window.onload=function() { //等所有都加载完了再执行function后面的
-            var startButton = document.getElementById('startButton');
-            startButton.addEventListener('click', function () {
-                video = document.getElementById('video');
-                video.play();
-                video.addEventListener('play', function () {
-                    this.currentTime = videoTime;//从几秒开始播放
-                });
+        //window.onload=function() { //等所有都加载完了再执行function后面的
+        var startButton = document.getElementById('startButton');
+        startButton.addEventListener('click', function () {
+            video = document.getElementById(videoTag);
+            video.play();
+            video.addEventListener('play', function () {
+                this.currentTime = videoTime;//从几秒开始播放
             });
+        });
 
-
-            var pauseButton = document.getElementById('pauseButton');
-            pauseButton.addEventListener('click', function () {
-                video = document.getElementById('video');
-                video.pause();
-                videoTime=video.currentTime;
-            });
-
-            video.play();//加载完后自动播放
-            camera.lookAt(mesh.position);
-            requestAnimationFrame(animate);
-            renderer.render(scene,camera);
-
-        }
-
-    }
-
-
-    //创建地平面
-    function CreatePanl() {
-        // var floor_1 = THREE.ImageUtils.loadTexture("textures/ground/grasslight-big.jpg");
-        // floor_1.wrapS = THREE.RepeatWrapping;
-        // floor_1.wrapT = THREE.RepeatWrapping;
-        // floor_1.repeat.set(4, 4);
-        //var floor_1Material = new THREE.MeshLambertMaterial({ map: floor_1 });
-        var planeGeometry = new THREE.PlaneGeometry(300,300,100,10);
-        planeMaterial = new THREE.MeshBasicMaterial({ color: 0xd6d6d6/*,map:floor_1,specular: 0xffffff, shininess: 200 */});
-        plane = new THREE.Mesh(planeGeometry, planeMaterial);
-
-
-        plane.receiveShadow = true;
-        plane.rotation.x = -0.5 * Math.PI;
-        plane.position.x = camera.position.x;
-        plane.position.y = camera.position.y-20;
-        plane.position.z = camera.position.z+150;
-        scene.add(plane);
+        var pauseButton = document.getElementById('pauseButton');
+        pauseButton.addEventListener('click', function () {
+            video = document.getElementById(videoTag);
+            video.pause();
+            videoTime = video.currentTime;
+        });
+        //}
+        video.play();//加载完后自动播放
     }
 
 
 
-    // for(var _key in model){
-    //     (function(key){
-    //         var loader = new THREE.FBXLoader(loadingManager);
-    //         loader.load( model[key].FBX, function ( object ) {//加载路径fbx文件
-    //             object.traverse(function (child) {
-    //             if (child.isMesh) {
-    //               child.castShadow = true;
-    //               child.receiveShadow = true;
-    //                 }
-    //             } );
-    //         //scene.add( object );//模型
-    //         model[key].object=object;
-    //     } );
-    //     })(_key)
-    // }
 
     //加载 glTF 格式的模型
     // for(var _key in model) {
