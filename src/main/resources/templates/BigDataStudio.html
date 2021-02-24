@@ -101,7 +101,7 @@
     function init(){
         //initLight();
         //CreatePanl();
-        initControls();
+        //initControls();
         initVideo();
 
         // control = new THREE.OrbitControls( camera, document.body );
@@ -128,7 +128,7 @@
 
 
     camera.position.x = 0;
-    camera.position.y = 100;
+    camera.position.y = 80;
     camera.position.z =-100;
     camera.lookAt(0,0,100);
     scene.add(camera);
@@ -175,7 +175,7 @@
         var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
 
         mesh.rotation.y=Math.PI;
-        mesh.position.set(0,150,95);
+        mesh.position.set(0,100,95);
         scene.add(mesh);
         //移除video标签的显示
         document.getElementById('video').style.display = 'none';
@@ -345,7 +345,7 @@
 
 
         //更新鼠标控制
-        controls.update();
+        //controls.update();
 
         renderer.setClearColor(new THREE.Color(0x55aaff));
         requestAnimationFrame(animate);
