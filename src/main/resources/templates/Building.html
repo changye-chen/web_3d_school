@@ -6,11 +6,11 @@
 		<title>建筑</title>
 
 		<script type="text/javascript" th:src="@{static/libs/three.js}"></script>
-<!--		<script type="text/javascript" th:src="@{static/libs/three.min.js}"></script>-->
 
 		<script type="text/javascript" th:src="@{static/libs/GLTFLoader.js}"></script>
 		<script type="text/javascript" th:src="@{static/libs/RGBELoader.js}"></script>
 		<script type="text/javascript" th:src="@{static/libs/OrbitControls.js}"></script>
+		<script type="text/javascript" th:src="@{static/libs/stats.js}"></script>
 
 	</head>
 	<body>
@@ -32,6 +32,7 @@
 		var group = new THREE.Group();//创建雨滴数组
 		var clouds = []; //点云
 		var range = 500; // 雪花出现范围
+		var Stats;
 		
 		var scene= new THREE.Scene();
 		var camera= new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1, 1000);
@@ -324,12 +325,29 @@
 			renderer.setSize(window.innerWidth, window.innerHeight);
 		}
 
+		function initStats() {
+
+			stats = new Stats();
+
+			stats.setMode(0); // 0: fps, 1: ms
+
+			// 放在左上角
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.left = '0px';
+			stats.domElement.style.top = '0px';
+
+			document.body.appendChild(stats.domElement);
+
+			return stats;
+		}
+
 		init();
 		function init(){
 			initLight();
 			CreatePanl();
 			initSkyBox();
 			initControls();
+			initStats();
 		if(weather.rain)
 			onloadRain();
 		if(weather.snow)
@@ -350,20 +368,16 @@
 				renderer.render(loadingScreen.scene,loadingScreen.camera);
 				return;
 			}
-			
+
+			//更新鼠标控制
+			controls.update();
+			stats.update();
+
 			if(weather.rain)
 			renderRain();
-			// else {
-			// 	renderer.render(scene, camera); //执行渲染操作
-			// 	requestAnimationFrame(animate);
-			// }
-			
 			else if(weather.snow)
 			renderSnow();
 			else {
-				//更新鼠标控制
-				controls.update();
-
 				renderer.render(scene, camera);
 				requestAnimationFrame(animate);
 			    }
@@ -379,8 +393,6 @@
                   sprite.position.y = 200;
                 }
               });
-              //更新鼠标控制
-				controls.update();
 
               renderer.render(scene, camera); //执行渲染操作
               requestAnimationFrame(renderRain);//请求再次执行渲染函数render，渲染下一帧
@@ -407,8 +419,6 @@
 			        //重要：渲染时需要更新位置（如果没有设为true,则无法显示动画）
 			        points.geometry.verticesNeedUpdate = true;
 				});
-				//更新鼠标控制
-				controls.update();
 
 				renderer.render(scene, camera);
 				requestAnimationFrame(animate);

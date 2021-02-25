@@ -16,6 +16,7 @@
 		<script th:src="@{static/libs/MTLLoader.js}"></script>
 		<script th:src="@{static/libs/OBJLoader.js}"></script>
 		<script th:src="@{static/libs/OrbitControls.js}"></script>
+		<script type="text/javascript" th:src="@{static/libs/stats.js}"></script>
 
 		<div id="overlay">
 			<button id="startButton">Play</button>
@@ -50,6 +51,15 @@
 		renderer.shadowMap.type=THREE.BasicShadowMap;
 		var plane;
 		document.body.appendChild(renderer.domElement);
+
+		var hdrPath='static/libs/texture/royal_esplanade_1k.hdr';
+		var gltfPath='static/models/gltf/Studio/JavaStudio/JavaStudio.gltf';
+
+		//场景美化效果
+		renderer.setPixelRatio( window.devicePixelRatio );
+		renderer.outputEncoding = THREE.sRGBEncoding;
+		renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
 		var pointLight;
 		var ambientLight;
 		var loadingManager=null,Resource_Loaded=true;
@@ -63,11 +73,6 @@
 							color:0xff0000,
 							wireframe:false
 							})
-							// 0xff0000 红色
-							// 0x00ff00 绿色,
-							// 0x0000ff 蓝色.
-							// 0xffffff 白色
-							// 0x000000 黑色
 				)
 			}
 		
@@ -108,10 +113,8 @@
 			//CreatePanl();
 			initControls();
 			initVideo();
-			//var name="static/room/computer_room.drc";
-			//addModeldrc(name);
-			//dracoLoad();
-			//loadDrc(model['computer_room'].url);
+			initStats();
+			loadGLTF(hdrPath,gltfPath,40,40,40,-800,0,-1000);
 
 
 		}
@@ -139,7 +142,6 @@
 
 
 		//加载视频
-		initVideo();
 		function initVideo() {
 
 			//辅助工具
@@ -204,93 +206,55 @@
 
 				video.play();//加载完后自动播放
 				camera.lookAt(mesh.position);
-
 			}
-
 		}
 
-
-		//创建地平面
-		function CreatePanl() {
-		            // var floor_1 = THREE.ImageUtils.loadTexture("textures/ground/grasslight-big.jpg");
-		            // floor_1.wrapS = THREE.RepeatWrapping;
-		            // floor_1.wrapT = THREE.RepeatWrapping;
-		            // floor_1.repeat.set(4, 4);
-		            //var floor_1Material = new THREE.MeshLambertMaterial({ map: floor_1 });
-		            var planeGeometry = new THREE.PlaneGeometry(300,300,100,10);
-		            planeMaterial = new THREE.MeshBasicMaterial({ color: 0xd6d6d6/*,map:floor_1,specular: 0xffffff, shininess: 200 */});
-		            plane = new THREE.Mesh(planeGeometry, planeMaterial);
-		          
-					
-					plane.receiveShadow = true;
-		            plane.rotation.x = -0.5 * Math.PI;
-		            plane.position.x = camera.position.x;
-		            plane.position.y = camera.position.y-20;
-		            plane.position.z = camera.position.z+150;
-		            scene.add(plane);
-		}
-
-
-			// var pmremGenerator = new THREE.PMREMGenerator( renderer );
-			// pmremGenerator.compileEquirectangularShader();
-			// new THREE.RGBELoader(loadingManager)
-			// 		.setDataType( THREE.UnsignedByteType ) //hdr文件可以渲染出更加真实的场景
-			// 		.load( 'static/libs/texture/royal_esplanade_1k.hdr', function ( texture ) {
-			// 			var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
-			// 			scene.background = envMap;
-			// 			scene.environment = envMap;
-			//
-			// 		} );
-			//
-			// var loader = new THREE.GLTFLoader(loadingManager).setPath( model.JavaStudio.GLTF );
-			// loader.load( 'JavaStudio.gltf', function ( gltf ) {
-			// 	gltf.scene.traverse( function ( child ) {
-			// 		if ( child.isMesh ) {
-			// 			// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
-			// 			// roughnessMipmapper.generateMipmaps( child.material );
-			// 		}
-			// 	} );
-			// 	scene.add( gltf.scene );
-			// 	gltf.scene.scale.set(60,60,60);
-			// 	//gltf.scene.rotation.z=Math.PI/2;
-			// 	//gltf.scene.position(0,-100,-120);
-			// 	//roughnessMipmapper.dispose();
-			// 	//render();
-			// } );
-
-			var pmremGenerator = new THREE.PMREMGenerator( renderer );
+		function loadGLTF(hdrPath,gltfPath,scalex, scaley, scalez,x,y,z) {
+			//增强场景的真实感
+			var pmremGenerator = new THREE.PMREMGenerator(renderer);
 			pmremGenerator.compileEquirectangularShader();
 			new THREE.RGBELoader(loadingManager)
-					.setDataType( THREE.UnsignedByteType ) //hdr文件可以渲染出更加真实的场景
-					.load( 'static/libs/texture/royal_esplanade_1k.hdr', function ( texture ) {
-
-						var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
-
+					.setDataType(THREE.UnsignedByteType) //hdr文件可以渲染出更加真实的场景
+					.load(hdrPath, function (texture) {
+						var envMap = pmremGenerator.fromEquirectangular(texture).texture;
 						scene.background = envMap;
 						scene.environment = envMap;
 
-					} );
+					});
 
-			var loader = new THREE.GLTFLoader(loadingManager).setPath( "static/models/gltf/Studio/JavaStudio/" );
-			loader.load( 'JavaStudio.gltf', function ( gltf ) {
-				gltf.scene.traverse( function ( child ) {
-					if ( child.isMesh ) {
+			var loader = new THREE.GLTFLoader(loadingManager);
+			loader.load(gltfPath, function (gltf) {
+				gltf.scene.traverse(function (child) {
+					if (child.isMesh) {
 						// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
 						// roughnessMipmapper.generateMipmaps( child.material );
 					}
-				} );
-				scene.add( gltf.scene );
-				gltf.scene.scale.set(40,40,40);
+				});
+				scene.add(gltf.scene);
+				gltf.scene.scale.set(scalex, scaley, scalez);
 				//gltf.scene.rotation.z=Math.PI/2;
-				gltf.scene.position.set(-800,0,-1000);
+				gltf.scene.position.set(x,y,z);
 				//roughnessMipmapper.dispose();
 				//render();
-			} );
+			});
+		}
 
 
+			function initStats() {
 
+				stats = new Stats();
 
+				stats.setMode(0); // 0: fps, 1: ms
 
+				// 放在左上角
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.left = '0px';
+				stats.domElement.style.top = '0px';
+
+				document.body.appendChild(stats.domElement);
+
+				return stats;
+			}
 
 				function onResourceLoaded(){
 			//将模型克隆到网络中
@@ -327,6 +291,7 @@
 
 			//更新鼠标控制
 			controls.update();
+			stats.update();
 
 			renderer.setClearColor(new THREE.Color(0x55aaff));
 		   	requestAnimationFrame(animate);
