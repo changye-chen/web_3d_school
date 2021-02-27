@@ -13,4 +13,22 @@ public class RoomController {
     public String room1(){
         return "BigDataStudio";
     }
+
+    @RequestMapping("/cssStudio")
+    public String room2(){
+        return "cssStudio";
+    }
+
+    @RequestMapping("/IndustryStudio")
+    public String room3(){
+        return "IndustryStudio";
+    }
+
+    @RequestMapping("/VisionStudio")
+    public String room4(){
+        return "VisionStudio";
+    }
+
+
+
 }

@@ -52,7 +52,7 @@
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
     var hdrPath='static/libs/texture/royal_esplanade_1k.hdr';
-    var gltfPath='static/models/gltf/Studio/BigDataStudio/BigDataStudio.gltf';
+    var gltfPath='static/models/gltf/Studio/cssStudio/cssStudio.gltf';
 
     document.body.appendChild(renderer.domElement);
     var loadingManager=null,Resource_Loaded=true;
@@ -110,35 +110,44 @@
     }
 
     function deskView() {
-        camera.position.x = 0;
-        camera.position.y = 65;
-        camera.position.z = -70;
-        camera.lookAt(0, 70, 95);
+        camera.position.x = 45;
+        camera.position.y = 75;
+        camera.position.z = -40;
+        camera.lookAt(40, 70, 170);
         scene.add(camera);
     }
 
     function screenView() {
-        camera.position.x = 0;
-        camera.position.y = 80;
-        camera.position.z = 0;
-        camera.lookAt(0, 80, 95);
+        camera.position.x = 45;
+        camera.position.y = 90;
+        camera.position.z = 30;
+        camera.lookAt(40, 80, 170);
         scene.add(camera);
     }
 
-    init();
-    function init() {
+    init(50,0,75);//多个屏幕整体位置
+    function init(x,y,z) {
         //加载两个小屏幕
-        initVideo(55, 80, 90, 124, 96, "video");
-        initVideo(55, 80, 90, 42, 96, "video");
+        initVideo(55, 80, 90+x, 124+y, 96+z, "video");
+        initVideo(55, 80, 90+x, 42+y, 96+z, "video");
         //initControls();
         //加载主屏幕及控制按钮
-        initVideo(200,150,-38.5,77,96,"video");
-        mainVideoControl(-115,158,96,-130,158,96,"video");
+        initVideo(200,150,-38.5+x,77+y,96+z,"video");
+        mainVideoControl(-115+x,158+y,96+z,-130+x,158+y,96+z,"video");
         //加载性能插件
         initStats();
         //默认桌子视角
         deskView();
         loadGLTF(hdrPath,gltfPath,60,60,60);
+
+        //加一块黑幕在屏幕后面
+        var darkMesh=new THREE.Mesh(
+            new THREE.PlaneBufferGeometry(260,165),
+            new THREE.MeshBasicMaterial({color:0x00000f})
+        )
+        darkMesh.position.set(-11+x,82+y,97+z);
+        darkMesh.rotation.x=Math.PI;
+        scene.add(darkMesh);
     }
 
     //加载视频
@@ -207,17 +216,6 @@
         //}
         video.play();//加载完后自动播放
     }
-
-
-    //加一块黑幕在屏幕后面
-    var darkMesh=new THREE.Mesh(
-        new THREE.PlaneBufferGeometry(260,165),
-        new THREE.MeshBasicMaterial({color:0x00000f})
-    )
-    darkMesh.position.set(-11,82,97);
-    darkMesh.rotation.x=Math.PI;
-    scene.add(darkMesh);
-
 
 
     //加载 glTF 格式的模型
@@ -425,7 +423,7 @@
         //设置相机距离原点的最远距离
         controls.minDistance = 1;
         //设置相机距离原点的最远距离
-        controls.maxDistance = 2000;
+        controls.maxDistance = 1900;
         //是否开启右键拖拽
         controls.enablePan = true;
     }
