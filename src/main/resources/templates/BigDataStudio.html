@@ -11,7 +11,7 @@
     <script type="text/javascript" th:src="@{static/libs/DRACOLoader.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/OrbitControls.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/stats.js}"></script>
-
+    <script type="text/javascript" th:src="@{static/libs/Layer.js}"></script>
     <div id="overlay" >
         <button id="startButton">Play</button>
     </div>
@@ -483,6 +483,19 @@
             }
             else if(intersects[0].object.name === 'pause'){
                 video.pause();
+            }
+            else if(intersects[0].object.name === 'BMan0003-Se'){
+                //忠涵加入字符串
+                var main_mission = new String("czh");
+                var layer = new MyLayer({
+                    top:"10%",
+                    left:"10%",
+                    width:"80%",
+                    height:"80%",
+                    title:"我的标题",
+                    content:main_mission
+                });
+                layer.openLayer();
             }
         }
 
