@@ -4,10 +4,13 @@
 		
 		<meta charset="utf-8">
 		<title>建筑</title>
-		<script th:src="@{static/libs/three.js}"></script>
-		<script th:src="@{static/libs/MTLLoader.js}"></script>
-		<script th:src="@{static/libs/OBJLoader.js}"></script>
-		<script th:src="@{static/libs/OrbitControls.js}"></script>
+
+		<script type="text/javascript" th:src="@{static/libs/three-dev95.js}"></script>
+
+		<script type="text/javascript" th:src="@{static/libs/GLTFLoader.js}"></script>
+		<script type="text/javascript" th:src="@{static/libs/RGBELoader.js}"></script>
+		<script type="text/javascript" th:src="@{static/libs/OrbitControls.js}"></script>
+		<script type="text/javascript" th:src="@{static/libs/stats.js}"></script>
 
 	</head>
 	<body>
@@ -29,6 +32,7 @@
 		var group = new THREE.Group();//创建雨滴数组
 		var clouds = []; //点云
 		var range = 500; // 雪花出现范围
+		var Stats;
 		
 		var scene= new THREE.Scene();
 		var camera= new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1, 1000);
@@ -36,6 +40,11 @@
 		renderer.setSize(window.innerWidth,window.innerHeight);
 		renderer.shadowMap.enabled=true;
 		renderer.shadowMap.type=THREE.BasicShadowMap;
+
+
+		var gltfPath='static/models/gltf/Studio/BigDataStudio/BigDataStudio.gltf';
+
+
 		var plane;
 		document.body.appendChild(renderer.domElement);
 		var pointLight;
@@ -51,11 +60,6 @@
 							color:0xff0000,
 							wireframe:false
 							})
-							// 0xff0000 红色
-							// 0x00ff00 绿色,
-							// 0x0000ff 蓝色.
-							// 0xffffff 白色
-							// 0x000000 黑色
 				)
 			}
 		
@@ -75,19 +79,15 @@
 		loadingManager.onLoad=function(){  //必须是onLoad才行，不能是onload！！！
 			console.log("已下载所有资源！");
 			Resource_Loaded=true;
-			onResourceLoaded();
+			//onResourceLoaded();
 		}
-		
-		
+
 		
 		//模型索引  
-		var models={
-			school:{
-				obj:"static/School/School.obj",
-				mtl:"static/School/School.mtl",
-				mesh:null,
-				receiveShadow:true,
-				castShadow:true,
+		var model={
+			InternetStudio:{
+				GLTF:"static/models/gltf/Building/Internet/",
+				gltfobj:null
 			},
 		// 	Garen:{    
 		// 	 	obj:"static/School/Garen.obj",
@@ -101,19 +101,19 @@
 		
 		//光源
 		function initLight(){ 
-		ambientLight=new THREE.AmbientLight(0xffffff,0.8);//浅蓝色
-		pointLight=new THREE.PointLight(0xefefef,1,500);
-		pointLight.position.set(-50,75,-50);
+		ambientLight=new THREE.AmbientLight(0xffffff,1);//浅蓝色
+		pointLight=new THREE.PointLight(0xffffff,1,1);
+		pointLight.position.set(0,30,0);
 		pointLight.castShadow=true;
 		
 		scene.add(ambientLight);
 		scene.add(pointLight);
 		}
-		
-		
+
+
 		camera.position.x = 0;
 		camera.position.y = 0;
-		camera.position.z = -70;
+		camera.position.z = -40;
 		camera.lookAt(scene.position);
 		
 		
@@ -170,10 +170,10 @@
 		
 		//创建地平面
 		function CreatePanl() {
-		            var floor_1 = THREE.ImageUtils.loadTexture("static/textures/ground/grasslight-big.jpg");
-		            floor_1.wrapS = THREE.RepeatWrapping;
-		            floor_1.wrapT = THREE.RepeatWrapping;
-		            floor_1.repeat.set(4, 4);
+		            // var floor_1 = THREE.ImageUtils.loadTexture("static/textures/ground/grasslight-big.jpg");
+		            // floor_1.wrapS = THREE.RepeatWrapping;
+		            // floor_1.wrapT = THREE.RepeatWrapping;
+		            // floor_1.repeat.set(4, 4);
 		            //var floor_1Material = new THREE.MeshLambertMaterial({ map: floor_1 });
 		            var planeGeometry = new THREE.PlaneGeometry(300,300,100,10);
 		            planeMaterial = new THREE.MeshPhongMaterial({ color: 0xd6d6d6/*,map:floor_1,specular: 0xffffff, shininess: 200 */});
@@ -187,56 +187,39 @@
 		            plane.position.z = camera.position.z+150;
 		            scene.add(plane);
 		        }
-		
-		// var onProgress = function(xhr) {
-		//     if (xhr.lengthComputable) {
-		//         var percentComplete = xhr.loaded / xhr.total * 100;
-		//         console.log(Math.round(percentComplete, 2) + '% downloaded');
-		//     }
-		// };
-		 
-		// var onError = function(xhr) {};
-		 
-		//THREE.Loader.Handlers.add(/\.dds$/i, new THREE.DDSLoader());
-		 
-		//加载模型,只调用一次就够了，无论加载几个模型
-		for(var _key in models){
-		    (function(key){    
-			    //加载模型和材质---->女模特
-			    var mtlLoader=new THREE.MTLLoader(loadingManager);
-			    mtlLoader.load(models[key].mtl,function(materials){
-				    materials.preload();
-				    var objLoader=new THREE.OBJLoader(loadingManager);
-				    objLoader.setMaterials(materials);
-				    objLoader.load(models[key].obj,function(mesh){
-					    //给加载的人物模型加上阴影
-					    mesh.traverse(function(node){
-						    if(node instanceof THREE.Mesh){
-								//不给枪加阴影，给其他模型加阴影
-								node.material.transparent=true;//透明材质，可以显示树枝丫
-								if("castShadow" in models[key]) 
-								    node.castShadow=models[key].castShadow;
-								else
-								    node.castShadow=false;
-								if("receiveShadow" in models[key]) 
-								    node.receiveShadow=models[key].receiveShadow;
-								else
-								    node.receiveShadow=false;
-							    //node.castShadow=true;
-							    //node.receiveShadow=true;
-						    }//, onProgress, onError 
-					    });
-						models[key].mesh=mesh;
-				    });
-			    });
-		    })(_key)
+
+
+		function loadGLTF(hdrPath,gltfPath,scalex, scaley, scalez,x,y,z) {
+			//增强场景的真实感
+			var pmremGenerator = new THREE.PMREMGenerator(renderer);
+			pmremGenerator.compileEquirectangularShader();
+			new THREE.RGBELoader(loadingManager)
+					.setDataType(THREE.UnsignedByteType) //hdr文件可以渲染出更加真实的场景
+					.load(hdrPath, function (texture) {
+						var envMap = pmremGenerator.fromEquirectangular(texture).texture;
+						scene.background = envMap;
+						scene.environment = envMap;
+
+					});
+
+			var loader = new THREE.GLTFLoader(loadingManager);
+			loader.load(gltfPath, function (gltf) {
+				gltf.scene.traverse(function (child) {
+					if (child.isMesh) {
+						// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
+						// roughnessMipmapper.generateMipmaps( child.material );
+						child.material.emissive =  child.material.color;
+						child.material.emissiveMap = child.material.map ;
+					}
+				});
+				scene.add(gltf.scene);
+				gltf.scene.scale.set(scalex, scaley, scalez);
+				//gltf.scene.rotation.z=Math.PI/2;
+				gltf.scene.position.set(x,y,z);
+				//roughnessMipmapper.dispose();
+				//render();
+			});
 		}
-		
-		// // 加载 obj 文件
-		//     var loader = new THREE.OBJMTLLoader();
-		//     loader.load('MQ-9.obj', 'MQ-9.mtl', function(object) {
-		//             scene.add(object);
-		//     });
 		
 		function onResourceLoaded(){
 			//将模型克隆到网络中
@@ -336,12 +319,29 @@
 			renderer.setSize(window.innerWidth, window.innerHeight);
 		}
 
+		function initStats() {
+
+			stats = new Stats();
+
+			stats.setMode(0); // 0: fps, 1: ms
+
+			// 放在左上角
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.left = '0px';
+			stats.domElement.style.top = '0px';
+
+			document.body.appendChild(stats.domElement);
+
+			return stats;
+		}
+
 		init();
 		function init(){
 			initLight();
 			CreatePanl();
 			initSkyBox();
 			initControls();
+			initStats();
 		if(weather.rain)
 			onloadRain();
 		if(weather.snow)
@@ -362,20 +362,16 @@
 				renderer.render(loadingScreen.scene,loadingScreen.camera);
 				return;
 			}
-			
+
+			//更新鼠标控制
+			controls.update();
+			stats.update();
+
 			if(weather.rain)
 			renderRain();
-			// else {
-			// 	renderer.render(scene, camera); //执行渲染操作
-			// 	requestAnimationFrame(animate);
-			// }
-			
 			else if(weather.snow)
 			renderSnow();
 			else {
-				//更新鼠标控制
-				controls.update();
-
 				renderer.render(scene, camera);
 				requestAnimationFrame(animate);
 			    }
@@ -391,8 +387,6 @@
                   sprite.position.y = 200;
                 }
               });
-              //更新鼠标控制
-				controls.update();
 
               renderer.render(scene, camera); //执行渲染操作
               requestAnimationFrame(renderRain);//请求再次执行渲染函数render，渲染下一帧
@@ -419,8 +413,6 @@
 			        //重要：渲染时需要更新位置（如果没有设为true,则无法显示动画）
 			        points.geometry.verticesNeedUpdate = true;
 				});
-				//更新鼠标控制
-				controls.update();
 
 				renderer.render(scene, camera);
 				requestAnimationFrame(animate);
@@ -519,7 +511,7 @@
 		   	// 计算物体和射线的焦点
 		   	const intersects = this.raycaster.intersectObjects(this.scene.children,true);
 		   	
-		    window.location.assign("room");
+		    //window.location.assign("room");
 
 		   	}
 		   
