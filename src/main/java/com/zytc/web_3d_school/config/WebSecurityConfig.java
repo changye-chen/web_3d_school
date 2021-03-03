@@ -24,7 +24,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         http.authorizeRequests()
                 .antMatchers("/").permitAll()
                 .antMatchers("/index.html").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
                 .and()
                 .formLogin().loginPage("/login")
                 .loginProcessingUrl("/detail")
@@ -38,7 +38,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/static/**","/index.html","/favicon.ico");
+        web.ignoring().antMatchers("/static/**","/index.html","/favicon.ico","/templates/**");
     }
 
     @Override
