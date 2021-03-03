@@ -20,14 +20,13 @@
 <div class="main-w3l">
     <div class="w3layouts-main">
         <h2>请登录</h2>
-        <p style="color: #ff0000" th:text="${msg}" th:if="${not #strings.isEmpty(msg)}"></p>
-        <form th:action="@{detail}" method="post">
+        <form th:action="@{/detail}" action="/detail" method="post">
             <label>
-                <input value="E-MAIL" name="Email" type="email" required onfocus="this.value = '';"
+                <input value="E-MAIL" name="login_name" type="email" required onfocus="this.value = '';"
                        onblur="if (this.value === '') {this.value = 'E-Mail';}"/>
             </label>
             <label>
-                <input value="PASSWORD" name="Password" type="password" required onfocus="this.value = '';"
+                <input value="PASSWORD" name="login_pwd" type="password" required onfocus="this.value = '';"
                        onblur="if (this.value === '') {this.value = 'password';}"/>
             </label>
             <span>
