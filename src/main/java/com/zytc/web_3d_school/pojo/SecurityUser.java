@@ -61,7 +61,7 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return is_examine == 1;
+        return true;
     }
 
     @Override

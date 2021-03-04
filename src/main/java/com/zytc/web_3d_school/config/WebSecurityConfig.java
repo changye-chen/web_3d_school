@@ -25,6 +25,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
                 .antMatchers("/").permitAll()
                 .antMatchers("/index.html").permitAll()
                 .anyRequest().permitAll()
+//                .anyRequest().authenticated()
                 .and()
                 .formLogin().loginPage("/login")
                 .loginProcessingUrl("/detail")
@@ -32,13 +33,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
                 .passwordParameter("login_pwd")
                 .permitAll()
                 .and()
-                .logout().permitAll();
+                .logout()
+                .permitAll()
+                .and()
+                .csrf().disable();
 
     }
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/static/**","/index.html","/favicon.ico","/templates/**");
+        web.ignoring().antMatchers("/static/**","/favicon.ico");
     }
 
     @Override
