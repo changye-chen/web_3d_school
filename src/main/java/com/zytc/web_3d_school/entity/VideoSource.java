@@ -1,14 +1,19 @@
-package com.zytc.web_3d_school.pojo;
+package com.zytc.web_3d_school.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.sql.Timestamp;
+/**
+ * @program: web_3d_school
+ * @description: 录播视频表实体类
+ * @author: ChangYe-Chen
+ * @create: 2021-02-18
+ **/
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class VideoSource {
     //视频id
     private int videoId;

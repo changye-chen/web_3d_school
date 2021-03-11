@@ -1,10 +1,20 @@
-package com.zytc.web_3d_school.pojo;
+package com.zytc.web_3d_school.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
+import lombok.NoArgsConstructor;
 import java.sql.Timestamp;
 
+/**
+ * @program: web_3d_school
+ * @description: 系统用户实体类
+ * @author: ChangYe-Chen
+ * @create: 2021-02-18
+ **/
+
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
     //主键，用户id
     private int user_id;
@@ -39,5 +49,4 @@ public class User {
         this.login_name = login_name;
         this.login_pwd = login_pwd;
     }
-    public User(){}
 }

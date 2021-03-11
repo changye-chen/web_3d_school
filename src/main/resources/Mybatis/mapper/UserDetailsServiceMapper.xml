@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zytc.web_3d_school.dao.mapper.UserDetailsServiceMapper">
+    <select id="loadUserByUsername" resultType="com.zytc.web_3d_school.pojo.SecurityUser">
+        select * from web3dschool.sys_user s WHERE s.login_name=#{username} limit 1
+    </select>
+</mapper>

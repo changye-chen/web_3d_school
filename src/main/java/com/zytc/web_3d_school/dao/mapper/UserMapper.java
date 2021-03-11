@@ -1,6 +1,6 @@
 package com.zytc.web_3d_school.dao.mapper;
 
-import com.zytc.web_3d_school.pojo.User;
+import com.zytc.web_3d_school.entity.User;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 @Mapper
 @Repository
 public interface UserMapper {
-    User CheckUser(@Param("User") User user);
+    User select(@Param("User") User user);
 }

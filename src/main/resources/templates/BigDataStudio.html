@@ -38,7 +38,7 @@
     </video>
 
 </head>
-<script >
+<script>
     //灵感1：资源文件里面有水滴的jpg，可以做一个配合现实天气的天气界面。
     //灵感2：房间贴纸分类：护眼色、经典色等。
     //灵感3：可加入"加载中"的动画
@@ -511,6 +511,23 @@
             }
             else if(intersects[0].object.name === 'pause'){
                 video.pause();
+            }
+            else if(intersects[0].object.name === 'BMan0003-Se'){
+                //忠涵加入字符串
+                var main_mission = "";
+                $.ajax({url:"/ajax/getMission"},function (data) {
+                    main_mission = data.toString();
+                })
+
+                var layer = new MyLayer({
+                    top:"10%",
+                    left:"10%",
+                    width:"80%",
+                    height:"80%",
+                    title:"我的标题",
+                    content:main_mission
+                });
+                layer.openLayer();
             }
         }
 

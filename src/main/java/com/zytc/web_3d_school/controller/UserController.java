@@ -1,16 +1,20 @@
 package com.zytc.web_3d_school.controller;
 
-import com.zytc.web_3d_school.pojo.User;
+import com.zytc.web_3d_school.entity.User;
 import com.zytc.web_3d_school.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
 import javax.servlet.http.HttpSession;
 
+/**
+ * @program: web_3d_school
+ * @description: As it's name shows
+ * @author: ChangYe-Chen
+ * @create: 2021-02-19
+ **/
 
 @Controller
 public class UserController {
@@ -23,23 +27,10 @@ public class UserController {
     }
 
     @RequestMapping("/detail")
-    public String detail(
-            @RequestParam("Email") String email,
-            @RequestParam("Password") String password,
-            Model model,
-            HttpSession session
-    ) {
-        //判断登录业务
-        User user = new User(email,password);
-        User u = userService.CheckUser(user);
-        if(u == null) {
-            model.addAttribute("msg", "请输入正确的登录名和密码");
-            return "login";
-
-        }else{
-            return "index";
-        }
+    public String detail(){
+        return "index";
     }
+
 
 }
 
