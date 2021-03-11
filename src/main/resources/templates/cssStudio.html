@@ -12,11 +12,23 @@
     <script type="text/javascript" th:src="@{static/libs/OrbitControls.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/stats.js}"></script>
 
-    <div id="overlay" >
+    <script type="text/javascript" th:src="@{static/libs/prefixfree.min.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/modernizr.js}"></script>
+    <style type="text/css" th:src="@{static/css/progress.css}"> @import "static/css/progress.css";</style>
+
+    <div id="wrapper">
+        <div class="loader-container">
+            <div class="meter">0</div>
+            <span class="runner"></span>
+        </div>
+    </div>
+
+
+    <div id="overlay" style="display:none">
         <button id="startButton">Play</button>
     </div>
 
-    <div id="overlay1" >
+    <div id="overlay1" style="display:none">
         <button id="pauseButton">Pause</button>
     </div>
 
@@ -37,9 +49,10 @@
     var player={height:1.8,speed:2,turnSpeed:Math.PI*0.01};
     var control;
     var stats;
+    var progress;
 
     var scene= new THREE.Scene();
-    var camera= new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1, 1000);
+    var camera= new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight,1, 500);
     var renderer=new THREE.WebGLRenderer({antialias:true});//防锯齿
     renderer.setSize(window.innerWidth,window.innerHeight);
     renderer.shadowMap.enabled=true;
@@ -52,10 +65,10 @@
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
     var hdrPath='static/libs/texture/royal_esplanade_1k.hdr';
-    var gltfPath='static/models/gltf/Studio/cssStudio/cssStudio.gltf';
+    var gltfPath='static/models/gltf/Studio/cssStudio-1/cssStudio.gltf';
 
-    document.body.appendChild(renderer.domElement);
-    var loadingManager=null,Resource_Loaded=true;
+    //document.body.appendChild(renderer.domElement);
+    var loadingManager=null,Resource_Loaded=false;
     var loadingScreen={  //“加载中”的场景
         scene:new THREE.Scene(),
         camera:new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1,100),
@@ -79,13 +92,19 @@
     loadingManager=new THREE.LoadingManager();
     //加载过程的方法一:加载过程
     loadingManager.onProgress=function(item,loaded,total){
-        console.log(item,loaded,total); //console里面展示加载的项目、加载和完成
+        //console.log(item,loaded,total); //console里面展示加载的项目、加载和完成
+        progress=(loaded / total * 100).toFixed(0);
+        console.log('加载完成的百分比' + progress + '%');
+        progressBar(progress);
     }
     //方法二：加载完成
     loadingManager.onLoad=function(){  //必须是onLoad才行，不能是onload！！！
         console.log("已下载所有资源！");  //没有加载完资源
         Resource_Loaded=true;
-       // onResourceLoaded(); //记得给所有loader加上（loadingManager）
+        document.body.appendChild(renderer.domElement);
+        document.getElementById('wrapper').style.display = 'none';
+        animate();
+        // onResourceLoaded(); //记得给所有loader加上（loadingManager）
     }
 
     //模型索引
@@ -112,7 +131,7 @@
     function deskView() {
         camera.position.x = 45;
         camera.position.y = 75;
-        camera.position.z = -40;
+        camera.position.z = -80;
         camera.lookAt(40, 70, 170);
         scene.add(camera);
     }
@@ -150,6 +169,37 @@
         scene.add(darkMesh);
     }
 
+    function progressBar(progress){
+        var Loader = function () {
+            var loader = document.querySelector('.loader-container'),
+                meter = document.querySelector('.meter'),
+                k, i = 1,
+                counter = function () {
+                    if (i <= 1) {
+                        meter.innerHTML =progress;//i.toString();
+                        i++;
+                    } else {
+                        window.clearInterval(k);
+                    }
+                };
+            return {
+                init: function (options) {
+                    options = options || {};
+                    var time = options.time ? options.time : 0,interval = time/20;
+                    loader.classList.add('run');
+                    k = window.setInterval(counter, interval);
+                    setTimeout(function () {
+                        loader.classList.add('done');
+                    }, time);
+                },
+            }
+        }();
+        Loader.init({
+            // If you have changed the @time in LESS, update this number to the corresponding value. Measured in miliseconds.
+            time: 100
+        });
+    }
+
     //加载视频
     function initVideo(width,height,x,y,z,videoTag) {
         //添加立方体
@@ -177,19 +227,30 @@
         var helper = new THREE.AxesHelper(50);
         //scene.add(helper);
 
+        var playTexture = new THREE.ImageUtils.loadTexture("static/textures/start.jpg",function(){
+        });
         var play=new THREE.Mesh(
             new THREE.PlaneBufferGeometry(10,10),
-            new THREE.MeshBasicMaterial({color:0x00ff00})//绿色
+            new THREE.MeshBasicMaterial({
+                map:playTexture
+                //color:0x00ff00
+            })
         )
         play.name = 'play';
         console.log(play);
         play.position.set(playx,playy,playz);
         play.rotation.x=Math.PI;
+        play.rotation.z=Math.PI;
         scene.add(play);
 
+        var pauseTexture = new THREE.ImageUtils.loadTexture("static/textures/pause.jpg",function(){
+        });
         var pause=new THREE.Mesh(
             new THREE.PlaneBufferGeometry(10,10),
-            new THREE.MeshBasicMaterial({color:0xff0000})//红色
+            new THREE.MeshBasicMaterial({
+                map:pauseTexture
+                //color:0xff0000
+            })
         )
         pause.name = 'pause';
         pause.position.set(pausex,pausey,pausez);
@@ -329,20 +390,8 @@
     }
 
 
-    animate();
+    //animate();
     function animate(){
-        //在加载资源时运行此代码
-        if(Resource_Loaded==false){
-            requestAnimationFrame(animate);
-            loadingScreen.box.position.x-=0.05;
-            renderer.setClearColor(new THREE.Color(0x55aaff));
-            if(loadingScreen.box.position.x<-10)
-                loadingScreen.box.position.x=10;
-            loadingScreen.box.position.y=Math.sin(loadingScreen.box.position.x);
-            renderer.render(loadingScreen.scene,loadingScreen.camera);
-            return;
-        }
-
 
         //更新鼠标控制
         //controls.update();

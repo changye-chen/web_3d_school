@@ -5,10 +5,6 @@
 		<meta charset="utf-8">
 		<title>建筑</title>
 
-<!--		<script th:src="@{static/libs/draco_decoder.js}"></script>-->
-<!--		<script th:src="@{static/libs/geometry_helper.js}"></script>-->
-<!--		<script th:src="@{static/libs/draco_wasm_wrapper.js}"></script>-->
-<!--		<script th:src="@{static/libs/draco_decoder.wasm}"></script>-->
 		<script th:src="@{static/libs/three.js}"></script>
 
 		<script th:src="@{static/libs/GLTFLoader.js}"></script>
@@ -18,11 +14,23 @@
 		<script th:src="@{static/libs/OrbitControls.js}"></script>
 		<script type="text/javascript" th:src="@{static/libs/stats.js}"></script>
 
-		<div id="overlay">
+		<script type="text/javascript" th:src="@{static/libs/prefixfree.min.js}"></script>
+		<script type="text/javascript" th:src="@{static/libs/modernizr.js}"></script>
+		<style type="text/css" th:src="@{static/css/progress.css}"> @import "static/css/progress.css";</style>
+
+		<div id="wrapper">
+			<div class="loader-container">
+				<div class="meter">0</div>
+				<span class="runner"></span>
+			</div>
+		</div>
+
+
+		<div id="overlay" style="display:none">
 			<button id="startButton">Play</button>
 		</div>
 
-		<div id="overlay1">
+		<div id="overlay1" style="display:none">
 			<button id="pauseButton">Pause</button>
 		</div>
 
@@ -50,10 +58,10 @@
 		renderer.shadowMap.enabled=true;
 		renderer.shadowMap.type=THREE.BasicShadowMap;
 		var plane;
-		document.body.appendChild(renderer.domElement);
+		//document.body.appendChild(renderer.domElement);
 
 		var hdrPath='static/libs/texture/royal_esplanade_1k.hdr';
-		var gltfPath='static/models/gltf/Studio/JavaStudio/JavaStudio.gltf';
+		var gltfPath='static/models/gltf/Studio/JavaStudio-1/JavaStudio.gltf';
 
 		//场景美化效果
 		renderer.setPixelRatio( window.devicePixelRatio );
@@ -65,7 +73,7 @@
 		var loadingManager=null,Resource_Loaded=true;
 		var loadingScreen={  //“加载中”的场景
 				scene:new THREE.Scene(),
-				camera:new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1,100),
+				camera:new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,1,500),
 				ambientLight:new THREE.AmbientLight(0xffffff,0.8),//浅蓝色
 				box:new THREE.Mesh(
 				        new THREE.BoxGeometry(1,1,1),
@@ -81,20 +89,24 @@
 		loadingScreen.camera.lookAt(loadingScreen.box.position);
 		loadingScreen.scene.add(loadingScreen.box);
 		loadingScreen.scene.add(loadingScreen.ambientLight);
-		
+
 		//实例化加载管理器
 		loadingManager=new THREE.LoadingManager();
 		//加载过程的方法一:加载过程
 		loadingManager.onProgress=function(item,loaded,total){
-			console.log(item,loaded,total); //console里面展示加载的项目、加载和完成
+			//console.log(item,loaded,total); //console里面展示加载的项目、加载和完成
+			progress=(loaded / total * 100).toFixed(0);
+			console.log('加载完成的百分比' + progress + '%');
+			progressBar(progress);
 		}
 		//方法二：加载完成
 		loadingManager.onLoad=function(){  //必须是onLoad才行，不能是onload！！！
-			console.log("已下载所有资源！");
+			console.log("已下载所有资源！");  //没有加载完资源
 			Resource_Loaded=true;
-
-			//onResourceLoaded();
-
+			document.body.appendChild(renderer.domElement);
+			document.getElementById('wrapper').style.display = 'none';
+			animate();
+			// onResourceLoaded(); //记得给所有loader加上（loadingManager）
 		}
 
 		//模型索引
@@ -111,7 +123,7 @@
 		function init(){
 		    initLight();
 			//CreatePanl();
-			initControls();
+			//initControls();
 			initVideo();
 			initStats();
 			loadGLTF(hdrPath,gltfPath,40,40,40,-800,0,-1000);
@@ -119,7 +131,36 @@
 
 		}
 
-
+		function progressBar(progress){
+			var Loader = function () {
+				var loader = document.querySelector('.loader-container'),
+						meter = document.querySelector('.meter'),
+						k, i = 1,
+						counter = function () {
+							if (i <= 1) {
+								meter.innerHTML =progress;//i.toString();
+								i++;
+							} else {
+								window.clearInterval(k);
+							}
+						};
+				return {
+					init: function (options) {
+						options = options || {};
+						var time = options.time ? options.time : 0,interval = time/20;
+						loader.classList.add('run');
+						k = window.setInterval(counter, interval);
+						setTimeout(function () {
+							loader.classList.add('done');
+						}, time);
+					},
+				}
+			}();
+			Loader.init({
+				// If you have changed the @time in LESS, update this number to the corresponding value. Measured in miliseconds.
+				time: 100
+			});
+		}
 
 
 		//光源
@@ -277,20 +318,9 @@
 		
 		animate();
 		function animate(){
-			//在加载资源时运行此代码
-			if(Resource_Loaded==false){
-				requestAnimationFrame(animate);
-				loadingScreen.box.position.x-=0.05;
-				renderer.setClearColor(new THREE.Color(0x55aaff));
-				if(loadingScreen.box.position.x<-10)
-				loadingScreen.box.position.x=10;
-				loadingScreen.box.position.y=Math.sin(loadingScreen.box.position.x);
-				renderer.render(loadingScreen.scene,loadingScreen.camera);
-				return;
-			}
 
 			//更新鼠标控制
-			controls.update();
+			//controls.update();
 			stats.update();
 
 			renderer.setClearColor(new THREE.Color(0x55aaff));
