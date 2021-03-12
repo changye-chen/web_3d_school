@@ -487,10 +487,12 @@
             }
             else if(intersects[0].object.name === 'BMan0003-Se'){
                 //忠涵加入字符串
-                var main_mission = "";
-                $.ajax({url:"/ajax/getMission"},function (data) {
+                var main_mission = new String();
+
+                $.ajax({url:"/ajax/getMission", success: function (data) {
                     main_mission = data.toString();
-                })
+                 }
+                });
 
                 var layer = new MyLayer({
                     top:"10%",

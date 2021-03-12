@@ -17,6 +17,7 @@ import javax.servlet.http.HttpSession;
  **/
 
 @Controller
+@RequestMapping("/user")
 public class UserController {
     @Autowired
     UserService userService;
@@ -31,6 +32,10 @@ public class UserController {
         return "index";
     }
 
+    @RequestMapping("/register")
+    public String register(){
+        return "register";
+    }
 
 }
 

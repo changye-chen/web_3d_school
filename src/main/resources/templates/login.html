@@ -8,19 +8,19 @@
 
     <!-- Meta tag Keywords -->
     <!-- css files -->
-    <link th:href="@{static/css/style.css}" rel="stylesheet" type="text/css" media="all">
+    <link th:href="@{../static/css/style.css}" rel="stylesheet" type="text/css" media="all">
 <body>
 
 <!--header-->
 <div class="agileheader">
-    <h1></h1>
+    <h1>Wed3D Short Video Educate Platform</h1>
 </div>
 <!--//header-->
 <!--main-->
 <div class="main-w3l">
     <div class="w3layouts-main">
         <h2>请登录</h2>
-        <form th:action="@{/detail}" action="/detail" method="post">
+        <form th:action="@{/user/detail}" action="/user/detail" method="post">
             <label>
                 <input value="E-MAIL" name="login_name" type="email" required onfocus="this.value = '';"
                        onblur="if (this.value === '') {this.value = 'E-Mail';}"/>
@@ -36,7 +36,7 @@
             <div class="clear"></div>
             <input type="submit" value="登 录" name="login">
         </form>
-        <p>还没有账号 ?<a href="#">立即注册</a></p>
+        <p>还没有账号 ?<a th:href="@{/user/register}">立即注册</a></p>
     </div>
 </div>
 <!--//main-->

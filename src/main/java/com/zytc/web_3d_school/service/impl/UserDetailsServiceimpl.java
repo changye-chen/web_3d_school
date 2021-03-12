@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserDetailsServiceimpl implements UserDetailsService {
     @Autowired
-    UserDetailsServiceMapper userDetailsServiceMapper;
+    private UserDetailsServiceMapper userDetailsServiceMapper;
     /**
      * @Description: 查询数据库，获取登录用户的信息
      * @Param: [login_name]

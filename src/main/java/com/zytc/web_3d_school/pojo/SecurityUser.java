@@ -60,9 +60,7 @@ public class SecurityUser implements UserDetails {
     }
 
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
+    public boolean isEnabled() { return true; }
 
     @Override
     public boolean isAccountNonExpired() {
