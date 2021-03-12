@@ -48,6 +48,10 @@ public class SecurityUser implements UserDetails {
     private String uuid;
     //审核状态 1：已审核 0：未审核
     private int is_examine;
+    //主任务id
+    private int main_mission_id;
+    //子任务id
+    private int sub_mission_id;
 
     @Override
     public String getPassword() {

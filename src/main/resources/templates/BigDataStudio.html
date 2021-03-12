@@ -11,6 +11,8 @@
     <script type="text/javascript" th:src="@{static/libs/DRACOLoader.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/OrbitControls.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/stats.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/Layer.js}"></script>
+    <script type="text/javascript" th:src="@{static/js/jquery-3.5.1.js}"></script>
 
     <script type="text/javascript" th:src="@{static/libs/prefixfree.min.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/modernizr.js}"></script>
@@ -514,9 +516,9 @@
             }
             else if(intersects[0].object.name === 'BMan0003-Se'){
                 //忠涵加入字符串
-                var main_mission = new String();
+                var main_mission = "";
 
-                $.ajax({url:"/ajax/getMission", success: function (data) {
+                $.ajax({url:"/ajax/getMission",async:false ,success: function (data) {
                     main_mission = data.toString();
                  }
                 });

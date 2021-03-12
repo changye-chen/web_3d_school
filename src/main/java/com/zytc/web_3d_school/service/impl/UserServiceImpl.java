@@ -1,11 +1,14 @@
 package com.zytc.web_3d_school.service.impl;
 
+import com.zytc.web_3d_school.dao.mapper.MainMissionMapper;
 import com.zytc.web_3d_school.dao.mapper.UserDetailsServiceMapper;
 import com.zytc.web_3d_school.dao.mapper.UserMapper;
 import com.zytc.web_3d_school.entity.User;
+import com.zytc.web_3d_school.pojo.MainMission;
 import com.zytc.web_3d_school.pojo.SecurityUser;
 import com.zytc.web_3d_school.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -13,9 +16,11 @@ import java.util.Date;
 
 
 @Service
-public class UserServiceimpl implements UserService {
+public class UserServiceImpl implements UserService {
     @Autowired(required = false)
-    UserDetailsServiceMapper userDetailsServiceMapper;
+    private UserDetailsServiceMapper userDetailsServiceMapper;
+    @Autowired
+    private MainMissionMapper mainMissionMapper;
     /**
     * @Description:
     * @Param: [user]
@@ -31,4 +36,11 @@ public class UserServiceimpl implements UserService {
         user.setStatus((byte) 0);
         return userDetailsServiceMapper.insertUser(user);
     }
+
+    @Override
+    public MainMission getMission(SecurityUser user) {
+       return mainMissionMapper.selectByPrimaryKey(user.getMain_mission_id());
+    }
+
+
 }

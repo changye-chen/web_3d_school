@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
  * @create: 2021-02-21 20:09
  **/
 @Service
-public class UserDetailsServiceimpl implements UserDetailsService {
+public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     private UserDetailsServiceMapper userDetailsServiceMapper;
     /**

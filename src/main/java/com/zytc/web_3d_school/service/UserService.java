@@ -1,6 +1,8 @@
 package com.zytc.web_3d_school.service;
 
+import com.zytc.web_3d_school.pojo.MainMission;
 import com.zytc.web_3d_school.pojo.SecurityUser;
+
 
 public interface UserService {
    /** 
@@ -11,4 +13,5 @@ public interface UserService {
    * @Date: 2021/3/10 
    */
    int userRegister(SecurityUser user);
+   MainMission getMission(SecurityUser user);
 }
