@@ -12,6 +12,17 @@
 		<script type="text/javascript" th:src="@{static/libs/OrbitControls.js}"></script>
 		<script type="text/javascript" th:src="@{static/libs/stats.js}"></script>
 
+		<script type="text/javascript" th:src="@{static/libs/prefixfree.min.js}"></script>
+		<script type="text/javascript" th:src="@{static/libs/modernizr.js}"></script>
+		<style type="text/css" th:src="@{static/css/progress.css}"> @import "static/css/progress.css";</style>
+
+		<div id="wrapper">
+			<div class="loader-container">
+				<div class="meter">0</div>
+				<span class="runner"></span>
+			</div>
+		</div>
+
 	</head>
 	<body>
 		<script>
@@ -33,6 +44,7 @@
 		var clouds = []; //点云
 		var range = 500; // 雪花出现范围
 		var Stats;
+		var progress;
 		
 		var scene= new THREE.Scene();
 		var camera= new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1, 1000);
@@ -42,11 +54,11 @@
 		renderer.shadowMap.type=THREE.BasicShadowMap;
 
 
-		var gltfPath='static/models/gltf/Studio/BigDataStudio/BigDataStudio.gltf';
+		var gltfPath='static/models/gltf/Building/Internet/Internet.gltf';
 
 
 		var plane;
-		document.body.appendChild(renderer.domElement);
+		//document.body.appendChild(renderer.domElement);
 		var pointLight;
 		var ambientLight;
 		var loadingManager=null,Resource_Loaded=false;
@@ -68,18 +80,24 @@
 		loadingScreen.camera.lookAt(loadingScreen.box.position);
 		loadingScreen.scene.add(loadingScreen.box);
 		loadingScreen.scene.add(loadingScreen.ambientLight);
-		
+
 		//实例化加载管理器
 		loadingManager=new THREE.LoadingManager();
 		//加载过程的方法一:加载过程
 		loadingManager.onProgress=function(item,loaded,total){
-			console.log(item,loaded,total); //console里面展示加载的项目、加载和完成
+			//console.log(item,loaded,total); //console里面展示加载的项目、加载和完成
+			progress=(loaded / total * 100).toFixed(0);
+			console.log('加载完成的百分比' + progress + '%');
+			progressBar(progress);
 		}
 		//方法二：加载完成
 		loadingManager.onLoad=function(){  //必须是onLoad才行，不能是onload！！！
-			console.log("已下载所有资源！");
+			console.log("已下载所有资源！");  //没有加载完资源
 			Resource_Loaded=true;
-			//onResourceLoaded();
+			document.body.appendChild(renderer.domElement);
+			document.getElementById('wrapper').style.display = 'none';
+			animate();
+			// onResourceLoaded(); //记得给所有loader加上（loadingManager）
 		}
 
 		
@@ -115,8 +133,38 @@
 		camera.position.y = 0;
 		camera.position.z = -40;
 		camera.lookAt(scene.position);
-		
-		
+
+		function progressBar(progress){
+			var Loader = function () {
+				var loader = document.querySelector('.loader-container'),
+						meter = document.querySelector('.meter'),
+						k, i = 1,
+						counter = function () {
+							if (i <= 1) {
+								meter.innerHTML =progress;//i.toString();
+								i++;
+							} else {
+								window.clearInterval(k);
+							}
+						};
+				return {
+					init: function (options) {
+						options = options || {};
+						var time = options.time ? options.time : 0,interval = time/20;
+						loader.classList.add('run');
+						k = window.setInterval(counter, interval);
+						setTimeout(function () {
+							loader.classList.add('done');
+						}, time);
+					},
+				}
+			}();
+			Loader.init({
+				// If you have changed the @time in LESS, update this number to the corresponding value. Measured in miliseconds.
+				time: 100
+			});
+		}
+
 		//天空之盒
 		function initSkyBox() {
 		    //获取立体位面图文件夹
@@ -155,7 +203,7 @@
             //    创建天空之盒
             var skybox = new THREE.Mesh(new THREE.BoxGeometry(500, 300, 300), material);
             //scene.background = createCubeMap();
-			//skybox.rotation.x = -0.15 * Math.PI;
+			skybox.rotation.x = -0.15 * Math.PI;
 			skybox.position.x=0;
 			skybox.position.y=1;
 			skybox.position.z=2;
@@ -189,18 +237,18 @@
 		        }
 
 
-		function loadGLTF(hdrPath,gltfPath,scalex, scaley, scalez,x,y,z) {
+		function loadGLTF(gltfPath,scalex, scaley, scalez,x,y,z) {
 			//增强场景的真实感
-			var pmremGenerator = new THREE.PMREMGenerator(renderer);
-			pmremGenerator.compileEquirectangularShader();
-			new THREE.RGBELoader(loadingManager)
-					.setDataType(THREE.UnsignedByteType) //hdr文件可以渲染出更加真实的场景
-					.load(hdrPath, function (texture) {
-						var envMap = pmremGenerator.fromEquirectangular(texture).texture;
-						scene.background = envMap;
-						scene.environment = envMap;
-
-					});
+			// var pmremGenerator = new THREE.PMREMGenerator(renderer);
+			// pmremGenerator.compileEquirectangularShader();
+			// new THREE.RGBELoader(loadingManager)
+			// 		.setDataType(THREE.UnsignedByteType) //hdr文件可以渲染出更加真实的场景
+			// 		.load(hdrPath, function (texture) {
+			// 			var envMap = pmremGenerator.fromEquirectangular(texture).texture;
+			// 			scene.background = envMap;
+			// 			scene.environment = envMap;
+			//
+			// 		});
 
 			var loader = new THREE.GLTFLoader(loadingManager);
 			loader.load(gltfPath, function (gltf) {
@@ -342,6 +390,8 @@
 			initSkyBox();
 			initControls();
 			initStats();
+			loadGLTF(gltfPath,1,1,1,0,0,0);
+			progressBar(progress);
 		if(weather.rain)
 			onloadRain();
 		if(weather.snow)
@@ -351,17 +401,6 @@
 		
 		animate();
 		function animate(){
-			//在加载资源时运行此代码
-			if(Resource_Loaded==false){
-				requestAnimationFrame(animate);
-				loadingScreen.box.position.x-=0.05;
-				renderer.setClearColor(new THREE.Color(0x000000/*0x55aaff*/));
-				if(loadingScreen.box.position.x<-10)
-				loadingScreen.box.position.x=10;
-				loadingScreen.box.position.y=Math.sin(loadingScreen.box.position.x);
-				renderer.render(loadingScreen.scene,loadingScreen.camera);
-				return;
-			}
 
 			//更新鼠标控制
 			controls.update();

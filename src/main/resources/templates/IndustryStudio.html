@@ -12,11 +12,23 @@
     <script type="text/javascript" th:src="@{static/libs/OrbitControls.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/stats.js}"></script>
 
-    <div id="overlay" >
+    <script type="text/javascript" th:src="@{static/libs/prefixfree.min.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/modernizr.js}"></script>
+    <style type="text/css" th:src="@{static/css/progress.css}"> @import "static/css/progress.css";</style>
+
+    <div id="wrapper">
+        <div class="loader-container">
+            <div class="meter">0</div>
+            <span class="runner"></span>
+        </div>
+    </div>
+
+
+    <div id="overlay" style="display:none" >
         <button id="startButton">Play</button>
     </div>
 
-    <div id="overlay1" >
+    <div id="overlay1" style="display:none" >
         <button id="pauseButton">Pause</button>
     </div>
 
@@ -37,9 +49,10 @@
     var player={height:1.8,speed:2,turnSpeed:Math.PI*0.01};
     var control;
     var stats;
+    var progress;
 
     var scene= new THREE.Scene();
-    var camera= new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1, 1000);
+    var camera= new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight,0.1, 1000);
     var renderer=new THREE.WebGLRenderer({antialias:true});//防锯齿
     renderer.setSize(window.innerWidth,window.innerHeight);
     renderer.shadowMap.enabled=true;
@@ -54,8 +67,8 @@
     var hdrPath='static/libs/texture/royal_esplanade_1k.hdr';
     var gltfPath='static/models/gltf/Studio/IndustryStudio/IndustryStudio.gltf';
 
-    document.body.appendChild(renderer.domElement);
-    var loadingManager=null,Resource_Loaded=true;
+    //document.body.appendChild(renderer.domElement);
+    var loadingManager=null,Resource_Loaded=false;
     var loadingScreen={  //“加载中”的场景
         scene:new THREE.Scene(),
         camera:new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1,100),
@@ -79,14 +92,21 @@
     loadingManager=new THREE.LoadingManager();
     //加载过程的方法一:加载过程
     loadingManager.onProgress=function(item,loaded,total){
-        console.log(item,loaded,total); //console里面展示加载的项目、加载和完成
+        //console.log(item,loaded,total); //console里面展示加载的项目、加载和完成
+        progress=(loaded / total * 100).toFixed(0);
+        console.log('加载完成的百分比' + progress + '%');
+        progressBar(progress);
     }
     //方法二：加载完成
     loadingManager.onLoad=function(){  //必须是onLoad才行，不能是onload！！！
         console.log("已下载所有资源！");  //没有加载完资源
         Resource_Loaded=true;
-       // onResourceLoaded(); //记得给所有loader加上（loadingManager）
+        document.body.appendChild(renderer.domElement);
+        document.getElementById('wrapper').style.display = 'none';
+        animate();
+        // onResourceLoaded(); //记得给所有loader加上（loadingManager）
     }
+
 
     //模型索引
     var model= {
@@ -112,7 +132,7 @@
     function deskView() {
         camera.position.x = 0;
         camera.position.y = 75;
-        camera.position.z = -10;
+        camera.position.z = -50;
         camera.lookAt(0, 70, 95);
         scene.add(camera);
     }
@@ -148,6 +168,38 @@
         scene.add(darkMesh);
     }
 
+
+    function progressBar(progress){
+        var Loader = function () {
+            var loader = document.querySelector('.loader-container'),
+                meter = document.querySelector('.meter'),
+                k, i = 1,
+                counter = function () {
+                    if (i <= 1) {
+                        meter.innerHTML =progress;//i.toString();
+                        i++;
+                    } else {
+                        window.clearInterval(k);
+                    }
+                };
+            return {
+                init: function (options) {
+                    options = options || {};
+                    var time = options.time ? options.time : 0,interval = time/20;
+                    loader.classList.add('run');
+                    k = window.setInterval(counter, interval);
+                    setTimeout(function () {
+                        loader.classList.add('done');
+                    }, time);
+                },
+            }
+        }();
+        Loader.init({
+            // If you have changed the @time in LESS, update this number to the corresponding value. Measured in miliseconds.
+            time: 100
+        });
+    }
+
     //加载视频
     function initVideo(width,height,x,y,z,videoTag) {
         //添加立方体
@@ -170,24 +222,36 @@
         document.getElementById('video').style.display = 'none';
     }
 
+
     function mainVideoControl(playx,playy,playz,pausex,pausey,pausez,videoTag){
         //辅助工具
         var helper = new THREE.AxesHelper(50);
         //scene.add(helper);
 
+        var playTexture = new THREE.ImageUtils.loadTexture("static/textures/start.jpg",function(){
+        });
         var play=new THREE.Mesh(
             new THREE.PlaneBufferGeometry(10,10),
-            new THREE.MeshBasicMaterial({color:0x00ff00})//绿色
+            new THREE.MeshBasicMaterial({
+                map:playTexture
+                //color:0x00ff00
+            })
         )
         play.name = 'play';
         console.log(play);
         play.position.set(playx,playy,playz);
         play.rotation.x=Math.PI;
+        play.rotation.z=Math.PI;
         scene.add(play);
 
+        var pauseTexture = new THREE.ImageUtils.loadTexture("static/textures/pause.jpg",function(){
+        });
         var pause=new THREE.Mesh(
             new THREE.PlaneBufferGeometry(10,10),
-            new THREE.MeshBasicMaterial({color:0xff0000})//红色
+            new THREE.MeshBasicMaterial({
+                map:pauseTexture
+                //color:0xff0000
+            })
         )
         pause.name = 'pause';
         pause.position.set(pausex,pausey,pausez);
@@ -211,32 +275,9 @@
             video.pause();
             videoTime = video.currentTime;
         });
-        //}
         video.play();//加载完后自动播放
     }
 
-
-
-    //加载 glTF 格式的模型
-    // for(var _key in model) {
-    //     (function (key) {
-    //         var loader = new THREE.GLTFLoader(loadingManager);/*实例化加载器*/
-    //         loader.load(model[key].gltf, function (obj) {
-    //             console.log(obj);
-    //             scene.add(obj.scene);
-    //             console.log("运行了一个模型");
-    //             meshes[key].gltfobj=obj.scene;
-    //             obj.scene.position.set(0,0,50);
-    //             obj.scene.scale.set(10,10,10);
-    //             console.log(obj);
-    //          }//, function (xhr) {
-    //          //    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-    //          //}, function (error) {
-    //          //    console.log('load error!' + error.getWebGLErrorMessage());
-    //          //}
-    //         )
-    //     })(_key)
-    // }
 
     function loadGLTF(hdrPath,gltfPath,scalex, scaley, scalez) {
         //增强场景的真实感
@@ -248,7 +289,6 @@
                 var envMap = pmremGenerator.fromEquirectangular(texture).texture;
                 scene.background = envMap;
                 scene.environment = envMap;
-
             });
 
         var loader = new THREE.GLTFLoader(loadingManager);
@@ -260,11 +300,6 @@
                 }
             });
             console.log(gltf.scene);
-            //去掉多余白色正方体
-            gltf.scene.children.forEach(object => {
-                if (object.name === 'Cube')
-                    gltf.scene.remove(object);
-            })
             scene.add(gltf.scene);
             gltf.scene.scale.set(scalex, scaley, scalez);
             //gltf.scene.rotation.z=Math.PI/2;
@@ -272,22 +307,6 @@
             //roughnessMipmapper.dispose();
             //render();
         });
-
-        // var loader = new THREE.GLTFLoader(loadingManager);//path =  'three/model/jifangDraco.gltf' ;
-        // var dracoLoader = new THREE.DRACOLoader();
-        // //dracoLoader.setDecoderPath( 'three/js/libs/draco/gltf/' );
-        // loader.setDRACOLoader( dracoLoader );
-        // loader.load(gltfPath,function (gltf) {
-        //     gltf.scene.traverse(function (child) {
-        //         if (child.isMesh) {
-        //             // TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
-        //             // roughnessMipmapper.generateMipmaps( child.material );
-        //         }
-        //     });
-        //     scene.add(gltf.scene);
-        //     gltf.scene.scale.set(scalex, scaley, scalez);
-        // });
-
     }
 
     function initStats() {
@@ -330,18 +349,6 @@
 
     animate();
     function animate(){
-        //在加载资源时运行此代码
-        if(Resource_Loaded==false){
-            requestAnimationFrame(animate);
-            loadingScreen.box.position.x-=0.05;
-            renderer.setClearColor(new THREE.Color(0x55aaff));
-            if(loadingScreen.box.position.x<-10)
-                loadingScreen.box.position.x=10;
-            loadingScreen.box.position.y=Math.sin(loadingScreen.box.position.x);
-            renderer.render(loadingScreen.scene,loadingScreen.camera);
-            return;
-        }
-
 
         //更新鼠标控制
         //controls.update();
