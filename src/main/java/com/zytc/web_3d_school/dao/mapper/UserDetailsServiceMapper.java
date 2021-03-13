@@ -27,7 +27,7 @@ public interface UserDetailsServiceMapper {
     */
     SecurityUser loadUserByUsername(@Param("username")String username);
     /** 
-    * @Description:  
+    * @Description:  插入用户数据
     * @Param: [user] 
     * @return: int 
     * @Author: ChangYe-Chen
