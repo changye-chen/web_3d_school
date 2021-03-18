@@ -1,6 +1,7 @@
 package com.zytc.web_3d_school.dao.mapper;
 
-import com.zytc.web_3d_school.pojo.SecurityPermission;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+//import com.zytc.web_3d_school.pojo.SecurityPermission;
 import com.zytc.web_3d_school.pojo.SecurityUser;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -22,14 +23,15 @@ public interface UserDetailsServiceMapper {
     * @Param:   [Username]
     * @return:  com.zytc.web_3d_school.pojo.SecurityUser
     * @Author: ChangYe-Chen
-    * @Date: 2021/2/25 
-    */
-    SecurityUser loadUserByUsername(@Param("username")String username);
-    /**
-    * @Description:
-    * @Param: []
-    * @return: java.util.List<com.zytc.web_3d_school.pojo.SecurityPermission>
-    * @Author: ChangYe-Chen
     * @Date: 2021/2/25
     */
+    SecurityUser loadUserByUsername(@Param("username")String username);
+    /** 
+    * @Description:  插入用户数据
+    * @Param: [user] 
+    * @return: int 
+    * @Author: ChangYe-Chen
+    * @Date: 2021/3/10 
+    */
+    int insertUser(@Param("user")SecurityUser user);
 }
