@@ -38,6 +38,7 @@
     </video>
 
 </head>
+<body>
 <script>
     //灵感1：资源文件里面有水滴的jpg，可以做一个配合现实天气的天气界面。
     //灵感2：房间贴纸分类：护眼色、经典色等。
@@ -144,6 +145,23 @@
         scene.add(camera);
     }
 
+    function doorView() {
+        camera.position.x = -107;
+        camera.position.y = 67;
+        camera.position.z = 161;
+        camera.lookAt(80, 75, -89);
+        scene.add(camera);
+    }
+
+    function bookView() {
+        camera.position.x = -36;
+        camera.position.y = 79;
+        camera.position.z = 37;
+        camera.lookAt(-36, 79, 0);
+        scene.add(camera);
+    }
+
+
     init(50,0,75);//多个屏幕整体位置
     function init(x,y,z) {
         //加载两个小屏幕
@@ -156,7 +174,7 @@
         //加载性能插件
         initStats();
         //默认桌子视角
-        deskView();
+        bookView();
         loadGLTF(hdrPath,gltfPath,60,60,60);
 
         //加一块黑幕在屏幕后面
@@ -444,10 +462,12 @@
 
         if(keyboard[38]){ //上箭头键
             camera.position.y+=player.speed;
+            console.log(camera.position);
         }
 
         if(keyboard[40]){ //下箭头键
             camera.position.y-=player.speed;
+            console.log(camera.position);
         }
 
     }

@@ -52,7 +52,7 @@
 		var player={height:1.8,speed:0.2,turnSpeed:Math.PI*0.01};
 		
 		var scene= new THREE.Scene();
-		var camera= new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1, 1000);
+		var camera= new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight,0.1, 1000);
 		var renderer=new THREE.WebGLRenderer({antialias:true});//防锯齿
 		renderer.setSize(window.innerWidth,window.innerHeight);
 		renderer.shadowMap.enabled=true;
@@ -174,8 +174,8 @@
 		}
 
 
-		camera.position.x = 0;
-		camera.position.y = 80;
+		camera.position.x = -40;
+		camera.position.y = 50;
 		camera.position.z = -80;
 		camera.lookAt(0,0,100);
 		scene.add(camera);
