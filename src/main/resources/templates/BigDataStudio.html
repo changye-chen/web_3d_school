@@ -175,6 +175,21 @@
         scene.add(camera);
     }
 
+    function doorView() {
+        camera.position.x = -124;
+        camera.position.y = 71;
+        camera.position.z = 66;
+        camera.lookAt(8, 35, -22);
+        scene.add(camera);
+    }
+
+    function bookView() {
+        camera.position.x = -20;
+        camera.position.y = 65;
+        camera.position.z = -50;
+        camera.lookAt(-124, 80, -40);
+        scene.add(camera);
+    }
     //init();
     function init() {
         //加载两个小屏幕
@@ -431,8 +446,15 @@
         if(keyboard[49]) { //敲1键
             deskView();
         }
-        if(keyboard[50]) { //敲1键
+        if(keyboard[50]) { //敲2键
             screenView();
+        }
+
+        if(keyboard[51]) { //敲3键
+            doorView();
+        }
+        if(keyboard[52]) { //敲4键
+            bookView();
         }
 
         if(keyboard[83]){ //敲W键
