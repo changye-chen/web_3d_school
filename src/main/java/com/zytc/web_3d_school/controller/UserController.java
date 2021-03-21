@@ -1,13 +1,9 @@
 package com.zytc.web_3d_school.controller;
 
-import com.zytc.web_3d_school.entity.User;
 import com.zytc.web_3d_school.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import javax.servlet.http.HttpSession;
 
 /**
  * @program: web_3d_school
@@ -17,6 +13,7 @@ import javax.servlet.http.HttpSession;
  **/
 
 @Controller
+@RequestMapping("/user")
 public class UserController {
     @Autowired
     UserService userService;
@@ -31,6 +28,10 @@ public class UserController {
         return "index";
     }
 
+    @RequestMapping("/register")
+    public String register(){
+        return "register";
+    }
 
 }
 

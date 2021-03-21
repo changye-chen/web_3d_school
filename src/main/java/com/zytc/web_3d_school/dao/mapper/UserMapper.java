@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserMapper {
     User select(@Param("User") User user);
+
 }

@@ -11,7 +11,6 @@
     <script type="text/javascript" th:src="@{static/libs/DRACOLoader.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/OrbitControls.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/stats.js}"></script>
-
     <script type="text/javascript" th:src="@{static/libs/prefixfree.min.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/modernizr.js}"></script>
     <style type="text/css" th:src="@{static/css/progress.css}"> @import "static/css/progress.css";</style>
@@ -37,6 +36,7 @@
     </video>
 
 </head>
+<body>
 <script>
     //灵感1：资源文件里面有水滴的jpg，可以做一个配合现实天气的天气界面。
     //灵感2：房间贴纸分类：护眼色、经典色等。
@@ -51,7 +51,7 @@
     var progress;
 
     var scene= new THREE.Scene();
-    var camera= new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight,1, 400);
+    var camera= new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight,1, 800);
     var renderer=new THREE.WebGLRenderer({antialias:true});//防锯齿
     renderer.setSize(window.innerWidth,window.innerHeight);
     renderer.shadowMap.enabled=true;
@@ -143,6 +143,22 @@
         scene.add(camera);
     }
 
+    function doorView() {
+        camera.position.x = 105;
+        camera.position.y = 63;
+        camera.position.z = 61;
+        camera.lookAt(-10, 80, -85);
+        scene.add(camera);
+    }
+
+    function bookView() {
+        camera.position.x = 9;
+        camera.position.y = 85;
+        camera.position.z = -86;
+        camera.lookAt(9, 77, -150);
+        scene.add(camera);
+    }
+
     init(-20,0,0);
     function init(x,y,z) {
         //加载两个小屏幕
@@ -155,7 +171,7 @@
         //加载性能插件
         initStats();
         //默认桌子视角
-        deskView();
+        bookView();
         loadGLTF(hdrPath,gltfPath,70,70,70);
 
         //加一块黑幕在屏幕后面
@@ -421,10 +437,12 @@
 
         if(keyboard[38]){ //上箭头键
             camera.position.y+=player.speed;
+            console.log(camera.position);
         }
 
         if(keyboard[40]){ //下箭头键
             camera.position.y-=player.speed;
+            console.log(camera.position);
         }
 
     }
