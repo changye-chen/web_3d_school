@@ -72,11 +72,12 @@
         <source src="static/video/2.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
     </video>
 
-    <img th:src="@{static/images/direction-left.png}" onmouseover="displayPromptMessage() " onmousedown="cameraLeft()" alt="视角左移" id="perspective-left">
-    <img th:src="@{static/images/direction-right.png}" onmouseover="displayPromptMessage()" onmousedown="cameraRight()" alt="视角右移" id="perspective-right">
+    <img th:src="@{static/images/direction-left.png}" onmouseleave="mouseleave()" onmouseover="displayPromptMessage() " onmousedown="cameraLeft()" alt="视角左移" id="perspective-left">
+    <img th:src="@{static/images/direction-right.png}" onmouseleave="mouseleave()" onmouseover="displayPromptMessage()" onmousedown="cameraRight()" alt="视角右移" id="perspective-right">
     <img th:src="@{static/images/personal-center.png}" alt="个人学习中心" id="personal-center">
     <img th:src="@{static/images/mission-center.png}" alt="任务栏" id="mission-center">
-
+    <img th:src="@{static/images/mention-direction.png}" id="mention-direction" style="display: none">
+    <img th:src="@{static/images/mention-mission.png}" id="mention-mission" style="display: none">
 </head>
 <script>
     //灵感1：资源文件里面有水滴的jpg，可以做一个配合现实天气的天气界面。
@@ -613,10 +614,30 @@
         v4.style.display = "block"
     }
 
+    let MouseCursorX = 0;
+    let MouseCursorY = 0;
+    //鼠标移动处理事件
+    function mousemove(ev){
+        ev = ev || window.onmousemove;
+        if(ev.pageX || ev.pageY){
+            MouseCursorX = ev.pageX;
+            MouseCursorY = ev.pageY;
+        }
+    }
+    //鼠标离开方向图标后
+    function mouseleave(){
+        let mention_direction = document.getElementById("mention-direction");
+        mention_direction.style.display="none";
+    }
     //显示提示信息函数
     function displayPromptMessage(){
         //忠涵加提示信息（直接加监听有问题，所以每个图片都需要单独加一个函数）
         //alert("111");
+        let mention_left = document.getElementById("mention-direction");
+        mention_left.style.position="absolute";
+        mention_left.style.top=MouseCursorY.toString()+"px";
+        mention_left.style.left=MouseCursorX.toString()+"px";
+        mention_left.style.display="block";
     }
 
     //视角左移函数
@@ -650,7 +671,7 @@
     window.addEventListener('keydown',keyDown);
     window.addEventListener('keyup',keyUp);
     window.addEventListener('resize', onResize, false);
+    document.onmousemove = mousemove;
 </script>
-
 </body>
 </html>
