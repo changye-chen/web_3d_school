@@ -19,19 +19,19 @@
 <!--    <link th:href="@{static/css/progress.css}" rel="stylesheet" type="text/css">-->
     <style type="text/css">
         #perspective-left{
-            width:50px;
-            height:50px;
+            width:150px;
+            height:150px;
             position: absolute;
             left:0;
-            top:0;
+            top:40%;
             display: none;
         }
         #perspective-right{
-            width:50px;
-            height:50px;
+            width:150px;
+            height:150px;
             position: absolute;
             right:0;
-            top:0;
+            top:40%;
             display: none;
         }
         #personal-center{
@@ -90,6 +90,7 @@
     var control;
     var stats;
     var progress;
+    var viewer=1;
 
     var scene= new THREE.Scene();
     var camera= new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight,0.1, 1000);
@@ -202,7 +203,7 @@
         //加载性能插件
         initStats();
         //默认桌子视角
-        deskView();
+        doorView();
         loadGLTF(hdrPath,gltfPath,60,60,60);
 
         //加一块黑幕在屏幕后面
@@ -621,12 +622,28 @@
     //视角左移函数
     //汇雲可以先调好几个视角，后续讨论视角的几个变换。
     function cameraLeft(){
-        camera.rotation.y -= 30;
+        viewer++;
+        if(viewer==1||viewer>=5)
+            {doorView();viewer=1;}
+        if(viewer==2)
+            deskView();
+        if(viewer==3)
+            bookView();
+        if(viewer==4)
+            screenView();
     }
 
     //视角右移函数
     function cameraRight(){
-        camera.rotation.y += 30;
+        viewer--;
+        if(viewer==1||viewer>=5||viewer<=0)
+        {doorView();viewer=5;}
+        if(viewer==2)
+            deskView();
+        if(viewer==3)
+            bookView();
+        if(viewer==4)
+            screenView();
     }
    // window.addEventListener('click',displayPromptMessage);
     window.addEventListener('click', mouseClickEvent);

@@ -119,16 +119,51 @@
 		//网格索引
 		var meshes={};
 
-		init();
-		function init(){
+		function deskView() {
+			camera.position.x = 62;
+			camera.position.y = 45;
+			camera.position.z = -30;
+			camera.lookAt(-38,45, 0);
+			scene.add(camera);
+		}
+
+		function screenView() {
+			camera.position.x = -40;
+			camera.position.y = 50;
+			camera.position.z = -80;
+			camera.lookAt(0, 0, 100);
+			scene.add(camera);
+		}
+
+		function doorView() {
+			camera.position.x = -40;
+			camera.position.y = 50;
+			camera.position.z = -80;
+			camera.lookAt(0, 0, 100);
+			scene.add(camera);
+		}
+
+		function bookView() {
+			camera.position.x = -40;
+			camera.position.y = 50;
+			camera.position.z = -80;
+			camera.lookAt(0, 0, 100);
+			scene.add(camera);
+		}
+
+		init(100,0,0);
+		function init(x,y,z){
 		    initLight();
-			//CreatePanl();
+			initVideo(55, 80, 90+x, 124+y, 96+z, "video");
+			initVideo(55, 80, 90+x, 42+y, 96+z, "video");
 			//initControls();
-			initVideo();
+			//加载主屏幕及控制按钮
+			initVideo(200,150,-38.5+x,77+y,96+z,"video");
+			mainVideoControl(-115+x,158+y,96+z,-130+x,158+y,96+z,"video");
+
 			initStats();
-			loadGLTF(hdrPath,gltfPath,40,40,40,-800,0,-1000);
-
-
+			loadGLTF(hdrPath,gltfPath,60,60,60,-800,0,-1000);
+			deskView();
 		}
 
 		function progressBar(progress){
@@ -174,80 +209,90 @@
 		}
 
 
-		camera.position.x = -40;
-		camera.position.y = 50;
-		camera.position.z = -80;
-		camera.lookAt(0,0,100);
-		scene.add(camera);
-
-
-
 		//加载视频
-		function initVideo() {
-
-			//辅助工具
-			var helper = new THREE.AxesHelper(50);
-			//scene.add(helper);
-
-			var play=new THREE.Mesh(
-					new THREE.PlaneGeometry(10,10),
-					new THREE.MeshBasicMaterial({color:0x00ff00})//绿色
-			)
-			play.name = 'play';
-			console.log(play);
-			play.position.set(120,150,90);
-			play.rotation.x=Math.PI;
-			scene.add(play);
-
-			var pause=new THREE.Mesh(
-					new THREE.PlaneGeometry(10,10),
-					new THREE.MeshBasicMaterial({color:0xff0000})//红色
-			)
-			pause.name = 'pause';
-			pause.position.set(120,130,90);
-			pause.rotation.x=Math.PI;
-			scene.add(pause);
-
+		function initVideo(width,height,x,y,z,videoTag) {
 			//添加立方体
-			var geometry = new THREE.PlaneGeometry(200,150);
+			var geometry = new THREE.PlaneBufferGeometry(width,height);
 
 			//获取到video对象
-			var video = document.querySelector("#video");
+			var video = document.querySelector("#"+videoTag);
+
 			//通过video对象实例化纹理
 			var texture = new THREE.VideoTexture(video);
 			texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;//使用平铺，因为视频尺寸不一定都是标准的
 			texture.minFilter = THREE.LinearFilter;
 			material = new THREE.MeshBasicMaterial( { map: texture } );
-			var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
+			var mainScreen = new THREE.Mesh(geometry, material); //网格模型对象Mesh
 
-			mesh.rotation.y=Math.PI;
-			mesh.position.set(0,100,95);
-			scene.add(mesh);
-            //移除video标签的显示
+			mainScreen.addEventListener('click', function () {
+				video = document.getElementById(videoTag);
+				video.play();
+				mainScreen.addEventListener('click', function () {
+					video.pause();
+				})
+			});
+
+			mainScreen.rotation.y=Math.PI;
+			mainScreen.position.set(x,y,z);
+			scene.add(mainScreen);
+			//移除video标签的显示
 			document.getElementById('video').style.display = 'none';
+		}
+
+		function mainVideoControl(playx,playy,playz,pausex,pausey,pausez,videoTag){
+			//辅助工具
+			var helper = new THREE.AxesHelper(50);
+			//scene.add(helper);
+
+			var playTexture = new THREE.ImageUtils.loadTexture("static/textures/start.jpg",function(){
+			});
+			var play=new THREE.Mesh(
+					new THREE.PlaneBufferGeometry(10,10),
+					new THREE.MeshBasicMaterial({
+						map:playTexture
+						//color:0x00ff00
+					})
+			)
+			play.name = 'play';
+			console.log(play);
+			play.position.set(playx,playy,playz);
+			play.rotation.x=Math.PI;
+			play.rotation.z=Math.PI;
+			scene.add(play);
+
+			var pauseTexture = new THREE.ImageUtils.loadTexture("static/textures/pause.jpg",function(){
+			});
+			var pause=new THREE.Mesh(
+					new THREE.PlaneBufferGeometry(10,10),
+					new THREE.MeshBasicMaterial({
+						map:pauseTexture
+						//color:0xff0000
+					})
+			)
+			pause.name = 'pause';
+			pause.position.set(pausex,pausey,pausez);
+			pause.rotation.x=Math.PI;
+			scene.add(pause);
 
 			var videoTime=0;
-			window.onload=function() { //等所有都加载完了再执行function后面的
-				var startButton = document.getElementById('startButton');
-				startButton.addEventListener('click', function () {
-					video = document.getElementById('video');
-					video.play();
-					video.addEventListener('play', function () {
-						this.currentTime = videoTime;//从几秒开始播放
-					});
+			//window.onload=function() { //等所有都加载完了再执行function后面的
+			var startButton = document.getElementById('startButton');
+			startButton.addEventListener('click', function () {
+				video = document.getElementById(videoTag);
+				video.play();
+				video.addEventListener('play', function () {
+					this.currentTime = videoTime;//从几秒开始播放
 				});
+			});
 
-
-				var pauseButton = document.getElementById('pauseButton');
-				pauseButton.addEventListener('click', function () {
-					video = document.getElementById('video');
-					video.pause();
-					videoTime=video.currentTime;
-				});
-
-				video.play();//加载完后自动播放
-				camera.lookAt(mesh.position);
-			}
+			var pauseButton = document.getElementById('pauseButton');
+			pauseButton.addEventListener('click', function () {
+				video = document.getElementById(videoTag);
+				video.pause();
+				videoTime = video.currentTime;
+			});
+			//}
+			video.play();//加载完后自动播放
 		}
 
 		function loadGLTF(hdrPath,gltfPath,scalex, scaley, scalez,x,y,z) {
@@ -281,32 +326,32 @@
 		}
 
 
-			function initStats() {
+		function initStats() {
 
-				stats = new Stats();
+			stats = new Stats();
 
-				stats.setMode(0); // 0: fps, 1: ms
+			stats.setMode(0); // 0: fps, 1: ms
 
-				// 放在左上角
-				stats.domElement.style.position = 'absolute';
-				stats.domElement.style.left = '0px';
-				stats.domElement.style.top = '0px';
+			// 放在左上角
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.left = '0px';
+			stats.domElement.style.top = '0px';
 
-				document.body.appendChild(stats.domElement);
+			document.body.appendChild(stats.domElement);
 
-				return stats;
-			}
-
-				function onResourceLoaded(){
-			//将模型克隆到网络中
-			meshes["computer_room"]=model.room_profile.mesh.clone();
-			//不知道为什么，使用这种方法，必须要有loadingManager，不然mesh为null值
-			meshes["computer_room"].position.set(0,-15,150);
-			meshes["computer_room"].scale.set(0.05,0.05,0.05);
-			//meshes["computer_room"].rotation.y+=Math.PI/2;
-			scene.add(meshes["computer_room"]);
-
+			return stats;
 		}
+
+			function onResourceLoaded(){
+		//将模型克隆到网络中
+		meshes["computer_room"]=model.room_profile.mesh.clone();
+		//不知道为什么，使用这种方法，必须要有loadingManager，不然mesh为null值
+		meshes["computer_room"].position.set(0,-15,150);
+		meshes["computer_room"].scale.set(0.05,0.05,0.05);
+		//meshes["computer_room"].rotation.y+=Math.PI/2;
+		scene.add(meshes["computer_room"]);
+
+	}
 
 		//camera大小随窗口变化
 		function onResize() {
@@ -364,10 +409,12 @@
 			
 			if(keyboard[38]){ //上箭头键
 				camera.position.y+=player.speed;
+				console.log(camera.position);
 							}
 								
 			if(keyboard[40]){ //下箭头键
 				camera.position.y-=player.speed;
+				console.log(camera.position);
 							}
 
 		   }
