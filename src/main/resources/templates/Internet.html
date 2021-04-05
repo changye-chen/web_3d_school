@@ -66,24 +66,6 @@
 		var pointLight;
 		var ambientLight;
 		var loadingManager=null,Resource_Loaded=false;
-		var loadingScreen={  //“加载中”的场景
-				scene:new THREE.Scene(),
-				camera:new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1,100),
-				ambientLight:new THREE.AmbientLight(0xffffff,0.8),//浅蓝色
-				box:new THREE.Mesh(
-				        new THREE.BoxGeometry(1,1,1),
-						new THREE.MeshPhongMaterial({
-							color:0xff0000,
-							wireframe:false
-							})
-				)
-			}
-		
-		//设置加载场景对象的一些属性
-		loadingScreen.box.position.set(0,0,5);
-		loadingScreen.camera.lookAt(loadingScreen.box.position);
-		loadingScreen.scene.add(loadingScreen.box);
-		loadingScreen.scene.add(loadingScreen.ambientLight);
 
 		//实例化加载管理器
 		loadingManager=new THREE.LoadingManager();
@@ -133,9 +115,9 @@
 		}
 
 
-		camera.position.x = 0;
-		camera.position.y = 0;
-		camera.position.z = -40;
+		camera.position.x = 104;
+		camera.position.y = 8;
+		camera.position.z = 16;
 		camera.lookAt(scene.position);
 
 		function progressBar(progress){

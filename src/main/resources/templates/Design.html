@@ -66,24 +66,6 @@
 		var pointLight;
 		var ambientLight;
 		var loadingManager=null,Resource_Loaded=false;
-		var loadingScreen={  //“加载中”的场景
-				scene:new THREE.Scene(),
-				camera:new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1,100),
-				ambientLight:new THREE.AmbientLight(0xffffff,0.8),//浅蓝色
-				box:new THREE.Mesh(
-				        new THREE.BoxGeometry(1,1,1),
-						new THREE.MeshPhongMaterial({
-							color:0xff0000,
-							wireframe:false
-							})
-				)
-			}
-		
-		//设置加载场景对象的一些属性
-		loadingScreen.box.position.set(0,0,5);
-		loadingScreen.camera.lookAt(loadingScreen.box.position);
-		loadingScreen.scene.add(loadingScreen.box);
-		loadingScreen.scene.add(loadingScreen.ambientLight);
 
 		//实例化加载管理器
 		loadingManager=new THREE.LoadingManager();
@@ -222,23 +204,23 @@
 		
 		//创建地平面
 		function CreatePanl() {
-		            // var floor_1 = THREE.ImageUtils.loadTexture("static/textures/ground/grasslight-big.jpg");
-		            // floor_1.wrapS = THREE.RepeatWrapping;
-		            // floor_1.wrapT = THREE.RepeatWrapping;
-		            // floor_1.repeat.set(4, 4);
-		            //var floor_1Material = new THREE.MeshLambertMaterial({ map: floor_1 });
-		            var planeGeometry = new THREE.PlaneGeometry(300,300,100,10);
-		            planeMaterial = new THREE.MeshPhongMaterial({ color: 0xd6d6d6/*,map:floor_1,specular: 0xffffff, shininess: 200 */});
-		            plane = new THREE.Mesh(planeGeometry, planeMaterial);
-		          
-					
-					plane.receiveShadow = true;
-		            plane.rotation.x = -0.5 * Math.PI;
-		            plane.position.x = camera.position.x;
-		            plane.position.y = camera.position.y-20;
-		            plane.position.z = camera.position.z+150;
-		            scene.add(plane);
-		        }
+			// var floor_1 = THREE.ImageUtils.loadTexture("static/textures/ground/grasslight-big.jpg");
+			// floor_1.wrapS = THREE.RepeatWrapping;
+			// floor_1.wrapT = THREE.RepeatWrapping;
+			// floor_1.repeat.set(4, 4);
+			//var floor_1Material = new THREE.MeshLambertMaterial({ map: floor_1 });
+			var planeGeometry = new THREE.PlaneGeometry(300,300,100,10);
+			planeMaterial = new THREE.MeshPhongMaterial({ color: 0xd6d6d6/*,map:floor_1,specular: 0xffffff, shininess: 200 */});
+			plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+
+			plane.receiveShadow = true;
+			plane.rotation.x = -0.5 * Math.PI;
+			plane.position.x = camera.position.x;
+			plane.position.y = camera.position.y-20;
+			plane.position.z = camera.position.z+150;
+			scene.add(plane);
+		}
 
 
 		function loadGLTF(gltfPath,scalex, scaley, scalez,x,y,z) {
