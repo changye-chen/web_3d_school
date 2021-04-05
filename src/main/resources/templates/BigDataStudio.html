@@ -129,6 +129,7 @@
     init();
     //方法二：加载完成
     loadingManager.onLoad=function(){  //必须是onLoad才行，不能是onload！！！
+
         console.log("已下载所有资源！");  //没有加载完资源
         Resource_Loaded=true;
         document.body.appendChild(renderer.domElement);
@@ -191,7 +192,6 @@
         camera.lookAt(-124, 80, -40);
         scene.add(camera);
     }
-
     //init();
     function init() {
         //加载两个小屏幕
@@ -206,7 +206,6 @@
         //默认桌子视角
         doorView();
         loadGLTF(hdrPath,gltfPath,60,60,60);
-        loadLadder(10,10,10,25,45,-24,"static/models/gltf/component/ladder.gltf");
 
         //加一块黑幕在屏幕后面
         var darkMesh=new THREE.Mesh(
@@ -217,48 +216,7 @@
         darkMesh.rotation.x=Math.PI;
         scene.add(darkMesh);
 
-        loadMark("mark1",0.5,0.5,0.5,84,88,32);
-        loadMark("mark2",0.5,0.5,0.5,84,88,32);
-    }
 
-
-    function loadLadder(scalex,scaley,scalez,x,y,z,url){
-        var loader = new THREE.GLTFLoader(loadingManager);
-        loader.load(url, function (gltf) {
-            gltf.scene.traverse(function (child) {
-                if (child.isMesh) {
-                    // TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
-                    // roughnessMipmapper.generateMipmaps( child.material );
-                }
-            });
-            console.log(gltf.scene);
-            scene.add(gltf.scene);
-            gltf.scene.scale.set(scalex, scaley, scalez);
-            gltf.scene.position.set(x, y, z);
-            meshes["ladder"]=gltf.scene;
-            //roughnessMipmapper.dispose();
-            //render();
-        });
-
-    }
-
-    function loadMark(mark,scalex,scaley,scalez,x,y,z) {
-        var loader = new THREE.GLTFLoader(loadingManager);
-        loader.load("static/models/gltf/component/"+mark+".gltf", function (gltf) {
-            gltf.scene.traverse(function (child) {
-                if (child.isMesh) {
-                    // TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
-                    // roughnessMipmapper.generateMipmaps( child.material );
-                }
-            });
-            console.log(gltf.scene);
-            scene.add(gltf.scene);
-            gltf.scene.scale.set(scalex, scaley, scalez);
-            gltf.scene.position.set(x, y, z);
-            meshes[mark]=gltf.scene;
-            //roughnessMipmapper.dispose();
-            //render();
-        });
     }
 
     function progressBar(progress){
@@ -482,9 +440,6 @@
         //controls.update();
         stats.update();
 
-        meshes["mark1"].rotation.y+=Math.PI/15;
-        meshes["mark2"].rotation.y+=Math.PI/15;
-
         requestAnimationFrame(animate);
         //mesh.rotation.x += 0.01;
         //mesh.rotation.y += 0.02;
@@ -539,12 +494,10 @@
 
         if(keyboard[38]){ //上箭头键
             camera.position.y+=player.speed;
-            console.log(camera.position);
         }
 
         if(keyboard[40]){ //下箭头键
             camera.position.y-=player.speed;
-            console.log(camera.position);
         }
 
     }

@@ -8,6 +8,26 @@
         insert into web3dschool.sys_user(`login_name`,`login_pwd`,`user_name`,`status`,`create_time`,`email`,`tel`,`is_examine`)
         values(#{user.login_name},#{user.login_pwd},#{user.user_name},#{user.status},#{user.create_time},#{user.email},#{user.tel},#{user.is_examine});
     </insert>
+    <update id="updateUser" parameterType="com.zytc.web_3d_school.pojo.SecurityUser">
+        update sys_user
+        set
+            login_name = #{user.login_name},
+            login_pwd = #{user.login_pwd},
+            user_name = #{user.user_name},
+            status = #{user.status},
+            last_login_time = #{user.last_login_time},
+            last_login_ip = #{user.last_login_ip},
+            create_time = #{user.create_time},
+            email = #{user.email},
+            tel = #{user.tel},
+            role_id = #{user.role_id},
+            bindingRole = #{user.bindingRole},
+            uuid = #{user.uuid},
+            is_examine = #{user.is_examine},
+            main_mission_id = #{user.main_mission_id},
+            sub_mission_id = #{user.sub_mission_id}
+        where user_id = #{user.user_id}
+    </update>
     <select id="loadUserByUsername" resultType="com.zytc.web_3d_school.pojo.SecurityUser">
         select * from web3dschool.sys_user s where s.login_name=#{username} limit 1;
     </select>

@@ -34,4 +34,12 @@ public interface UserDetailsServiceMapper {
     * @Date: 2021/3/10 
     */
     int insertUser(@Param("user")SecurityUser user);
+    /**
+    * @Description:  更新用户数据
+    * @Param:
+    * @return:
+    * @Author: ChangYe-Chen
+    * @Date: 2021/3/30
+    */
+    int updateUser(@Param("user") SecurityUser user);
 }

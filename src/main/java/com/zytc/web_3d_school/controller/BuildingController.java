@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author: ChangYe-Chen
  * @create: 2021-02-19
  **/
-
 @Controller
 public class BuildingController {
     @RequestMapping("/Internet")

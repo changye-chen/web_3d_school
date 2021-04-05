@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zytc.web_3d_school.dao.mapper.SubMissionMapper">
+  <resultMap id="BaseResultMap" type="com.zytc.web_3d_school.pojo.SubMission">
+    <id column="sub_mission_id" jdbcType="INTEGER" property="subMissionId" />
+    <result column="main_mission_id" jdbcType="INTEGER" property="mainMissionId" />
+    <result column="sub_mission_detail" jdbcType="VARCHAR" property="subMissionDetail" />
+    <result column="video_url" jdbcType="VARCHAR" property="videoUrl" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    sub_mission_id, main_mission_id, sub_mission_detail, video_url
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from sub_mission
+    where sub_mission_id = #{subMissionId,jdbcType=INTEGER}
+  </select>
+  <select id="selectByMainMissionId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"></include>
+    from sub_mission
+    where main_mission_id=#{mainMissionId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from sub_mission
+    where sub_mission_id = #{subMissionId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="sub_mission_id" keyProperty="subMissionId" parameterType="com.zytc.web_3d_school.pojo.SubMission" useGeneratedKeys="true">
+    insert into sub_mission (main_mission_id, sub_mission_detail, 
+      video_url)
+    values (#{mainMissionId,jdbcType=INTEGER}, #{subMissionDetail,jdbcType=VARCHAR}, 
+      #{videoUrl,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" keyColumn="sub_mission_id" keyProperty="subMissionId" parameterType="com.zytc.web_3d_school.pojo.SubMission" useGeneratedKeys="true">
+    insert into sub_mission
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="mainMissionId != null">
+        main_mission_id,
+      </if>
+      <if test="subMissionDetail != null">
+        sub_mission_detail,
+      </if>
+      <if test="videoUrl != null">
+        video_url,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="mainMissionId != null">
+        #{mainMissionId,jdbcType=INTEGER},
+      </if>
+      <if test="subMissionDetail != null">
+        #{subMissionDetail,jdbcType=VARCHAR},
+      </if>
+      <if test="videoUrl != null">
+        #{videoUrl,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zytc.web_3d_school.pojo.SubMission">
+    update sub_mission
+    <set>
+      <if test="mainMissionId != null">
+        main_mission_id = #{mainMissionId,jdbcType=INTEGER},
+      </if>
+      <if test="subMissionDetail != null">
+        sub_mission_detail = #{subMissionDetail,jdbcType=VARCHAR},
+      </if>
+      <if test="videoUrl != null">
+        video_url = #{videoUrl,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where sub_mission_id = #{subMissionId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zytc.web_3d_school.pojo.SubMission">
+    update sub_mission
+    set main_mission_id = #{mainMissionId,jdbcType=INTEGER},
+      sub_mission_detail = #{subMissionDetail,jdbcType=VARCHAR},
+      video_url = #{videoUrl,jdbcType=VARCHAR}
+    where sub_mission_id = #{subMissionId,jdbcType=INTEGER}
+  </update>
+</mapper>
