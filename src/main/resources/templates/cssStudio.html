@@ -15,6 +15,40 @@
     <script type="text/javascript" th:src="@{static/libs/prefixfree.min.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/modernizr.js}"></script>
     <style type="text/css" th:src="@{static/css/progress.css}"> @import "static/css/progress.css";</style>
+    <style type="text/css">
+        #perspective-left{
+            width:150px;
+            height:150px;
+            position: absolute;
+            left:0;
+            top:40%;
+            display: none;
+        }
+        #perspective-right{
+            width:150px;
+            height:150px;
+            position: absolute;
+            right:0;
+            top:40%;
+            display: none;
+        }
+        #personal-center{
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            left:0;
+            bottom:0;
+            display: none;
+        }
+        #mission-center{
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            right:0;
+            bottom:0;
+            display: none;
+        }
+    </style>
 
     <div id="wrapper">
         <div class="loader-container">
@@ -24,19 +58,24 @@
     </div>
 
 
-    <div id="overlay" style="display:none">
+    <div id="overlay" style="display:none" >
         <button id="startButton">Play</button>
     </div>
 
-    <div id="overlay1" style="display:none">
+    <div id="overlay1" style="display:none" >
         <button id="pauseButton">Pause</button>
     </div>
 
-
-    <video id="video" autoplay controls><!--loop crossOrigin="anonymous" playsinline style="display:none"-->
-        <source src="static/video/4.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+    <video id="video" autoplay controls style="display:none"><!--loop crossOrigin="anonymous" playsinline style="display:none"-->
+        <source src="static/video/2.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
     </video>
 
+    <img th:src="@{static/images/direction-left.png}" onmouseleave="mouseleave()" onmouseover="displayPromptMessage() " onmousedown="cameraLeft()" alt="视角左移" id="perspective-left">
+    <img th:src="@{static/images/direction-right.png}" onmouseleave="mouseleave()" onmouseover="displayPromptMessage()" onmousedown="cameraRight()" alt="视角右移" id="perspective-right">
+    <img th:src="@{static/images/personal-center.png}" alt="个人学习中心" id="personal-center">
+    <img th:src="@{static/images/mission-center.png}" alt="任务栏" id="mission-center">
+    <img th:src="@{static/images/mention-direction.png}" id="mention-direction" style="display: none">
+    <img th:src="@{static/images/mention-mission.png}" id="mention-mission" style="display: none">
 </head>
 <body>
 <script>
@@ -51,6 +90,7 @@
     var control;
     var stats;
     var progress;
+    var viewer=1;
 
     var scene= new THREE.Scene();
     var camera= new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight,1, 500);
@@ -70,24 +110,6 @@
 
     //document.body.appendChild(renderer.domElement);
     var loadingManager=null,Resource_Loaded=false;
-    var loadingScreen={  //“加载中”的场景
-        scene:new THREE.Scene(),
-        camera:new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1,100),
-        ambientLight:new THREE.AmbientLight(0xffffff,0.8),//浅蓝色
-        box:new THREE.Mesh(
-            new THREE.BoxBufferGeometry(1,1,1),
-            new THREE.MeshPhongMaterial({
-                color:0xff0000,
-                wireframe:false
-            })
-        )
-    }
-
-    //设置加载场景对象的一些属性
-    loadingScreen.box.position.set(0,0,5);
-    loadingScreen.camera.lookAt(loadingScreen.box.position);
-    loadingScreen.scene.add(loadingScreen.box);
-    loadingScreen.scene.add(loadingScreen.ambientLight);
 
     //实例化加载管理器
     loadingManager=new THREE.LoadingManager();
@@ -106,6 +128,7 @@
         document.getElementById('wrapper').style.display = 'none';
         animate();
         // onResourceLoaded(); //记得给所有loader加上（loadingManager）
+        displayIcon();//加载图标
     }
 
     //模型索引
@@ -141,7 +164,7 @@
         camera.position.x = 45;
         camera.position.y = 90;
         camera.position.z = 30;
-        camera.lookAt(40, 80, 170);
+        camera.lookAt(40, 90, 170);
         scene.add(camera);
     }
 
@@ -174,7 +197,7 @@
         //加载性能插件
         initStats();
         //默认桌子视角
-        bookView();
+        doorView();
         loadGLTF(hdrPath,gltfPath,60,60,60);
 
         //加一块黑幕在屏幕后面
@@ -551,15 +574,97 @@
             else if(intersects[0].object.name === 'pause'){
                 video.pause();
             }
+            else if(intersects[0].object.name === 'BMan0003-Se'){
+                //忠涵加入字符串
+                var main_mission = "";
+                $.ajax({url:"/ajax/getMission", async:false ,success: function(data) {
+                        main_mission = data.toString();
+                    }})
+
+                var layer = new MyLayer({
+                    top:"10%",
+                    left:"10%",
+                    width:"80%",
+                    height:"80%",
+                    title:"任务",
+                    content:main_mission
+                });
+                layer.openLayer();
+            }
         }
 
 
     }
+    //加载模型后显示各个图标
+    function displayIcon(){
+        var v1 = document.getElementById("perspective-left");
+        v1.style.display = "block";
+        var v2 = document.getElementById("perspective-right");
+        v2.style.display = "block";
+        var v3 = document.getElementById("personal-center");
+        v3.style.display = "block";
+        var v4 = document.getElementById("mission-center");
+        v4.style.display = "block"
+    }
+
+    let MouseCursorX = 0;
+    let MouseCursorY = 0;
+    //鼠标移动处理事件
+    function mousemove(ev){
+        ev = ev || window.onmousemove;
+        if(ev.pageX || ev.pageY){
+            MouseCursorX = ev.pageX;
+            MouseCursorY = ev.pageY;
+        }
+    }
+    //鼠标离开方向图标后
+    function mouseleave(){
+        let mention_direction = document.getElementById("mention-direction");
+        mention_direction.style.display="none";
+    }
+    //显示提示信息函数
+    function displayPromptMessage(){
+        //忠涵加提示信息（直接加监听有问题，所以每个图片都需要单独加一个函数）
+        //alert("111");
+        let mention_left = document.getElementById("mention-direction");
+        mention_left.style.position="absolute";
+        mention_left.style.top=MouseCursorY.toString()+"px";
+        mention_left.style.left=MouseCursorX.toString()+"px";
+        mention_left.style.display="block";
+    }
+
+    //视角左移函数
+    //汇雲可以先调好几个视角，后续讨论视角的几个变换。
+    function cameraLeft(){
+        viewer++;
+        if(viewer==1||viewer>=5)
+        {doorView();viewer=1;}
+        if(viewer==2)
+            deskView();
+        if(viewer==3)
+            bookView();
+        if(viewer==4)
+            screenView();
+    }
+
+    //视角右移函数
+    function cameraRight(){
+        viewer--;
+        if(viewer==1||viewer>=5||viewer<=0)
+        {doorView();viewer=5;}
+        if(viewer==2)
+            deskView();
+        if(viewer==3)
+            bookView();
+        if(viewer==4)
+            screenView();
+    }
+    // window.addEventListener('click',displayPromptMessage);
     window.addEventListener('click', mouseClickEvent);
     window.addEventListener('keydown',keyDown);
     window.addEventListener('keyup',keyUp);
     window.addEventListener('resize', onResize, false);
+    document.onmousemove = mousemove;
 </script>
-
 </body>
 </html>

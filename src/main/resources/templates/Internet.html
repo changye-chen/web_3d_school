@@ -35,10 +35,10 @@
 		var keyboard={}; //定义数组
 		var player={height:1.8,speed:2,turnSpeed:Math.PI*0.01};
 		var weather={  
-			sky:0, //四种天气仅有一个为true
+			sky:1, //四种天气仅有一个为true
 			cloud:0,
 			rain:0,
-			snow:1,
+			snow:0,
 		};
 		var group = new THREE.Group();//创建雨滴数组
 		var clouds = []; //点云
@@ -53,8 +53,12 @@
 		renderer.shadowMap.enabled=true;
 		renderer.shadowMap.type=THREE.BasicShadowMap;
 
+		//场景美化效果
+		renderer.setPixelRatio( window.devicePixelRatio );
+		renderer.outputEncoding = THREE.sRGBEncoding;
+		//renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
-		var gltfPath='static/models/gltf/Building/Design/Design.gltf';
+		var gltfPath='static/models/gltf/Building/Internet/Internet.gltf';
 
 
 		var plane;
@@ -492,10 +496,12 @@
 			
 			if(keyboard[38]){ //上箭头键
 				camera.position.y+=player.speed;
+				console.log(camera.position);
 							}
 								
 			if(keyboard[40]){ //下箭头键
 				camera.position.y-=player.speed;
+				console.log(camera.position);
 							}
 
 		   }
