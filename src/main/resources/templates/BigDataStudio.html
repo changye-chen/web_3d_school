@@ -79,6 +79,7 @@
     <img th:src="@{static/images/mention-direction.png}" id="mention-direction" style="display: none">
     <img th:src="@{static/images/mention-mission.png}" id="mention-mission" style="display: none">
 </head>
+<body>
 <script>
     //灵感1：资源文件里面有水滴的jpg，可以做一个配合现实天气的天气界面。
     //灵感2：房间贴纸分类：护眼色、经典色等。
@@ -656,5 +657,7 @@
     window.addEventListener('resize', onResize, false);
     document.onmousemove = mousemove;
 </script>
+<progress value="80" max="100" style="position: absolute; left: 0; bottom: 20%"></progress>
+
 </body>
 </html>

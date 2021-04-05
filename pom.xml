@@ -72,11 +72,11 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.zytc</groupId>
-            <artifactId>web_3d_school</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.zytc</groupId>-->
+<!--            <artifactId>web_3d_school</artifactId>-->
+<!--            <version>0.0.1-SNAPSHOT</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>

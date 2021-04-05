@@ -27,9 +27,10 @@ public class AjaxController {
     @RequestMapping("/getMission")
     @ResponseBody
     public String getMission(){
-        SecurityUser user = (SecurityUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        SecurityUser user = (SecurityUser)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userService.getMission(user).getMainMissionDetail();
     }
+
     @RequestMapping("/register")
     @ResponseBody
     public String registerConfirm(SecurityUser user){
@@ -37,4 +38,5 @@ public class AjaxController {
         userService.userRegister(user);
         return "OK";
     }
+
 }
