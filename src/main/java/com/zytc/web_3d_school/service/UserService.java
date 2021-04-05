@@ -1,5 +1,6 @@
 package com.zytc.web_3d_school.service;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.zytc.web_3d_school.pojo.MainMission;
 import com.zytc.web_3d_school.pojo.SecurityUser;
 
@@ -14,4 +15,6 @@ public interface UserService {
    */
    int userRegister(SecurityUser user);
    MainMission getMission(SecurityUser user);
+   int acceptMission(SecurityUser user);
+   int completeSubMission(SecurityUser user);
 }

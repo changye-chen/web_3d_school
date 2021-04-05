@@ -18,26 +18,39 @@
     <style type="text/css" th:src="@{static/css/progress.css}"> @import "static/css/progress.css";</style>
 <!--    <link th:href="@{static/css/progress.css}" rel="stylesheet" type="text/css">-->
     <style type="text/css">
-        #exit{
-            width:50px;
-            height:50px;
+        #perspective-left{
+            width:150px;
+            height:150px;
             position: absolute;
-            right:0;
-            top:0;
+            left:0;
+            top:40%;
             display: none;
         }
-        #navigation{
-            width:900px;
-            height:45px;
+        #perspective-right{
+            width:150px;
+            height:150px;
+            position: absolute;
+            right:0;
+            top:40%;
+            display: none;
+        }
+        #personal-center{
+            width: 100px;
+            height: 100px;
             position: absolute;
             left:0;
             bottom:0;
             display: none;
         }
+        #mission-center{
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            right:0;
+            bottom:0;
+            display: none;
+        }
     </style>
-
-</head>
-<body>
 
     <div id="wrapper">
         <div class="loader-container">
@@ -59,17 +72,13 @@
         <source src="static/video/2.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
     </video>
 
-    <img th:src="@{static/images/exit.png}" id="exit" alt="退出">
-    <map id="navigation_map" name="navigation_map">
-        <area shape="rect" coords="0,0,175,45" alt="openPersonal_center" onclick="openPersonal_center()"/>
-        <area shape="rect" coords="175,0,350,45" alt="openMission_center" onclick="openMission_center()"/>
-        <area shape="rect" coords="460,0,490,45" alt="doorView" onclick="doorView()"/>
-        <area shape="rect" coords="535,0,565,45" alt="deskView" onclick="deskView()"/>
-        <area shape="rect" coords="600,0,630,45" alt="bookView" onclick="bookView()"/>
-        <area shape="rect" coords="670,0,705,45" alt="screenView" onclick="screenView()"/>
-    </map>
-    <img th:src="@{static/images/doorView_nav.png}" id="navigation" alt="导航" usemap="#navigation_map">
-
+    <img th:src="@{static/images/direction-left.png}" onmouseleave="mouseleave()" onmouseover="displayPromptMessage() " onmousedown="cameraLeft()" alt="视角左移" id="perspective-left">
+    <img th:src="@{static/images/direction-right.png}" onmouseleave="mouseleave()" onmouseover="displayPromptMessage()" onmousedown="cameraRight()" alt="视角右移" id="perspective-right">
+    <img th:src="@{static/images/personal-center.png}" alt="个人学习中心" id="personal-center">
+    <img th:src="@{static/images/mission-center.png}" alt="任务栏" id="mission-center">
+    <img th:src="@{static/images/mention-direction.png}" id="mention-direction" style="display: none">
+    <img th:src="@{static/images/mention-mission.png}" id="mention-mission" style="display: none">
+</head>
 <script>
     //灵感1：资源文件里面有水滴的jpg，可以做一个配合现实天气的天气界面。
     //灵感2：房间贴纸分类：护眼色、经典色等。
@@ -153,27 +162,22 @@
     }
 
     function deskView() {
-        $("#navigation").attr('src', "/static/images/deskView_nav.png");
         camera.position.x = 0;
         camera.position.y = 65;
         camera.position.z = -80;
         camera.lookAt(0, 70, 95);
         scene.add(camera);
-
     }
 
     function screenView() {
-        $("#navigation").attr('src', "/static/images/screenView_nav.png");
         camera.position.x = -30;
         camera.position.y = 80;
         camera.position.z = -50;
         camera.lookAt(-20, 80, 95);
         scene.add(camera);
-
     }
 
     function doorView() {
-        $("#navigation").attr('src', "/static/images/doorView_nav.png");
         camera.position.x = -124;
         camera.position.y = 71;
         camera.position.z = 66;
@@ -182,13 +186,11 @@
     }
 
     function bookView() {
-        $("#navigation").attr('src', "/static/images/bookView_nav.png");
         camera.position.x = -20;
         camera.position.y = 65;
         camera.position.z = -50;
         camera.lookAt(-124, 80, -40);
         scene.add(camera);
-
     }
     //init();
     function init() {
@@ -602,11 +604,14 @@
     }
     //加载模型后显示各个图标
     function displayIcon(){
-        var v1 = document.getElementById("exit");
+        var v1 = document.getElementById("perspective-left");
         v1.style.display = "block";
-        var v2 = document.getElementById("navigation");
+        var v2 = document.getElementById("perspective-right");
         v2.style.display = "block";
-
+        var v3 = document.getElementById("personal-center");
+        v3.style.display = "block";
+        var v4 = document.getElementById("mission-center");
+        v4.style.display = "block"
     }
 
     let MouseCursorX = 0;
@@ -660,17 +665,6 @@
             bookView();
         if(viewer==4)
             screenView();
-    }
-
-    //打开个人中心
-    function openPersonal_center(){
-        var personal = new MyLayer({content: "个人中心"});
-        personal.openLayer();
-    }
-    //打开任务中心
-    function openMission_center(){
-        var personal = new MyLayer({content: "任务中心"});
-        personal.openLayer();
     }
    // window.addEventListener('click',displayPromptMessage);
     window.addEventListener('click', mouseClickEvent);

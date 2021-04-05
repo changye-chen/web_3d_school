@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zytc.web_3d_school.dao.mapper.UserMainMissionMapper">
+  <resultMap id="BaseResultMap" type="com.zytc.web_3d_school.pojo.UserMainMission">
+    <id column="main_mission_id" jdbcType="INTEGER" property="mainMissionId" />
+    <id column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="main_mission_detail" jdbcType="VARCHAR" property="mainMissionDetail" />
+    <result column="accept_time" jdbcType="TIMESTAMP" property="acceptTime" />
+    <result column="sub_mission_num" jdbcType="INTEGER" property="subMissionNum" />
+    <result column="completed_num" jdbcType="INTEGER" property="completedNum" />
+    <result column="completed_time" jdbcType="TIMESTAMP" property="completedTime" />
+    <result column="completed_flag" jdbcType="INTEGER" property="completedFlag" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    main_mission_id, user_id, main_mission_detail, accept_time, sub_mission_num, completed_num, 
+    completed_time, completed_flag
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="com.zytc.web_3d_school.pojo.UserMainMissionKey" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from user_main_mission
+    where main_mission_id = #{mainMissionId,jdbcType=INTEGER}
+      and user_id = #{userId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="com.zytc.web_3d_school.pojo.UserMainMissionKey">
+    delete from user_main_mission
+    where main_mission_id = #{mainMissionId,jdbcType=INTEGER}
+      and user_id = #{userId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.zytc.web_3d_school.pojo.UserMainMission">
+    insert into user_main_mission (main_mission_id, user_id, main_mission_detail, 
+      accept_time, sub_mission_num, completed_num, 
+      completed_time, completed_flag)
+    values (#{mainMissionId,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{mainMissionDetail,jdbcType=VARCHAR}, 
+      #{acceptTime,jdbcType=TIMESTAMP}, #{subMissionNum,jdbcType=INTEGER}, #{completedNum,jdbcType=INTEGER}, 
+      #{completedTime,jdbcType=TIMESTAMP}, #{completedFlag,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zytc.web_3d_school.pojo.UserMainMission">
+    insert into user_main_mission
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="mainMissionId != null">
+        main_mission_id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="mainMissionDetail != null">
+        main_mission_detail,
+      </if>
+      <if test="acceptTime != null">
+        accept_time,
+      </if>
+      <if test="subMissionNum != null">
+        sub_mission_num,
+      </if>
+      <if test="completedNum != null">
+        completed_num,
+      </if>
+      <if test="completedTime != null">
+        completed_time,
+      </if>
+      <if test="completedFlag != null">
+        completed_flag,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="mainMissionId != null">
+        #{mainMissionId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="mainMissionDetail != null">
+        #{mainMissionDetail,jdbcType=VARCHAR},
+      </if>
+      <if test="acceptTime != null">
+        #{acceptTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="subMissionNum != null">
+        #{subMissionNum,jdbcType=INTEGER},
+      </if>
+      <if test="completedNum != null">
+        #{completedNum,jdbcType=INTEGER},
+      </if>
+      <if test="completedTime != null">
+        #{completedTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="completedFlag != null">
+        #{completedFlag,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zytc.web_3d_school.pojo.UserMainMission">
+    update user_main_mission
+    <set>
+      <if test="mainMissionDetail != null">
+        main_mission_detail = #{mainMissionDetail,jdbcType=VARCHAR},
+      </if>
+      <if test="acceptTime != null">
+        accept_time = #{acceptTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="subMissionNum != null">
+        sub_mission_num = #{subMissionNum,jdbcType=INTEGER},
+      </if>
+      <if test="completedNum != null">
+        completed_num = #{completedNum,jdbcType=INTEGER},
+      </if>
+      <if test="completedTime != null">
+        completed_time = #{completedTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="completedFlag != null">
+        completed_flag = #{completedFlag,jdbcType=INTEGER},
+      </if>
+    </set>
+    where main_mission_id = #{mainMissionId,jdbcType=INTEGER}
+      and user_id = #{userId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zytc.web_3d_school.pojo.UserMainMission">
+    update user_main_mission
+    set main_mission_detail = #{mainMissionDetail,jdbcType=VARCHAR},
+      accept_time = #{acceptTime,jdbcType=TIMESTAMP},
+      sub_mission_num = #{subMissionNum,jdbcType=INTEGER},
+      completed_num = #{completedNum,jdbcType=INTEGER},
+      completed_time = #{completedTime,jdbcType=TIMESTAMP},
+      completed_flag = #{completedFlag,jdbcType=INTEGER}
+    where main_mission_id = #{mainMissionId,jdbcType=INTEGER}
+      and user_id = #{userId,jdbcType=INTEGER}
+  </update>
+</mapper>
