@@ -15,17 +15,30 @@
 		<script type="text/javascript" th:src="@{static/libs/prefixfree.min.js}"></script>
 		<script type="text/javascript" th:src="@{static/libs/modernizr.js}"></script>
 		<style type="text/css" th:src="@{static/css/progress.css}"> @import "static/css/progress.css";</style>
-
-		<div id="wrapper">
-			<div class="loader-container">
-				<div class="meter">0</div>
-				<span class="runner"></span>
-			</div>
-		</div>
-
 	</head>
-	<body>
-		<script>
+<body>
+	<div id="wrapper">
+		<div class="loader-container">
+			<div class="meter">0</div>
+			<span class="runner"></span>
+		</div>
+	</div>
+
+	<a href="index"><img th:src="@{static/images/exit.png}" id="exit" alt="退出"></a>
+	<map id="navigation_map" name="navigation_map">
+		<area id="cssView" shape="rect" coords="600,0,630,45" alt="cssView" onclick="cssView()" onmouseover="reminder(this.id)" onmouseleave="mouseleave()"/>
+		<area id="JavaView" shape="rect" coords="670,0,705,45" alt="JavaView" onclick="JavaView()" />
+		<area id="BigDataView" shape="rect" coords="670,0,705,45" alt="BigDataView" onclick="BigDataView()" />
+		<area id="sunny" shape="rect" coords="715,0,750,45" alt="sunny" onclick="sunny=1" />
+		<area id="rain" shape="rect" coords="715,0,750,45" alt="rain" onclick="rain=1" />
+		<area id="cloudy" shape="rect" coords="715,0,750,45" alt="cloudy" onclick="cloudy=1" />
+		<area id="snow" shape="rect" coords="715,0,750,45" alt="snow" onclick="snow=1" />
+		<area id="doorView" shape="rect" coords="460,0,490,45" alt="doorView" onclick="doorView()" />
+		<area id="skyView" shape="rect" coords="535,0,565,45" alt="skyView" onclick="skyView()" />
+	</map>
+	<img th:src="@{static/images/InternetView_nav.png}" id="navigation" alt="导航" usemap="#navigation_map">
+
+	<script>
 			//灵感1：资源文件里面有水滴的jpg，可以做一个配合现实天气的天气界面。
 			//灵感2：房间贴纸分类：护眼色、经典色等。
 			//灵感3：可加入"加载中"的动画
@@ -35,8 +48,8 @@
 		var keyboard={}; //定义数组
 		var player={height:1.8,speed:2,turnSpeed:Math.PI*0.01};
 		var weather={  
-			sky:1, //四种天气仅有一个为true
-			cloud:0,
+			sunny:1, //四种天气仅有一个为true
+			cloudy:0,
 			rain:0,
 			snow:0,
 		};
@@ -57,8 +70,9 @@
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.outputEncoding = THREE.sRGBEncoding;
 		//renderer.toneMapping = THREE.ACESFilmicToneMapping;
+		renderer.textureEncoding=THREE.sRGBEncoding;
 
-		var gltfPath='static/models/gltf/Building/Internet/Internet.gltf';
+		var gltfPath='static/models/gltf/Building/Internet/Internet2.gltf';
 
 
 		var plane;
@@ -114,11 +128,46 @@
 		scene.add(pointLight);
 		}
 
-
-		camera.position.x = 104;
-		camera.position.y = 8;
-		camera.position.z = 16;
-		camera.lookAt(scene.position);
+		function doorView() {
+			$("#navigation").attr('src', "/static/images/InternetDoorView.png");
+			camera.position.x = 104;
+			camera.position.y = 8;
+			camera.position.z = 16;
+			camera.lookAt(-50, 8, 30);
+			scene.add(camera);
+		}
+		function skyView(){   //这些视角还没调试出来
+			$("#navigation").attr('src', "/static/images/InternetSkyView.png");
+			camera.position.x = 104;
+			camera.position.y = 80;
+			camera.position.z = 16;
+			camera.lookAt(-50, 8, 80);
+			scene.add(camera);
+		}
+		function cssView(){
+			$("#navigation").attr('src', "/static/images/InternetCssView.png");
+			camera.position.x = 104;
+			camera.position.y = 80;
+			camera.position.z = 0;
+			camera.lookAt(-50, 8, 50);
+			scene.add(camera);
+		}
+		function JavaView(){
+			$("#navigation").attr('src', "/static/images/InternetJavaView.png");
+			camera.position.x = 104;
+			camera.position.y = 80;
+			camera.position.z = 16;
+			camera.lookAt(-50, 8, 80);
+			scene.add(camera);
+		}
+		function BigDataView(){
+			$("#navigation").attr('src', "/static/images/InternetBigDataView.png");
+			camera.position.x = 104;
+			camera.position.y = 80;
+			camera.position.z = 16;
+			camera.lookAt(-50, 8, 80);
+			scene.add(camera);
+		}
 
 		function progressBar(progress){
 			var Loader = function () {
@@ -204,23 +253,23 @@
 		
 		//创建地平面
 		function CreatePanl() {
-		            // var floor_1 = THREE.ImageUtils.loadTexture("static/textures/ground/grasslight-big.jpg");
-		            // floor_1.wrapS = THREE.RepeatWrapping;
-		            // floor_1.wrapT = THREE.RepeatWrapping;
-		            // floor_1.repeat.set(4, 4);
-		            //var floor_1Material = new THREE.MeshLambertMaterial({ map: floor_1 });
-		            var planeGeometry = new THREE.PlaneGeometry(300,300,100,10);
-		            planeMaterial = new THREE.MeshPhongMaterial({ color: 0xd6d6d6/*,map:floor_1,specular: 0xffffff, shininess: 200 */});
-		            plane = new THREE.Mesh(planeGeometry, planeMaterial);
-		          
-					
-					plane.receiveShadow = true;
-		            plane.rotation.x = -0.5 * Math.PI;
-		            plane.position.x = camera.position.x;
-		            plane.position.y = camera.position.y-20;
-		            plane.position.z = camera.position.z+150;
-		            scene.add(plane);
-		        }
+			// var floor_1 = THREE.ImageUtils.loadTexture("static/textures/ground/grasslight-big.jpg");
+			// floor_1.wrapS = THREE.RepeatWrapping;
+			// floor_1.wrapT = THREE.RepeatWrapping;
+			// floor_1.repeat.set(4, 4);
+			//var floor_1Material = new THREE.MeshLambertMaterial({ map: floor_1 });
+			var planeGeometry = new THREE.PlaneGeometry(300,300,100,10);
+			planeMaterial = new THREE.MeshPhongMaterial({ color: 0xd6d6d6/*,map:floor_1,specular: 0xffffff, shininess: 200 */});
+			plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+
+			plane.receiveShadow = true;
+			plane.rotation.x = -0.5 * Math.PI;
+			plane.position.x = camera.position.x;
+			plane.position.y = camera.position.y-20;
+			plane.position.z = camera.position.z+150;
+			scene.add(plane);
+		}
 
 
 		function loadGLTF(gltfPath,scalex, scaley, scalez,x,y,z) {
@@ -374,7 +423,7 @@
 			initLight();
 			CreatePanl();
 			initSkyBox();
-			initControls();
+			//initControls();
 			initStats();
 			loadGLTF(gltfPath,1,1,1,0,0,0);
 			progressBar(progress);
@@ -389,7 +438,7 @@
 		function animate(){
 
 			//更新鼠标控制
-			controls.update();
+			//controls.update();
 			stats.update();
 
 			if(weather.rain)
@@ -541,7 +590,44 @@
 		    //window.location.assign("room");
 
 		   	}
-		   
+
+			//加载模型后显示各个图标
+			function displayIcon() {
+				var v1 = document.getElementById("exit");
+				v1.style.display = "block";
+				var v2 = document.getElementById("navigation");
+				v2.style.display = "block";
+			}
+			//导航栏提示信息函数
+			function reminder(id){
+				var info = document.getElementById("reminder");
+				info.style.position = "absolute";
+				if(id === "skyView"){
+					info.value = "学院俯瞰";
+				}
+				else if(id === "doorView"){
+					info.value = "学院入口";
+				}
+				else if(id === "sunny"){
+					info.value = "切换到晴天模式";
+				}
+				else if(id === "rain"){
+					info.value = "切换到雨天模式";
+				}
+				else if(id === "rain"){
+					info.value = "切换到阴天模式";
+				}
+				else if(id === "rain"){
+					info.value = "切换到下雪模式";
+				}
+				info.style.left = MouseCursorX.toString() + "px";
+				info.style.top = MouseCursorY.toString() + "px";
+				info.style.display = "block";
+			}
+			function mouseleave(){
+				var info = document.getElementById("reminder");
+				info.style.display = "none";
+			}
 		   
 		   window.addEventListener('keydown',keyDown);
 		   window.addEventListener('keyup',keyUp);
