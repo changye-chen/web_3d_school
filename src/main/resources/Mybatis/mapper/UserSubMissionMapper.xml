@@ -28,7 +28,7 @@
       and user_id = #{userId,jdbcType=INTEGER}
   </delete>
   <insert id="insert" keyProperty="subMissionId" parameterType="com.zytc.web_3d_school.pojo.UserSubMission" useGeneratedKeys="true">
-    insert into user_sub_mission (sub_mission_id, user_id, main_mission_id, sub_mission_detail,
+    insert ignore user_sub_mission (sub_mission_id, user_id, main_mission_id, sub_mission_detail,
       video_url, accept_time, completed_time, 
       completed_flag)
     values (#{subMissionId,jdbcType=INTEGER},#{userId,jdbcType=INTEGER}, #{mainMissionId,jdbcType=INTEGER}, #{subMissionDetail,jdbcType=VARCHAR},

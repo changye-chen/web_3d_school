@@ -2,13 +2,13 @@
  * @param options 弹窗基本配置信息
  * @constructor 构造方法
  */
-function PersonalCenter(options) {
+function MissionCenter(options) {
     this.options = options ;
 }
 /**
  * 打开弹窗
  */
-PersonalCenter.prototype.openLayer = function () {
+MissionCenter.prototype.openLayer = function () {
     var background_layer = document.createElement("div");
 
     background_layer.style.display = "none";
@@ -23,18 +23,7 @@ PersonalCenter.prototype.openLayer = function () {
 
 
     var open_layer = document.createElement("div");
-    if(this.options.completed_num === undefined) {
-        open_layer.style.background = "url(static/images/personal_0.png) no-repeat";
-    }
-    else if(this.options.completed_num === 1) {
-        open_layer.style.background = "url(static/images/personal_1.png) no-repeat";
-    }
-    else if(this.options.completed_num === 2) {
-        open_layer.style.background = "url(static/images/personal_2.png) no-repeat";
-    }
-    else if(this.options.completed_num === 3) {
-        open_layer.style.background = "url(static/images/personal_3.png) no-repeat";
-    }
+    open_layer.style.background = "url(static/images/mission_center.png) no-repeat";
     open_layer.style.display = "none";
     open_layer.style.position = "fixed";
     open_layer.style.top="10%";
@@ -45,8 +34,8 @@ PersonalCenter.prototype.openLayer = function () {
     // open_layer.style.left = this.options.left === undefined ? "10%" :this.options.left;
     // open_layer.style.width = this.options.width === undefined ? "80%" : this.options.width;
     // open_layer.style.height = this.options.height === undefined ? "80%" : this.options.height;
-    open_layer.style.width = "350px";
-    open_layer.style.height = "364px";
+    open_layer.style.width = "400px";
+    open_layer.style.height = "298px";
     open_layer.style.border = "1px solid";
     open_layer.style.borderRadius = "15px" ;
     open_layer.style.boxShadow = "4px 4px 10px #171414";;
@@ -74,10 +63,27 @@ PersonalCenter.prototype.openLayer = function () {
     open_layer.appendChild(span_close);
 
 
+    //接受任务
+    var span_accept_mission = document.createElement("img");
+    span_accept_mission.src = "static/images/accept.png";
+    span_accept_mission.style.position="absolute";
+    span_accept_mission.style.width = "86px";
+    span_accept_mission.style.height = "37px";
+    span_accept_mission.style.right = "0";
+    span_accept_mission.style.bottom = "0";
+    span_accept_mission.onmouseover = function(){
+    	//接受任务提示信息
+        // alert("1");
+    }
+    span_accept_mission.onclick = this.options.function;
+    open_layer.appendChild(span_accept_mission);
+
+
+
     var div_content = document.createElement("div");
 
     div_content.style.textAlign = "center";
-    div_content.style.fontSize = "16px";
+    div_content.style.fontSize = "20px";
     div_content.style.color = "white";
     div_content.appendChild(document.createElement("br"));
     div_content.appendChild(document.createElement("br"));

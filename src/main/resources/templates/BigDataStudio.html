@@ -10,6 +10,8 @@
     <script type="text/javascript" th:src="@{static/libs/OrbitControls.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/stats.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/PersonalCenter.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/MyMission.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/MissionCenter.js}"></script>
     <script type="text/javascript" th:src="@{static/js/jquery-3.5.1.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/prefixfree.min.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/modernizr.js}"></script>
@@ -42,29 +44,27 @@
         </div>
     </div>
 
-
-    <div id="overlay" style="display:none" >
-        <button id="startButton">Play</button>
-    </div>
-
-    <div id="overlay1" style="display:none" >
-        <button id="pauseButton">Pause</button>
-    </div>
-
+    <input id="reminder" style="border: none; background:transparent; display: none">
     <video id="video" autoplay controls style="display:none"><!--loop crossOrigin="anonymous" playsinline style="display:none"-->
-        <source src="static/video/2.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+        <source id="video_source" src="static/video/2.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
     </video>
-    <img th:src="@{static/images/exit.png}" id="exit" alt="退出">
+    <a href="Internet"><img th:src="@{static/images/exit.png}" id="exit" alt="退出"></a>
     <map id="navigation_map" name="navigation_map">
-        <area shape="rect" coords="0,0,175,45" alt="openPersonal_center" onclick="openPersonal_center()"/>
-        <area shape="rect" coords="175,0,350,45" alt="openMission_center" onclick="openMission_center()"/>
-        <area shape="rect" coords="460,0,490,45" alt="doorView" onclick="doorView()"/>
-        <area shape="rect" coords="535,0,565,45" alt="deskView" onclick="deskView()"/>
-        <area shape="rect" coords="600,0,630,45" alt="bookView" onclick="bookView()"/>
-        <area shape="rect" coords="670,0,705,45" alt="screenView" onclick="screenView()"/>
+        <area id="openPersonal_center" shape="rect" coords="0,0,175,45" alt="openPersonal_center" onclick="openPersonal_center()" onmouseover="reminder(this.id)" onmouseleave="mouseleave()"/>
+        <area id="openMission_center" shape="rect" coords="175,0,350,45" alt="openMission_center" onclick="openMy_mission()"/>
+        <area id="door" shape="rect" coords="460,0,490,45" alt="doorView" onclick="doorView()" />
+        <area id="desk" shape="rect" coords="535,0,565,45" alt="deskView" onclick="deskView()" />
+        <area id="book" shape="rect" coords="600,0,630,45" alt="bookView" onclick="bookView()" />
+        <area id="screen" shape="rect" coords="670,0,705,45" alt="screenView" onclick="screenView()" />
+        <area id="ladder" shape="rect" coords="715,0,750,45" alt="ladder" onclick="ladderView()" />
     </map>
     <img th:src="@{static/images/doorView_nav.png}" id="navigation" alt="导航" usemap="#navigation_map">
-        <script>
+    <form class="form-signin" th:action="@{/user/upload}" method="post" enctype="multipart/form-data" style="display: none">
+        <p><input type="file" id="choosefile" name="myfile"/></p>
+        <p><input type="submit" id="upload" value="上传"/></p>
+    </form>
+
+    <script>
         //光源
         function initLight(){
             ambientLight=new THREE.AmbientLight(0xfffffff,0.5);//浅蓝色
@@ -87,12 +87,11 @@
 
         function screenView() {
             $("#navigation").attr('src', "/static/images/screenView_nav.png");
-            camera.position.x = -30;
+            camera.position.x = -20;
             camera.position.y = 80;
             camera.position.z = -50;
             camera.lookAt(-20, 80, 95);
             scene.add(camera);
-
         }
 
         function doorView() {
@@ -114,6 +113,26 @@
 
         }
 
+        //阶梯视角
+        function ladderView(ladderUrl,scalex, scaley, scalez,x,y,z){
+            $("#navigation").attr('src', "/static/images/ladderView_nav.png");
+            var loader = new THREE.GLTFLoader(loadingManager);
+            loader.load(ladderUrl, function (gltf) {
+                gltf.scene.traverse(function (child) {
+                    if (child.isMesh) {
+                        // TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
+                        // roughnessMipmapper.generateMipmaps( child.material );
+                    }
+                });
+                scene.add(gltf.scene);
+                gltf.scene.scale.set(scalex, scaley, scalez);
+                //gltf.scene.rotation.z=Math.PI/2;
+                //gltf.scene.position(0,-100,-120);
+                //roughnessMipmapper.dispose();
+                //render();
+            });
+        }
+
         //init();
         function init() {
             //加载两个小屏幕
@@ -122,7 +141,7 @@
             initControls();
             //加载主屏幕及控制按钮
             initVideo(200,150,-38.5,77,96,"video");
-            mainVideoControl(-115,158,96,-130,158,96,"video");
+            mainVideoControl(-115,158,96,-130,158,96,-100,158,96,-85,158,96,"video");
             //加载性能插件
             initStats();
             //默认桌子视角
@@ -244,12 +263,12 @@
             document.getElementById('video').style.display = 'none';
         }
 
-        function mainVideoControl(playx,playy,playz,pausex,pausey,pausez,videoTag){
+        function mainVideoControl(playx,playy,playz,pausex,pausey,pausez,selectx,selecty,selectz,uploadx,uploady,uploadz,videoTag){
             //辅助工具
             var helper = new THREE.AxesHelper(50);
             //scene.add(helper);
 
-            var playTexture = new THREE.ImageUtils.loadTexture("static/textures/start.jpg",function(){
+            var playTexture = new THREE.ImageUtils.loadTexture("static/images/start.png",function(){
             });
             var play=new THREE.Mesh(
                 new THREE.PlaneBufferGeometry(10,10),
@@ -265,7 +284,7 @@
             play.rotation.z=Math.PI;
             scene.add(play);
 
-            var pauseTexture = new THREE.ImageUtils.loadTexture("static/textures/pause.jpg",function(){
+            var pauseTexture = new THREE.ImageUtils.loadTexture("static/images/pause.png",function(){
             });
             var pause=new THREE.Mesh(
                 new THREE.PlaneBufferGeometry(10,10),
@@ -279,25 +298,33 @@
             pause.rotation.x=Math.PI;
             scene.add(pause);
 
-            var videoTime=0;
-            //window.onload=function() { //等所有都加载完了再执行function后面的
-            var startButton = document.getElementById('startButton');
-            startButton.addEventListener('click', function () {
-                video = document.getElementById(videoTag);
-                video.play();
-                video.addEventListener('play', function () {
-                    this.currentTime = videoTime;//从几秒开始播放
-                });
+            var selectTexture = new THREE.ImageUtils.loadTexture("static/images/pause.png",function(){
             });
+            var select=new THREE.Mesh(
+                new THREE.PlaneBufferGeometry(10,10),
+                new THREE.MeshBasicMaterial({
+                    map:selectTexture
+                    //color:0xff0000
+                })
+            )
+            select.name = 'select';
+            select.position.set(selectx,selecty,selectz);
+            select.rotation.x=Math.PI;
+            scene.add(select);
 
-            var pauseButton = document.getElementById('pauseButton');
-            pauseButton.addEventListener('click', function () {
-                video = document.getElementById(videoTag);
-                video.pause();
-                videoTime = video.currentTime;
+            var uploadTexture = new THREE.ImageUtils.loadTexture("static/images/pause.png",function(){
             });
-            //}
-            video.play();//加载完后自动播放
+            var upload=new THREE.Mesh(
+                new THREE.PlaneBufferGeometry(10,10),
+                new THREE.MeshBasicMaterial({
+                    map:uploadTexture
+                    //color:0xff0000
+                })
+            )
+            upload.name = 'upload';
+            upload.position.set(uploadx,uploady,uploadz);
+            upload.rotation.x=Math.PI;
+            scene.add(upload);
         }
 
         function loadGLTF(hdrPath,gltfPath,scalex, scaley, scalez) {
@@ -482,6 +509,41 @@
             keyboard[event.keyCode]=false;
         }
 
+        //接受任务
+        //TODO:在此处添加json处理
+        function acceptMission(){
+            var sub_mission = "";
+            var videoUrl = "";
+            //接受主任务
+            $.ajax({url:"/user/acceptMission",async:false, success:function (data){
+                if(data.toString() === "ok")
+                {
+                    //接受成功
+
+                    //重置视频标志与上传作业标志
+                    video_flag = 0;
+                    upload_flag = 0;
+
+                    //获取子任务描述
+                    $.ajax({url:"/user/getSubMission", async:false ,success: function(data) {
+                            sub_mission = data.toString();
+                    }})
+                    //获取视频路径
+                    $.ajax({url:"/user/getVideoUrl", async:false ,success: function(data) {
+                            videoUrl = data.toString();
+                    }})
+                    if(videoUrl != "") {
+                        //更改视频路径
+                        var video = document.getElementById("video");
+                        video.src = videoUrl;
+                        video.pause();
+                    }
+                }
+            }})
+
+
+
+        }
 
         //鼠标点击事件
         function mouseClickEvent(event){
@@ -506,31 +568,50 @@
                 if(intersects[0].object.name === 'play'){
                     video.play();
 
+                    //完成子任务1
+                    if(video_flag == 0) {
+                        $.ajax({
+                            url: "/user/completeSubMission", async: false, success: function (data) {
+                                if(data === "ok"){
+                                    //视频任务完成，提示用户到我的任务查看新的子任务
+
+                                }
+                            }
+                        })
+                    }
+
                 }
                 else if(intersects[0].object.name === 'pause'){
                     video.pause();
                 }
+                else if(intersects[0].object.name === 'select'){
+                    document.getElementById("upload").click();
+                }
+                else if(intersects[0].object.name === 'upload'){
+                    document.getElementById("choosefile").click();
+
+                }
                 else if(intersects[0].object.name === 'BMan0003-Se'){
-                    //忠涵加入字符串
                     var main_mission = "";
                     $.ajax({url:"/ajax/getMission", async:false ,success: function(data) {
                             main_mission = data.toString();
                         }})
 
-                    var layer = new MyLayer({
-                        top:"10%",
-                        left:"10%",
-                        width:"80%",
-                        height:"80%",
-                        title:"任务",
-                        content:main_mission
+                    var layer = new MissionCenter({
+                        content:main_mission,
+                        function:acceptMission
                     });
                     layer.openLayer();
+                }
+                else if(intersects[0].object.name === 'Text002'){
+
                 }
             }
 
 
         }
+
+
         //加载模型后显示各个图标
         function displayIcon() {
             var v1 = document.getElementById("exit");
@@ -540,13 +621,44 @@
         }
         //打开个人中心
         function openPersonal_center(){
-            var personal = new PersonalCenter({content: "用户名：李佳辰"});
-            personal.openLayer();
+            $.ajax({url:"/user/getCompletedNum", async:false ,success: function(data) {
+                    var personal = new PersonalCenter({content: "",
+                        completed_num:data});
+                    personal.openLayer();
+                }})
         }
-        //打开任务中心
-        function openMission_center(){
-            var personal = new MyLayer({content: "任务中心"});
-            personal.openLayer();
+        //打开我的任务
+        function openMy_mission(){
+            $.ajax({url:"/user/getSubMission", async:false ,success: function(data) {
+                    var sub_mission_detail = data.toString();
+                    var my_mission = new MyMission({content: sub_mission_detail});
+                    my_mission.openLayer();
+                }})
+
+        }
+        //导航栏提示信息函数
+        function reminder(id){
+            var info = document.getElementById("reminder");
+            info.style.position = "absolute";
+            if(id === "door"){
+                info.value = "切换到工作室入口视角";
+            }
+            else if(id === "desk"){
+                info.value = "切换到座位视角";
+            }
+            else if(id === "screen"){
+                info.value = "切换到大屏幕视角";
+            }
+            else if(id === "book"){
+                info.value = "切换到书架视角";
+            }
+            info.style.left = MouseCursorX.toString() + "px";
+            info.style.top = MouseCursorY.toString() + "px";
+            info.style.display = "block";
+        }
+        function mouseleave(){
+            var info = document.getElementById("reminder");
+            info.style.display = "none";
         }
     </script>
     <script>
@@ -562,6 +674,7 @@
         var stats;
         var progress;
         var viewer=1;
+        var ladderUrl;//阶梯的路径
 
         var scene= new THREE.Scene();
         var camera= new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight,0.1, 1000);
@@ -628,21 +741,10 @@
                 MouseCursorY = ev.pageY;
             }
         }
-        //鼠标离开方向图标后
-        function mouseleave(){
-            let mention_direction = document.getElementById("mention-direction");
-            mention_direction.style.display="none";
-        }
-        //显示提示信息函数
-        function displayPromptMessage(){
-            //忠涵加提示信息（直接加监听有问题，所以每个图片都需要单独加一个函数）
-            //alert("111");
-            let mention_left = document.getElementById("mention-direction");
-            mention_left.style.position="absolute";
-            mention_left.style.top=MouseCursorY.toString()+"px";
-            mention_left.style.left=MouseCursorX.toString()+"px";
-            mention_left.style.display="block";
-        }
+
+
+        var video_flag = 0;//视频播放标志
+        var upload_flag = 0;//上传作业标志
 
         window.addEventListener('click', mouseClickEvent);
         window.addEventListener('keydown',keyDown);

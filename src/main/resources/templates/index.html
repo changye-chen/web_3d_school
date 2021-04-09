@@ -23,10 +23,10 @@
       visibility: hidden;
     }
   </style>
-  <script type="text/javascript" th:src="@{/static/js/three.js}"></script>
-  <script type="text/javascript" th:src="@{/static/js/OrbitControls.js}"></script>
-  <script type="text/javascript" th:src="@{/static/js/d3-array.v1.min.js}"></script>
-  <script type="text/javascript" th:src="@{/static/js/d3-geo.v1.min.js}"></script>
+  <script type="text/javascript" th:src="@{../static/js/three.js}"></script>
+  <script type="text/javascript" th:src="@{../static/js/OrbitControls.js}"></script>
+  <script type="text/javascript" th:src="@{../static/js/d3-array.v1.min.js}"></script>
+  <script type="text/javascript" th:src="@{../static/js/d3-geo.v1.min.js}"></script>
 </head>
 <body>
   <a th:href="@{/user/login}">登录</a>
@@ -88,7 +88,7 @@
 
       // 加载json文件
       let loader = new THREE.FileLoader();
-      loader.load('static/json/china.json', function (data) {
+      loader.load('../static/json/china.json', function (data) {
         let jsonData = JSON.parse(data);
         _this.initMap(jsonData);
       });
@@ -97,7 +97,7 @@
     loadFont() { //加载中文字体
       var loader = new THREE.FontLoader();
       var _this = this;
-      loader.load('fonts/chinese.json', function (response) {
+      loader.load('../fonts/chinese.json', function (response) {
         _this.font = response;
         _this.loadMapData();
       });
@@ -187,7 +187,7 @@
 
         //绘制光柱
         if(province.properties.center){
-          const texture = new THREE.TextureLoader().load("static/images/lightray_yellow.jpg");
+          const texture = new THREE.TextureLoader().load("../static/images/lightray_yellow.jpg");
 
           const [x, y] = projection(province.properties.center);
           const planegeomentry = new THREE.PlaneGeometry(1, 10);
