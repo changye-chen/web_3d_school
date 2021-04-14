@@ -136,8 +136,8 @@
         //init();
         function init() {
             //加载两个小屏幕
-            initVideo(55, 80, 90, 124, 96, "video");
-            initVideo(55, 80, 90, 42, 96, "video");
+            initImage(55, 80, 90, 124, 96, "static/images/pactera.jpg");
+            initImage(55, 80, 90, 42, 96, "static/images/teamLogo1.jpg");
             initControls();
             //加载主屏幕及控制按钮
             initVideo(200,150,-38.5,77,96,"video");
@@ -147,7 +147,7 @@
             //默认桌子视角
             doorView();
             loadGLTF(hdrPath,gltfPath,60,60,60);
-            loadLadder(10,10,10,25,45,-24,"static/models/gltf/component/ladder.gltf");
+            loadLadder(5,5,5,160,82,450,"static/models/gltf/component/ladder3.gltf");
 
             //加一块黑幕在屏幕后面
             var darkMesh=new THREE.Mesh(
@@ -158,8 +158,8 @@
             darkMesh.rotation.x=Math.PI;
             scene.add(darkMesh);
 
-            loadMark("mark1",0.5,0.5,0.5,84,88,32);
-            loadMark("mark2",0.5,0.5,0.5,84,88,32);
+            loadMark("mark1",0.5,0.5,0.5,160,92,472);
+            loadMark("mark2",0.5,0.5,0.5,160,92,472);
         }
 
 
@@ -233,6 +233,23 @@
             });
         }
 
+        //加载贴图
+        function initImage(width,height,x,y,z,imageUrl) {
+            //添加立方体
+            var geometry = new THREE.PlaneBufferGeometry(width,height);
+            //加载贴图
+            var texture = new THREE.ImageUtils.loadTexture(imageUrl,function(){
+            });
+            texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;//使用平铺，因为视频尺寸不一定都是标准的
+            texture.minFilter = THREE.LinearFilter;
+            material = new THREE.MeshBasicMaterial( { map: texture } );
+            var mainScreen = new THREE.Mesh(geometry, material); //网格模型对象Mesh
+
+            mainScreen.rotation.y=Math.PI;
+            mainScreen.position.set(x,y,z);
+            scene.add(mainScreen);
+        }
+
         //加载视频
         function initVideo(width,height,x,y,z,videoTag) {
             //添加立方体
@@ -247,14 +264,6 @@
             texture.minFilter = THREE.LinearFilter;
             material = new THREE.MeshBasicMaterial( { map: texture } );
             var mainScreen = new THREE.Mesh(geometry, material); //网格模型对象Mesh
-
-            mainScreen.addEventListener('click', function () {
-                video = document.getElementById(videoTag);
-                video.play();
-                mainScreen.addEventListener('click', function () {
-                    video.pause();
-                })
-            });
 
             mainScreen.rotation.y=Math.PI;
             mainScreen.position.set(x,y,z);
@@ -298,7 +307,7 @@
             pause.rotation.x=Math.PI;
             scene.add(pause);
 
-            var selectTexture = new THREE.ImageUtils.loadTexture("static/images/pause.png",function(){
+            var selectTexture = new THREE.ImageUtils.loadTexture("static/images/upload.png",function(){
             });
             var select=new THREE.Mesh(
                 new THREE.PlaneBufferGeometry(10,10),
@@ -312,7 +321,7 @@
             select.rotation.x=Math.PI;
             scene.add(select);
 
-            var uploadTexture = new THREE.ImageUtils.loadTexture("static/images/pause.png",function(){
+            var uploadTexture = new THREE.ImageUtils.loadTexture("static/images/accept.png",function(){
             });
             var upload=new THREE.Mesh(
                 new THREE.PlaneBufferGeometry(10,10),
@@ -540,9 +549,6 @@
                     }
                 }
             }})
-
-
-
         }
 
         //鼠标点击事件
@@ -607,8 +613,6 @@
 
                 }
             }
-
-
         }
 
 
