@@ -11,6 +11,7 @@
     <script type="text/javascript" th:src="@{static/libs/stats.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/PersonalCenter.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/MyMission.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/Reminder.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/MissionCenter.js}"></script>
     <script type="text/javascript" th:src="@{static/js/jquery-3.5.1.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/prefixfree.min.js}"></script>
@@ -56,7 +57,7 @@
         <area id="desk" shape="rect" coords="535,0,565,45" alt="deskView" onclick="deskView()" />
         <area id="book" shape="rect" coords="600,0,630,45" alt="bookView" onclick="bookView()" />
         <area id="screen" shape="rect" coords="670,0,705,45" alt="screenView" onclick="screenView()" />
-        <area id="ladder" shape="rect" coords="715,0,750,45" alt="ladder" onclick="ladderView()" />
+        <area id="ladder" shape="rect" coords="800,0,835,45" alt="ladder" onclick="ladderView()" />
     </map>
     <img th:src="@{static/images/doorView_nav.png}" id="navigation" alt="导航" usemap="#navigation_map">
     <form class="form-signin" th:action="@{/user/upload}" method="post" enctype="multipart/form-data" style="display: none">
@@ -159,7 +160,7 @@
             scene.add(darkMesh);
 
             loadMark("mark1",0.5,0.5,0.5,84,88,32);
-            loadMark("mark2",0.5,0.5,0.5,84,88,32);
+            //loadMark("mark2",0.5,0.5,0.5,84,88,32);
         }
 
 
@@ -298,7 +299,21 @@
             pause.rotation.x=Math.PI;
             scene.add(pause);
 
-            var selectTexture = new THREE.ImageUtils.loadTexture("static/images/pause.png",function(){
+            var submitTexture = new THREE.ImageUtils.loadTexture("static/images/submit.png",function(){
+            });
+            var submit=new THREE.Mesh(
+                new THREE.PlaneBufferGeometry(10,10),
+                new THREE.MeshBasicMaterial({
+                    map:submitTexture
+                    //color:0xff0000
+                })
+            )
+            submit.name = 'submit';
+            submit.position.set(selectx,selecty,selectz);
+            submit.rotation.x=Math.PI;
+            scene.add(submit);
+
+            var selectTexture = new THREE.ImageUtils.loadTexture("static/images/select.png",function(){
             });
             var select=new THREE.Mesh(
                 new THREE.PlaneBufferGeometry(10,10),
@@ -308,23 +323,9 @@
                 })
             )
             select.name = 'select';
-            select.position.set(selectx,selecty,selectz);
+            select.position.set(uploadx,uploady,uploadz);
             select.rotation.x=Math.PI;
             scene.add(select);
-
-            var uploadTexture = new THREE.ImageUtils.loadTexture("static/images/pause.png",function(){
-            });
-            var upload=new THREE.Mesh(
-                new THREE.PlaneBufferGeometry(10,10),
-                new THREE.MeshBasicMaterial({
-                    map:uploadTexture
-                    //color:0xff0000
-                })
-            )
-            upload.name = 'upload';
-            upload.position.set(uploadx,uploady,uploadz);
-            upload.rotation.x=Math.PI;
-            scene.add(upload);
         }
 
         function loadGLTF(hdrPath,gltfPath,scalex, scaley, scalez) {
@@ -410,7 +411,7 @@
             stats.update();
 
             meshes["mark1"].rotation.y+=Math.PI/15;
-            meshes["mark2"].rotation.y+=Math.PI/15;
+            //meshes["mark2"].rotation.y+=Math.PI/15;
 
             requestAnimationFrame(animate);
             //mesh.rotation.x += 0.01;
@@ -519,6 +520,8 @@
                 if(data.toString() === "ok")
                 {
                     //接受成功
+                    var reminder = new Reminder({content:"接受成功"});
+                    reminder.openLayer();
 
                     //重置视频标志与上传作业标志
                     video_flag = 0;
@@ -574,7 +577,8 @@
                             url: "/user/completeSubMission", async: false, success: function (data) {
                                 if(data === "ok"){
                                     //视频任务完成，提示用户到我的任务查看新的子任务
-
+                                    var reminder = new Reminder({content:"子任务1完成！"});
+                                    reminder.openLayer();
                                 }
                             }
                         })
@@ -585,12 +589,12 @@
                     video.pause();
                 }
                 else if(intersects[0].object.name === 'select'){
+                    document.getElementById("choosefile").click();
+                }
+                else if(intersects[0].object.name === 'submit'){
                     document.getElementById("upload").click();
                 }
-                else if(intersects[0].object.name === 'upload'){
-                    document.getElementById("choosefile").click();
 
-                }
                 else if(intersects[0].object.name === 'BMan0003-Se'){
                     var main_mission = "";
                     $.ajax({url:"/ajax/getMission", async:false ,success: function(data) {
@@ -602,6 +606,8 @@
                         function:acceptMission
                     });
                     layer.openLayer();
+
+
                 }
                 else if(intersects[0].object.name === 'Text002'){
 

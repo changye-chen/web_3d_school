@@ -14,25 +14,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class RoomController {
     @RequestMapping("/JavaStudio")
     public String room(){
-        return "JavaStudio";
+        return "redirect:JavaStudio";
     }
     @RequestMapping("/BigDataStudio")
     public String room1(){
-        return "BigDataStudio";
+        return "redirect:BigDataStudio";
     }
 
     @RequestMapping("/cssStudio")
     public String room2(){
-        return "cssStudio";
+        return "redirect:cssStudio";
     }
 
     @RequestMapping("/IndustryStudio")
     public String room3(){
-        return "IndustryStudio";
+        return "redirect:IndustryStudio";
     }
 
     @RequestMapping("/VisionStudio")
     public String room4(){
-        return "VisionStudio";
+        return "redirect:VisionStudio";
     }
 }

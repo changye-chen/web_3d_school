@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @program: web_3d_school
- * @description: ajax测试
+ * @description: ajax
  * @author: ChangYe-Chen
  * @create: 2021-03-04
  **/
@@ -35,8 +35,10 @@ public class AjaxController {
     @ResponseBody
     public String registerConfirm(SecurityUser user){
         System.out.println(user.toString());
-        userService.userRegister(user);
-        return "OK";
+        if(userService.userRegister(user)==1){
+            return "注册成功";
+        }
+        return "该用户名已存在";
     }
 
 }
