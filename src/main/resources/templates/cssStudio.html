@@ -3,52 +3,40 @@
 <head>
 
     <meta charset="utf-8">
-    <title>建筑</title>
-
+    <title>css工作室</title>
     <script type="text/javascript" th:src="@{static/libs/three.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/GLTFLoader.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/RGBELoader.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/OrbitControls.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/stats.js}"></script>
-
+    <script type="text/javascript" th:src="@{static/libs/PersonalCenter.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/MyMission.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/MissionCenter.js}"></script>
+    <script type="text/javascript" th:src="@{static/js/jquery-3.5.1.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/prefixfree.min.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/modernizr.js}"></script>
     <style type="text/css" th:src="@{static/css/progress.css}"> @import "static/css/progress.css";</style>
-    <style type="text/css">
-        #perspective-left{
-            width:150px;
-            height:150px;
-            position: absolute;
-            left:0;
-            top:40%;
-            display: none;
-        }
-        #perspective-right{
-            width:150px;
-            height:150px;
-            position: absolute;
-            right:0;
-            top:40%;
-            display: none;
-        }
-        #personal-center{
-            width: 100px;
-            height: 100px;
-            position: absolute;
-            left:0;
-            bottom:0;
-            display: none;
-        }
-        #mission-center{
-            width: 100px;
-            height: 100px;
-            position: absolute;
-            right:0;
-            bottom:0;
-            display: none;
-        }
-    </style>
 
+    <style type="text/css">
+        #exit{
+            width:50px;
+            height:50px;
+            position: absolute;
+            right:0;
+            top:0;
+            display: none;
+        }
+        #navigation{
+            width:900px;
+            height:45px;
+            position: absolute;
+            left:0;
+            bottom:0;
+            display: none;
+        }
+        </style>
+</head>
+<body>
     <div id="wrapper">
         <div class="loader-container">
             <div class="meter">0</div>
@@ -56,91 +44,27 @@
         </div>
     </div>
 
-
-    <div id="overlay" style="display:none" >
-        <button id="startButton">Play</button>
-    </div>
-
-    <div id="overlay1" style="display:none" >
-        <button id="pauseButton">Pause</button>
-    </div>
-
+    <input id="reminder" style="border: none; background:transparent; display: none">
     <video id="video" autoplay controls style="display:none"><!--loop crossOrigin="anonymous" playsinline style="display:none"-->
-        <source src="static/video/2.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+        <source id="video_source" src="static/video/2.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
     </video>
+    <a href="Internet"><img th:src="@{static/images/exit.png}" id="exit" alt="退出"></a>
+    <map id="navigation_map" name="navigation_map">
+        <area id="openPersonal_center" shape="rect" coords="0,0,175,45" alt="openPersonal_center" onclick="openPersonal_center()" onmouseover="reminder(this.id)" onmouseleave="mouseleave()"/>
+        <area id="openMission_center" shape="rect" coords="175,0,350,45" alt="openMission_center" onclick="openMy_mission()"/>
+        <area id="door" shape="rect" coords="460,0,490,45" alt="doorView" onclick="doorView()" />
+        <area id="desk" shape="rect" coords="535,0,565,45" alt="deskView" onclick="deskView()" />
+        <area id="book" shape="rect" coords="600,0,630,45" alt="bookView" onclick="bookView()" />
+        <area id="screen" shape="rect" coords="670,0,705,45" alt="screenView" onclick="screenView()" />
+        <area id="ladder" shape="rect" coords="715,0,750,45" alt="ladder" onclick="ladderView()" />
+    </map>
+    <img th:src="@{static/images/doorView_nav.png}" id="navigation" alt="导航" usemap="#navigation_map">
+    <form class="form-signin" th:action="@{/user/upload}" method="post" enctype="multipart/form-data" style="display: none">
+        <p><input type="file" id="choosefile" name="myfile"/></p>
+        <p><input type="submit" id="upload" value="上传"/></p>
+    </form>
 
-    <img th:src="@{static/images/direction-left.png}" onmouseleave="mouseleave()" onmouseover="displayPromptMessage() " onmousedown="cameraLeft()" alt="视角左移" id="perspective-left">
-    <img th:src="@{static/images/direction-right.png}" onmouseleave="mouseleave()" onmouseover="displayPromptMessage()" onmousedown="cameraRight()" alt="视角右移" id="perspective-right">
-    <img th:src="@{static/images/personal-center.png}" alt="个人学习中心" id="personal-center">
-    <img th:src="@{static/images/mission-center.png}" alt="任务栏" id="mission-center">
-    <img th:src="@{static/images/mention-direction.png}" id="mention-direction" style="display: none">
-    <img th:src="@{static/images/mention-mission.png}" id="mention-mission" style="display: none">
-</head>
-<body>
 <script>
-    //灵感1：资源文件里面有水滴的jpg，可以做一个配合现实天气的天气界面。
-    //灵感2：房间贴纸分类：护眼色、经典色等。
-    //灵感3：可加入"加载中"的动画
-    //color:#ffffff;
-    // 创建一个场景，将我们所有的元素，如物体，相机和灯光。
-
-    var keyboard={}; //定义数组
-    var player={height:1.8,speed:2,turnSpeed:Math.PI*0.01};
-    var control;
-    var stats;
-    var progress;
-    var viewer=1;
-
-    var scene= new THREE.Scene();
-    var camera= new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight,1, 500);
-    var renderer=new THREE.WebGLRenderer({antialias:true});//防锯齿
-    renderer.setSize(window.innerWidth,window.innerHeight);
-    renderer.shadowMap.enabled=true;
-    renderer.shadowMap.type=THREE.BasicShadowMap;
-    renderer.setClearColor(new THREE.Color(0x55aaff));
-
-    //场景美化效果
-    renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-
-    var hdrPath='static/libs/texture/royal_esplanade_1k.hdr';
-    var gltfPath='static/models/gltf/Studio/cssStudio/cssStudio.gltf';
-
-    //document.body.appendChild(renderer.domElement);
-    var loadingManager=null,Resource_Loaded=false;
-
-    //实例化加载管理器
-    loadingManager=new THREE.LoadingManager();
-    //加载过程的方法一:加载过程
-    loadingManager.onProgress=function(item,loaded,total){
-        //console.log(item,loaded,total); //console里面展示加载的项目、加载和完成
-        progress=(loaded / total * 100).toFixed(0);
-        console.log('加载完成的百分比' + progress + '%');
-        progressBar(progress);
-    }
-    //方法二：加载完成
-    loadingManager.onLoad=function(){  //必须是onLoad才行，不能是onload！！！
-        console.log("已下载所有资源！");  //没有加载完资源
-        Resource_Loaded=true;
-        document.body.appendChild(renderer.domElement);
-        document.getElementById('wrapper').style.display = 'none';
-        animate();
-        // onResourceLoaded(); //记得给所有loader加上（loadingManager）
-        displayIcon();//加载图标
-    }
-
-    //模型索引
-    var model= {
-        BigDataStudio:{
-            GLTF:"static/models/gltf/Studio/BigDataStudio/BigDataStudio.gltf",
-            gltfobj:null
-        }
-    }
-    //网格索引
-    var meshes={};
-
-
     //光源
     function initLight(){
         ambientLight=new THREE.AmbientLight(0xfffffff,0.5);//浅蓝色
@@ -152,6 +76,7 @@
     }
 
     function deskView() {
+        $("#navigation").attr('src', "/static/images/deskView_nav.png");
         camera.position.x = 45;
         camera.position.y = 75;
         camera.position.z = -80;
@@ -160,6 +85,7 @@
     }
 
     function screenView() {
+        $("#navigation").attr('src', "/static/images/screenView_nav.png");
         camera.position.x = 45;
         camera.position.y = 90;
         camera.position.z = 30;
@@ -168,6 +94,7 @@
     }
 
     function doorView() {
+        $("#navigation").attr('src', "/static/images/doorView_nav.png");
         camera.position.x = -107;
         camera.position.y = 67;
         camera.position.z = 161;
@@ -176,6 +103,7 @@
     }
 
     function bookView() {
+        $("#navigation").attr('src', "/static/images/bookView_nav.png");
         camera.position.x = -36;
         camera.position.y = 79;
         camera.position.z = 37;
@@ -183,21 +111,40 @@
         scene.add(camera);
     }
 
+    //阶梯视角
+    function ladderView(ladderUrl,scalex, scaley, scalez,x,y,z){
+        $("#navigation").attr('src', "/static/images/ladderView_nav.png");
+        var loader = new THREE.GLTFLoader(loadingManager);
+        loader.load(ladderUrl, function (gltf) {
+            gltf.scene.traverse(function (child) {
+                if (child.isMesh) {
+                    // TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
+                    // roughnessMipmapper.generateMipmaps( child.material );
+                }
+            });
+            scene.add(gltf.scene);
+            gltf.scene.scale.set(scalex, scaley, scalez);
+            //gltf.scene.rotation.z=Math.PI/2;
+            //gltf.scene.position(0,-100,-120);
+            //roughnessMipmapper.dispose();
+            //render();
+        });
+    }
 
-    init(50,0,75);//多个屏幕整体位置
     function init(x,y,z) {
         //加载两个小屏幕
-        initVideo(55, 80, 90+x, 124+y, 96+z, "video");
-        initVideo(55, 80, 90+x, 42+y, 96+z, "video");
+        initImage(55, 80, 90+x, 124+y, 96+z, "static/images/pactera.jpg");
+        initImage(55, 80, 90+x, 42+y, 96+z, "static/images/teamLogo1.jpg");
         //initControls();
         //加载主屏幕及控制按钮
         initVideo(200,150,-38.5+x,77+y,96+z,"video");
-        mainVideoControl(-115+x,158+y,96+z,-130+x,158+y,96+z,"video");
+        mainVideoControl(-115+x,158+y,96+z,-130+x,158+y,96+z,-100+x,158+y,96+z,-85+x,158+y,96+z,"video");
         //加载性能插件
         initStats();
         //默认桌子视角
         doorView();
         loadGLTF(hdrPath,gltfPath,60,60,60);
+        loadLadder(10,10,10,25,45,-24,"ladder0");
 
         //加一块黑幕在屏幕后面
         var darkMesh=new THREE.Mesh(
@@ -207,6 +154,65 @@
         darkMesh.position.set(-11+x,82+y,97+z);
         darkMesh.rotation.x=Math.PI;
         scene.add(darkMesh);
+
+        loadMark("mark1",0.5,0.5,0.5,84,88,32);
+        loadMark("mark2",0.5,0.5,0.5,84,88,32);
+    }
+
+    function loadMark(mark,scalex,scaley,scalez,x,y,z) {
+        var loader = new THREE.GLTFLoader(loadingManager);
+        loader.load("static/models/gltf/component/"+mark+".gltf", function (gltf) {
+            gltf.scene.traverse(function (child) {
+                if (child.isMesh) {
+                    // TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
+                    // roughnessMipmapper.generateMipmaps( child.material );
+                }
+            });
+            console.log(gltf.scene);
+            scene.add(gltf.scene);
+            gltf.scene.scale.set(scalex, scaley, scalez);
+            gltf.scene.position.set(x, y, z);
+            meshes[mark]=gltf.scene;
+            //roughnessMipmapper.dispose();
+            //render();
+        });
+    }
+
+    //加载贴图
+    function initImage(width,height,x,y,z,imageUrl) {
+        //添加立方体
+        var geometry = new THREE.PlaneBufferGeometry(width,height);
+        //加载贴图
+        var texture = new THREE.ImageUtils.loadTexture(imageUrl,function(){
+        });
+        texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;//使用平铺，因为视频尺寸不一定都是标准的
+        texture.minFilter = THREE.LinearFilter;
+        material = new THREE.MeshBasicMaterial( { map: texture } );
+        var mainScreen = new THREE.Mesh(geometry, material); //网格模型对象Mesh
+
+        mainScreen.rotation.y=Math.PI;
+        mainScreen.position.set(x,y,z);
+        scene.add(mainScreen);
+    }
+
+    function loadLadder(scalex,scaley,scalez,x,y,z,rank){
+        var loader = new THREE.GLTFLoader(loadingManager);
+        loader.load("static/models/gltf/component/"+rank+".gltf", function (gltf) {
+            gltf.scene.traverse(function (child) {
+                if (child.isMesh) {
+                    // TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
+                    // roughnessMipmapper.generateMipmaps( child.material );
+                }
+            });
+            console.log(gltf.scene);
+            scene.add(gltf.scene);
+            gltf.scene.scale.set(scalex, scaley, scalez);
+            gltf.scene.position.set(x, y, z);
+            meshes[rank]=gltf.scene;
+            //roughnessMipmapper.dispose();
+            //render();
+        });
+
     }
 
     function progressBar(progress){
@@ -262,12 +268,12 @@
         document.getElementById('video').style.display = 'none';
     }
 
-    function mainVideoControl(playx,playy,playz,pausex,pausey,pausez,videoTag){
+    function mainVideoControl(playx,playy,playz,pausex,pausey,pausez,selectx,selecty,selectz,uploadx,uploady,uploadz,videoTag){
         //辅助工具
         var helper = new THREE.AxesHelper(50);
         //scene.add(helper);
 
-        var playTexture = new THREE.ImageUtils.loadTexture("static/textures/start.jpg",function(){
+        var playTexture = new THREE.ImageUtils.loadTexture("static/images/start.png",function(){
         });
         var play=new THREE.Mesh(
             new THREE.PlaneBufferGeometry(10,10),
@@ -283,7 +289,7 @@
         play.rotation.z=Math.PI;
         scene.add(play);
 
-        var pauseTexture = new THREE.ImageUtils.loadTexture("static/textures/pause.jpg",function(){
+        var pauseTexture = new THREE.ImageUtils.loadTexture("static/images/pause.png",function(){
         });
         var pause=new THREE.Mesh(
             new THREE.PlaneBufferGeometry(10,10),
@@ -297,27 +303,34 @@
         pause.rotation.x=Math.PI;
         scene.add(pause);
 
-        var videoTime=0;
-        //window.onload=function() { //等所有都加载完了再执行function后面的
-        var startButton = document.getElementById('startButton');
-        startButton.addEventListener('click', function () {
-            video = document.getElementById(videoTag);
-            video.play();
-            video.addEventListener('play', function () {
-                this.currentTime = videoTime;//从几秒开始播放
-            });
+        var selectTexture = new THREE.ImageUtils.loadTexture("static/images/upload.png",function(){
         });
+        var select=new THREE.Mesh(
+            new THREE.PlaneBufferGeometry(10,10),
+            new THREE.MeshBasicMaterial({
+                map:selectTexture
+                //color:0xff0000
+            })
+        )
+        select.name = 'select';
+        select.position.set(selectx,selecty,selectz);
+        select.rotation.x=Math.PI;
+        scene.add(select);
 
-        var pauseButton = document.getElementById('pauseButton');
-        pauseButton.addEventListener('click', function () {
-            video = document.getElementById(videoTag);
-            video.pause();
-            videoTime = video.currentTime;
+        var uploadTexture = new THREE.ImageUtils.loadTexture("static/images/accept.png",function(){
         });
-        //}
-        video.play();//加载完后自动播放
+        var upload=new THREE.Mesh(
+            new THREE.PlaneBufferGeometry(10,10),
+            new THREE.MeshBasicMaterial({
+                map:uploadTexture
+                //color:0xff0000
+            })
+        )
+        upload.name = 'upload';
+        upload.position.set(uploadx,uploady,uploadz);
+        upload.rotation.x=Math.PI;
+        scene.add(upload);
     }
-
 
     function loadGLTF(hdrPath,gltfPath,scalex, scaley, scalez) {
         //增强场景的真实感
@@ -353,22 +366,6 @@
             //roughnessMipmapper.dispose();
             //render();
         });
-
-        // var loader = new THREE.GLTFLoader(loadingManager);//path =  'three/model/jifangDraco.gltf' ;
-        // var dracoLoader = new THREE.DRACOLoader();
-        // //dracoLoader.setDecoderPath( 'three/js/libs/draco/gltf/' );
-        // loader.setDRACOLoader( dracoLoader );
-        // loader.load(gltfPath,function (gltf) {
-        //     gltf.scene.traverse(function (child) {
-        //         if (child.isMesh) {
-        //             // TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
-        //             // roughnessMipmapper.generateMipmaps( child.material );
-        //         }
-        //     });
-        //     scene.add(gltf.scene);
-        //     gltf.scene.scale.set(scalex, scaley, scalez);
-        // });
-
     }
 
     function initStats() {
@@ -393,8 +390,6 @@
          //meshes["bigdata_room"].rotation.y+=Math.PI;
          scene.add(meshes["bigdata_room"]);
 
-
-
         // meshes["desk"]=model.desk.mesh.clone();
         // meshes["desk"].position.set(0,-10,100);
         // meshes["desk"].scale.set(0.03,0.03,0.03);
@@ -417,8 +412,16 @@
         stats.update();
 
         requestAnimationFrame(animate);
-        //mesh.rotation.x += 0.01;
-        //mesh.rotation.y += 0.02;
+        renderer.render(scene,camera);
+
+        // pauseButton.addEventListener('click', function () {
+        //     loadLadder(3,3,3,93,49,0,"ladder0");
+        //     //meshes[ladder]
+        // });
+        meshes["mark1"].rotation.y+=Math.PI/15;
+        meshes["mark2"].rotation.y+=Math.PI/15;
+
+        requestAnimationFrame(animate);
         renderer.render(scene,camera);
 
         if(keyboard[49]) { //敲1键
@@ -506,6 +509,39 @@
         keyboard[event.keyCode]=false;
     }
 
+    //接受任务
+    //TODO:在此处添加json处理
+    function acceptMission(){
+        var sub_mission = "";
+        var videoUrl = "";
+        //接受主任务
+        $.ajax({url:"/user/acceptMission",async:false, success:function (data){
+                if(data.toString() === "ok")
+                {
+                    //接受成功
+
+                    //重置视频标志与上传作业标志
+                    video_flag = 0;
+                    upload_flag = 0;
+
+                    //获取子任务描述
+                    $.ajax({url:"/user/getSubMission", async:false ,success: function(data) {
+                            sub_mission = data.toString();
+                        }})
+                    //获取视频路径
+                    $.ajax({url:"/user/getVideoUrl", async:false ,success: function(data) {
+                            videoUrl = data.toString();
+                        }})
+                    if(videoUrl != "") {
+                        //更改视频路径
+                        var video = document.getElementById("video");
+                        video.src = videoUrl;
+                        video.pause();
+                    }
+                }
+            }})
+    }
+
     function mouseClickEvent(event){
         if (!this.raycaster)
             this.raycaster = new THREE.Raycaster();
@@ -550,20 +586,179 @@
                 layer.openLayer();
             }
         }
-
-
     }
+
+    //鼠标点击事件
+    function mouseClickEvent(event){
+        if (!this.raycaster)
+            this.raycaster = new THREE.Raycaster();
+        if (!this.mouse)
+            this.mouse = new THREE.Vector2();
+
+        // 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        // 通过摄像机和鼠标位置更新射线
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+
+        // 计算物体和射线的焦点
+        const intersects = this.raycaster.intersectObjects(this.scene.children,true);
+
+        console.log(intersects);
+        if (intersects.length !== 0){
+            var video = document.getElementById('video');
+            if(intersects[0].object.name === 'play'){
+                video.play();
+
+                //完成子任务1
+                if(video_flag == 0) {
+                    $.ajax({
+                        url: "/user/completeSubMission", async: false, success: function (data) {
+                            if(data === "ok"){
+                                //视频任务完成，提示用户到我的任务查看新的子任务
+
+                            }
+                        }
+                    })
+                }
+
+            }
+            else if(intersects[0].object.name === 'pause'){
+                video.pause();
+            }
+            else if(intersects[0].object.name === 'select'){
+                document.getElementById("upload").click();
+            }
+            else if(intersects[0].object.name === 'upload'){
+                document.getElementById("choosefile").click();
+
+            }
+            else if(intersects[0].object.name === 'BMan0003-Se'){
+                var main_mission = "";
+                $.ajax({url:"/ajax/getMission", async:false ,success: function(data) {
+                        main_mission = data.toString();
+                    }})
+
+                var layer = new MissionCenter({
+                    content:main_mission,
+                    function:acceptMission
+                });
+                layer.openLayer();
+            }
+            else if(intersects[0].object.name === 'Text002'){
+
+            }
+        }
+    }
+
     //加载模型后显示各个图标
-    function displayIcon(){
-        var v1 = document.getElementById("perspective-left");
+    function displayIcon() {
+        var v1 = document.getElementById("exit");
         v1.style.display = "block";
-        var v2 = document.getElementById("perspective-right");
+        var v2 = document.getElementById("navigation");
         v2.style.display = "block";
-        var v3 = document.getElementById("personal-center");
-        v3.style.display = "block";
-        var v4 = document.getElementById("mission-center");
-        v4.style.display = "block"
     }
+    //打开个人中心
+    function openPersonal_center(){
+        $.ajax({url:"/user/getCompletedNum", async:false ,success: function(data) {
+                var personal = new PersonalCenter({content: "",
+                    completed_num:data});
+                personal.openLayer();
+            }})
+    }
+    //打开我的任务
+    function openMy_mission(){
+        $.ajax({url:"/user/getSubMission", async:false ,success: function(data) {
+                var sub_mission_detail = data.toString();
+                var my_mission = new MyMission({content: sub_mission_detail});
+                my_mission.openLayer();
+            }})
+
+    }
+    //导航栏提示信息函数
+    function reminder(id){
+        var info = document.getElementById("reminder");
+        info.style.position = "absolute";
+        if(id === "door"){
+            info.value = "切换到工作室入口视角";
+        }
+        else if(id === "desk"){
+            info.value = "切换到座位视角";
+        }
+        else if(id === "screen"){
+            info.value = "切换到大屏幕视角";
+        }
+        else if(id === "book"){
+            info.value = "切换到书架视角";
+        }
+        info.style.left = MouseCursorX.toString() + "px";
+        info.style.top = MouseCursorY.toString() + "px";
+        info.style.display = "block";
+    }
+    function mouseleave(){
+        var info = document.getElementById("reminder");
+        info.style.display = "none";
+    }
+</script>
+<script>
+    var keyboard={}; //定义数组
+    var player={height:1.8,speed:2,turnSpeed:Math.PI*0.01};
+    var control;
+    var stats;
+    var progress;
+    var viewer=1;
+
+    var scene= new THREE.Scene();
+    var camera= new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight,1, 500);
+    var renderer=new THREE.WebGLRenderer({antialias:true});//防锯齿
+    renderer.setSize(window.innerWidth,window.innerHeight);
+    renderer.shadowMap.enabled=true;
+    renderer.shadowMap.type=THREE.BasicShadowMap;
+    renderer.setClearColor(new THREE.Color(0x55aaff));
+
+    //场景美化效果
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+    var hdrPath='static/libs/texture/royal_esplanade_1k.hdr';
+    var gltfPath='static/models/gltf/Studio/cssStudio/cssStudio.gltf';
+
+    //document.body.appendChild(renderer.domElement);
+    var loadingManager=null,Resource_Loaded=false;
+
+    //实例化加载管理器
+    loadingManager=new THREE.LoadingManager();
+    //加载过程的方法一:加载过程
+    loadingManager.onProgress=function(item,loaded,total){
+        //console.log(item,loaded,total); //console里面展示加载的项目、加载和完成
+        progress=(loaded / total * 100).toFixed(0);
+        console.log('加载完成的百分比' + progress + '%');
+        progressBar(progress);
+    }
+
+    init(50,0,75);//多个屏幕整体位置
+    //方法二：加载完成
+    loadingManager.onLoad=function(){  //必须是onLoad才行，不能是onload！！！
+        console.log("已下载所有资源！");  //没有加载完资源
+        Resource_Loaded=true;
+        document.body.appendChild(renderer.domElement);
+        document.getElementById('wrapper').style.display = 'none';
+        animate();
+        // onResourceLoaded(); //记得给所有loader加上（loadingManager）
+        displayIcon();//加载图标
+    }
+
+    //模型索引
+    var model= {
+        BigDataStudio:{
+            GLTF:"static/models/gltf/Studio/BigDataStudio/BigDataStudio.gltf",
+            gltfobj:null
+        }
+    }
+    //网格索引
+    var meshes={};
 
     let MouseCursorX = 0;
     let MouseCursorY = 0;
@@ -575,49 +770,10 @@
             MouseCursorY = ev.pageY;
         }
     }
-    //鼠标离开方向图标后
-    function mouseleave(){
-        let mention_direction = document.getElementById("mention-direction");
-        mention_direction.style.display="none";
-    }
-    //显示提示信息函数
-    function displayPromptMessage(){
-        //忠涵加提示信息（直接加监听有问题，所以每个图片都需要单独加一个函数）
-        //alert("111");
-        let mention_left = document.getElementById("mention-direction");
-        mention_left.style.position="absolute";
-        mention_left.style.top=MouseCursorY.toString()+"px";
-        mention_left.style.left=MouseCursorX.toString()+"px";
-        mention_left.style.display="block";
-    }
 
-    //视角左移函数
-    //汇雲可以先调好几个视角，后续讨论视角的几个变换。
-    function cameraLeft(){
-        viewer++;
-        if(viewer==1||viewer>=5)
-        {doorView();viewer=1;}
-        if(viewer==2)
-            deskView();
-        if(viewer==3)
-            bookView();
-        if(viewer==4)
-            screenView();
-    }
+    var video_flag = 0;//视频播放标志
+    var upload_flag = 0;//上传作业标志
 
-    //视角右移函数
-    function cameraRight(){
-        viewer--;
-        if(viewer==1||viewer>=5||viewer<=0)
-        {doorView();viewer=5;}
-        if(viewer==2)
-            deskView();
-        if(viewer==3)
-            bookView();
-        if(viewer==4)
-            screenView();
-    }
-    // window.addEventListener('click',displayPromptMessage);
     window.addEventListener('click', mouseClickEvent);
     window.addEventListener('keydown',keyDown);
     window.addEventListener('keyup',keyUp);

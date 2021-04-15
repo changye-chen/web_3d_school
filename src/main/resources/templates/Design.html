@@ -15,17 +15,29 @@
 		<script type="text/javascript" th:src="@{static/libs/prefixfree.min.js}"></script>
 		<script type="text/javascript" th:src="@{static/libs/modernizr.js}"></script>
 		<style type="text/css" th:src="@{static/css/progress.css}"> @import "static/css/progress.css";</style>
-
-		<div id="wrapper">
-			<div class="loader-container">
-				<div class="meter">0</div>
-				<span class="runner"></span>
-			</div>
-		</div>
-
 	</head>
-	<body>
-		<script>
+<body>
+	<div id="wrapper">
+		<div class="loader-container">
+			<div class="meter">0</div>
+			<span class="runner"></span>
+		</div>
+	</div>
+
+	<a href="index"><img th:src="@{static/images/exit.png}" id="exit" alt="退出"></a>
+	<map id="navigation_map" name="navigation_map">
+		<area id="VisionView" shape="rect" coords="600,0,630,45" alt="VisionView" onclick="VisionView()" onmouseover="reminder(this.id)" onmouseleave="mouseleave()"/>
+		<area id="IndustryView" shape="rect" coords="670,0,705,45" alt="IndustryView" onclick="IndustryView()" />
+		<area id="sunny" shape="rect" coords="715,0,750,45" alt="sunny" onclick="sunny=1" />
+		<area id="rain" shape="rect" coords="715,0,750,45" alt="rain" onclick="rain=1" />
+		<area id="cloudy" shape="rect" coords="715,0,750,45" alt="cloudy" onclick="cloudy=1" />
+		<area id="snow" shape="rect" coords="715,0,750,45" alt="snow" onclick="snow=1" />
+		<area id="doorView" shape="rect" coords="460,0,490,45" alt="doorView" onclick="doorView()" />
+		<area id="skyView" shape="rect" coords="535,0,565,45" alt="skyView" onclick="skyView()" />
+	</map>
+	<img th:src="@{static/images/DesignView_nav.png}" id="navigation" alt="导航" usemap="#navigation_map">
+
+	<script>
 			//灵感1：资源文件里面有水滴的jpg，可以做一个配合现实天气的天气界面。
 			//灵感2：房间贴纸分类：护眼色、经典色等。
 			//灵感3：可加入"加载中"的动画
@@ -35,8 +47,8 @@
 		var keyboard={}; //定义数组
 		var player={height:1.8,speed:2,turnSpeed:Math.PI*0.01};
 		var weather={  
-			sky:1, //四种天气仅有一个为true
-			cloud:0,
+			sunny:1, //四种天气仅有一个为true
+			cloudy:0,
 			rain:0,
 			snow:0,
 		};
@@ -57,6 +69,7 @@
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.outputEncoding = THREE.sRGBEncoding;
 		//renderer.toneMapping = THREE.ACESFilmicToneMapping;
+		renderer.textureEncoding=THREE.sRGBEncoding;
 
 		var gltfPath='static/models/gltf/Building/Design/Design.gltf';
 
@@ -101,12 +114,45 @@
 		}
 		//网格索引
 		var meshes={};
-		
+
+
+		function IndustryView(){
+			$("#navigation").attr('src', "/static/images/DesignIndustryView.png");
+			camera.position.x = 713;
+			camera.position.y = -34;
+			camera.position.z = -689;
+			camera.lookAt(712, -34,-700);
+			scene.add(camera);
+		}
+
+		function VisionView(){
+			$("#navigation").attr('src', "/static/images/DesignVisionView.png");
+			camera.position.x = 769;
+			camera.position.y = -34;
+			camera.position.z = -675;
+			camera.lookAt(800, -34,-700);
+			scene.add(camera);
+		}
+
+		function doorView(){
+			$("#navigation").attr('src', "/static/images/DesignDoorView.png");
+			camera.position.x = 718;
+			camera.position.y = -22;
+			camera.position.z = -645;
+			camera.lookAt(738,-40,-691);
+		}
+		function skyView(){
+			$("#navigation").attr('src', "/static/images/DesignSkyView.png");
+			camera.position.x = 718;
+			camera.position.y = 10;
+			camera.position.z = -645;
+			camera.lookAt(738,-40,-700);
+		}
 		
 		//光源
 		function initLight(){ 
-			ambientLight=new THREE.AmbientLight(0xffffff,1);//浅蓝色
-			pointLight=new THREE.PointLight(0xffffff,1,1);
+			ambientLight=new THREE.AmbientLight(0xff000f,0.2);//浅蓝色
+			pointLight=new THREE.PointLight(0xf000ff,1,1);
 			pointLight.position.set(732,-8,-660);
 			pointLight.castShadow=true;
 
@@ -114,11 +160,6 @@
 			scene.add(pointLight);
 		}
 
-
-		camera.position.x = 718;
-		camera.position.y = -22;
-		camera.position.z = -645;
-		camera.lookAt(738,-40,-691);
 
 		function progressBar(progress){
 			var Loader = function () {
@@ -158,7 +199,7 @@
 		    var format = '.jpg';   //图像后缀
 		    //生成图像地址数组
 			var urls;
-			if(weather.sky||weather.snow)
+			if(weather.sunny||weather.snow)
 		    urls = [
 		    path + 'px' + format, path + 'nx' + format,
 		    path + 'py' + format, path + 'ny' + format,
@@ -242,10 +283,22 @@
 					if (child.isMesh) {
 						// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
 						// roughnessMipmapper.generateMipmaps( child.material );
+						// 	var prevMaterial = child.material;
+						// 	child.material = new THREE.MeshPhongMaterial();
+						// 	//MeshBasicMaterial.prototype.copy.call( child.material, prevMaterial );
+
 						child.material.emissive =  child.material.color;
 						child.material.emissiveMap = child.material.map ;
 					}
 				});
+
+				console.log(gltf.scene);
+				//去掉多余白色正方体
+				gltf.scene.children.forEach(object => {
+					if (object.name === 'Shape012')
+						gltf.scene.remove(object);
+				})
+
 				scene.add(gltf.scene);
 				gltf.scene.scale.set(scalex, scaley, scalez);
 				//gltf.scene.rotation.z=Math.PI/2;
@@ -374,6 +427,7 @@
 			initLight();
 			//CreatePanl();
 			initSkyBox();
+			VisionView();
 			//initControls();
 			initStats();
 			loadGLTF(gltfPath,1,1,1,300,-50,150);
@@ -537,11 +591,49 @@
 		   	
 		   	// 计算物体和射线的焦点
 		   	const intersects = this.raycaster.intersectObjects(this.scene.children,true);
-		   	
+			console.log(intersects);
+
 		    //window.location.assign("room");
 
 		   	}
-		   
+
+		//加载模型后显示各个图标
+		function displayIcon() {
+			var v1 = document.getElementById("exit");
+			v1.style.display = "block";
+			var v2 = document.getElementById("navigation");
+			v2.style.display = "block";
+		}
+		//导航栏提示信息函数
+		function reminder(id){
+			var info = document.getElementById("reminder");
+			info.style.position = "absolute";
+			if(id === "skyView"){
+				info.value = "学院俯瞰";
+			}
+			else if(id === "doorView"){
+				info.value = "学院入口";
+			}
+			else if(id === "sunny"){
+				info.value = "切换到晴天模式";
+			}
+			else if(id === "rain"){
+				info.value = "切换到雨天模式";
+			}
+			else if(id === "rain"){
+				info.value = "切换到阴天模式";
+			}
+			else if(id === "rain"){
+				info.value = "切换到下雪模式";
+			}
+			info.style.left = MouseCursorX.toString() + "px";
+			info.style.top = MouseCursorY.toString() + "px";
+			info.style.display = "block";
+		}
+		function mouseleave(){
+			var info = document.getElementById("reminder");
+			info.style.display = "none";
+		}
 		   
 		   window.addEventListener('keydown',keyDown);
 		   window.addEventListener('keyup',keyUp);
