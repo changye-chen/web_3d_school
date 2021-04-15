@@ -117,21 +117,7 @@
         //阶梯视角
         function ladderView(ladderUrl,scalex, scaley, scalez,x,y,z){
             $("#navigation").attr('src', "/static/images/ladderView_nav.png");
-            var loader = new THREE.GLTFLoader(loadingManager);
-            loader.load(ladderUrl, function (gltf) {
-                gltf.scene.traverse(function (child) {
-                    if (child.isMesh) {
-                        // TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
-                        // roughnessMipmapper.generateMipmaps( child.material );
-                    }
-                });
-                scene.add(gltf.scene);
-                gltf.scene.scale.set(scalex, scaley, scalez);
-                //gltf.scene.rotation.z=Math.PI/2;
-                //gltf.scene.position(0,-100,-120);
-                //roughnessMipmapper.dispose();
-                //render();
-            });
+            meshes["ladder"].scale.set(10, 10, 10);
         }
 
         //init();
@@ -159,6 +145,7 @@
             darkMesh.rotation.x=Math.PI;
             scene.add(darkMesh);
 
+            //加载感叹号
             loadMark("mark1",0.5,0.5,0.5,84,88,32);
             //loadMark("mark2",0.5,0.5,0.5,84,88,32);
         }
@@ -175,7 +162,7 @@
                 });
                 console.log(gltf.scene);
                 scene.add(gltf.scene);
-                gltf.scene.scale.set(scalex, scaley, scalez);
+                gltf.scene.scale.set(20, 20, 20);
                 gltf.scene.position.set(x, y, z);
                 meshes["ladder"]=gltf.scene;
                 //roughnessMipmapper.dispose();
@@ -543,9 +530,10 @@
                     }
                 }
             }})
-
-
-
+            var background_layer = document.getElementById("background_layer");
+            var open_layer = document.getElementById("open_layer");
+            open_layer.style.display = "none" ;
+            background_layer.style.display = "none";
         }
 
         //鼠标点击事件
@@ -592,10 +580,26 @@
                     document.getElementById("choosefile").click();
                 }
                 else if(intersects[0].object.name === 'submit'){
-                    document.getElementById("upload").click();
+                    //document.getElementById("upload").click();
+                    //完成子任务2
+                    if(upload_flag == 0) {
+                        $.ajax({
+                            url: "/user/completeSubMission", async: false, success: function (data) {
+                                if(data === "ok"){
+                                    //上传任务完成
+                                    var reminder = new Reminder({content:"子任务2完成！您可查看个人中心以及学习阶梯情况！"});
+                                    reminder.openLayer();
+                                }
+                            }
+                        })
+                    }
                 }
-
+                //人物
                 else if(intersects[0].object.name === 'BMan0003-Se'){
+
+                }
+                //感叹号
+                else if(intersects[0].object.name === 'Text002'){
                     var main_mission = "";
                     $.ajax({url:"/ajax/getMission", async:false ,success: function(data) {
                             main_mission = data.toString();
@@ -606,10 +610,6 @@
                         function:acceptMission
                     });
                     layer.openLayer();
-
-
-                }
-                else if(intersects[0].object.name === 'Text002'){
 
                 }
             }
@@ -624,6 +624,10 @@
             v1.style.display = "block";
             var v2 = document.getElementById("navigation");
             v2.style.display = "block";
+
+            //第一次进入后提示用户点击人物上方感叹号接受任务
+            var reminder = new Reminder({content:"欢迎来到”钟糖+雨尘“工作室开发的web3D短视频教育平台！点击人物上方感叹号即可接受任务开启学习之旅！"});
+            reminder.openLayer();
         }
         //打开个人中心
         function openPersonal_center(){

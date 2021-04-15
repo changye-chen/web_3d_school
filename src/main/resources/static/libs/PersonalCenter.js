@@ -23,7 +23,7 @@ PersonalCenter.prototype.openLayer = function () {
 
 
     var open_layer = document.createElement("div");
-    if(this.options.completed_num === undefined) {
+    if(this.options.completed_num === undefined || this.options.completed_num === 0) {
         open_layer.style.background = "url(static/images/personal_0.png) no-repeat";
     }
     else if(this.options.completed_num === 1) {

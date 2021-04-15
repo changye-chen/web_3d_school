@@ -319,27 +319,6 @@
     }
 
 
-    //加载 glTF 格式的模型
-    // for(var _key in model) {
-    //     (function (key) {
-    //         var loader = new THREE.GLTFLoader(loadingManager);/*实例化加载器*/
-    //         loader.load(model[key].gltf, function (obj) {
-    //             console.log(obj);
-    //             scene.add(obj.scene);
-    //             console.log("运行了一个模型");
-    //             meshes[key].gltfobj=obj.scene;
-    //             obj.scene.position.set(0,0,50);
-    //             obj.scene.scale.set(10,10,10);
-    //             console.log(obj);
-    //          }//, function (xhr) {
-    //          //    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-    //          //}, function (error) {
-    //          //    console.log('load error!' + error.getWebGLErrorMessage());
-    //          //}
-    //         )
-    //     })(_key)
-    // }
-
     function loadGLTF(hdrPath,gltfPath,scalex, scaley, scalez) {
         //增强场景的真实感
         var pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -527,26 +506,6 @@
         keyboard[event.keyCode]=false;
     }
 
-    // //鼠标点击事件
-    // function mouseClickEvent(event){
-    // 	if (!this.raycaster)
-    // 		this.raycaster = new THREE.Raycaster();
-    // 	if (!this.mouse)
-    // 		this.mouse = new THREE.Vector2();
-    //
-    // 	// 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
-    // 	this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    // 	this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    //
-    // 	// 通过摄像机和鼠标位置更新射线
-    // 	this.raycaster.setFromCamera(this.mouse, this.camera);
-    //
-    // 	// 计算物体和射线的焦点
-    // 	const intersects = this.raycaster.intersectObjects(this.scene.children,true);
-    //
-    // 	window.location.assign("room");
-    //
-    // }
     function mouseClickEvent(event){
         if (!this.raycaster)
             this.raycaster = new THREE.Raycaster();

@@ -51,7 +51,6 @@ Reminder.prototype.openLayer = function () {
     span_confirm.style.width = "54px";
     span_confirm.style.height = "23px";
     span_confirm.style.right = "0";
-    span_confirm.style.bottom = "0";
     span_confirm.onmouseover = function(){
         //提示信息
 

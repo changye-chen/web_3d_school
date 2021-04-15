@@ -50,7 +50,8 @@ public class UserServiceImpl implements UserService {
     */
     @Override
     public MainMission getMission(SecurityUser user) {
-        return mainMissionMapper.selectByPrimaryKey(user.getMain_mission_id());
+        SecurityUser userWithPwd = userDetailsServiceMapper.loadUserByUsername(user.getUsername());
+        return mainMissionMapper.selectByPrimaryKey(userWithPwd.getMain_mission_id());
     }
     /**
     * @Description:

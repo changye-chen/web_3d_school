@@ -10,7 +10,7 @@ function MissionCenter(options) {
  */
 MissionCenter.prototype.openLayer = function () {
     var background_layer = document.createElement("div");
-
+    background_layer.id = "background_layer";
     background_layer.style.display = "none";
     background_layer.style.position = "absolute";
     background_layer.style.top =  "0px";
@@ -23,6 +23,7 @@ MissionCenter.prototype.openLayer = function () {
 
 
     var open_layer = document.createElement("div");
+    open_layer.id = "open_layer";
     open_layer.style.background = "url(static/images/mission_center.png) no-repeat";
     open_layer.style.display = "none";
     open_layer.style.position = "fixed";
@@ -71,16 +72,14 @@ MissionCenter.prototype.openLayer = function () {
     span_accept_mission.style.height = "37px";
     span_accept_mission.style.right = "0";
     span_accept_mission.style.bottom = "0";
-    span_accept_mission.onmouseover = function(){
-    	//接受任务提示信息
-        // alert("1");
-    }
+
     span_accept_mission.onclick = this.options.function;
     open_layer.appendChild(span_accept_mission);
 
 
 
     var div_content = document.createElement("div");
+
     div_content.style.display = "none";
     div_content.style.textAlign = "center";
     div_content.style.fontSize = "20px";
@@ -98,3 +97,9 @@ MissionCenter.prototype.openLayer = function () {
     background_layer.style.display = "block";
     div_content.style.display = "block";
 };
+MissionCenter.prototype.closeLayer = function () {
+    var background_layer = document.getElementById("background_layer");
+    var open_layer = document.getElementById("open_layer");
+    open_layer.style.display = "none" ;
+    background_layer.style.display = "none";
+}

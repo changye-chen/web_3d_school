@@ -1,0 +1,113 @@
+/* 
+SETTINGS
+If you need the loader go faster or slower, this is the place to change. Don't forget to update 'time' in the javascript
+*/
+.loader-container {
+  height: 6px; 
+  width: 600px; 
+  position: absolute;
+  top: 75%;
+  left: 50%;
+  margin-top: -3px;
+  margin-left: -300px;
+  background-color: transparent;
+  background-image: -webkit-linear-gradient(left, #5bd8ff, #ff0000);
+  background-image: -moz-linear-gradient(left, #5bd8ff, #ff0000);
+  background-image: -o-linear-gradient(left, #5bd8ff, #ff0000);
+  background-image: -ms-linear-gradient(left, #5bd8ff, #ff0000);
+  background-image: linear-gradient(left, #5bd8ff, #ff0000);
+  box-shadow: inset 0 -2px 2px rgba(0, 0, 0, 0.4);
+  border-radius: 3px 0 0 3px;
+}
+.loader-container:after {
+  content: "";
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  margin-top: -0.5em;
+  margin-right: -1em;
+  background-image: -webkit-linear-gradient(top,#000000, #212121);
+  background-image: -moz-linear-gradient(top, #000000, #212121);
+  background-image: -o-linear-gradient(top, #000000, #212121);
+  background-image: -ms-linear-gradient(top,#000000, #212121);
+  background-image: linear-gradient(top,#000000, #212121);
+}
+.loader-container.done:after {
+  background: Red;
+}
+.run .runner {
+  content: "";
+  position: absolute;
+  right: 0;
+  height: 100%;
+  width: 0%;
+  background-color: transparent;
+  background-image: -webkit-linear-gradient(top, #000000, #212121);
+  background-image: -moz-linear-gradient(top, #000000, #212121);
+  background-image: -o-linear-gradient(top,#000000, #212121);
+  background-image: -ms-linear-gradient(top, #000000, #212121);
+  background-image: linear-gradient(top, #000000, #212121);
+  animation: loader 1s linear;
+}
+.meter {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 2em;
+  margin-top: .3em;
+  color: #ff0000;
+  animation: meter 10s linear;
+  text-shadow: 0 -1px 0 #333333;
+}
+.meter:after {
+  content: "%";
+}
+@keyframes loader {
+  0% {
+    width: 100%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+@keyframes meter {
+  0% {
+    color: #5bd8ff;
+  }
+  100% {
+    color: #ff0000;
+  }
+}
+/* Decoration */
+html,
+body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+body {
+  background: transparent url('run.gif') no-repeat;
+  background-position:center;
+  background-color: #127cc7;
+}
+footer {
+  font-family: 'Give You Glory', cursive;
+  position: absolute;
+  bottom: 2em;
+  right: 1em;
+  color: #777;
+  font-size: 1.2em;
+}
+footer a {
+  text-decoration: none;
+  color: #777;
+  border: none;
+}
+#wrapper {
+  width: 600px;
+  margin: 0 auto;
+}
