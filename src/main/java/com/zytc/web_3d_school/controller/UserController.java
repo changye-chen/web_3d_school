@@ -112,7 +112,7 @@ public class UserController {
          OutputStream outputStream = null;
          try {
              //指定上传的位置为 d:/upload/
-             String path = "d:/upload/";
+             String path = "/usr/upload/";
              //获取文件的输入流
              inputStream = multipartFile.getInputStream();
              //获取上传时的文件名
@@ -138,11 +138,11 @@ public class UserController {
         而得知的*/
 
              //告诉页面上传成功了
-             return "ok";
+             return "上传成功";
          } catch (IOException e) {
              e.printStackTrace();
              //出现异常，则告诉页面失败
-             return "failed";
+             return "上传失败";
          } finally {
              //无论成功与否，都有关闭输入输出流
              if (inputStream != null) {

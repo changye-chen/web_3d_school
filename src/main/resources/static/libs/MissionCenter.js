@@ -81,7 +81,7 @@ MissionCenter.prototype.openLayer = function () {
 
 
     var div_content = document.createElement("div");
-
+    div_content.style.display = "none";
     div_content.style.textAlign = "center";
     div_content.style.fontSize = "20px";
     div_content.style.color = "white";
@@ -96,4 +96,5 @@ MissionCenter.prototype.openLayer = function () {
     document.body.appendChild(background_layer);
     open_layer.style.display = "block" ;
     background_layer.style.display = "block";
+    div_content.style.display = "block";
 };

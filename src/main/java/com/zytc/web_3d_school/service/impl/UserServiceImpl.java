@@ -36,7 +36,10 @@ public class UserServiceImpl implements UserService {
         //已审核，额，就是这样
         user.setIs_examine(1);
         user.setStatus((byte) 0);
-        return userDetailsServiceMapper.insertUser(user);
+        if(userDetailsServiceMapper.loadUserByUsername(user.getUsername())==null) {
+            return userDetailsServiceMapper.insertUser(user);
+        }
+        return 0;
     }
     /**
     * @Description:

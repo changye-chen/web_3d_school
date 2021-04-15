@@ -11,6 +11,7 @@
     <script type="text/javascript" th:src="@{static/libs/stats.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/PersonalCenter.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/MyMission.js}"></script>
+    <script type="text/javascript" th:src="@{static/libs/Reminder.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/MissionCenter.js}"></script>
     <script type="text/javascript" th:src="@{static/js/jquery-3.5.1.js}"></script>
     <script type="text/javascript" th:src="@{static/libs/prefixfree.min.js}"></script>
@@ -56,7 +57,7 @@
         <area id="desk" shape="rect" coords="535,0,565,45" alt="deskView" onclick="deskView()" />
         <area id="book" shape="rect" coords="600,0,630,45" alt="bookView" onclick="bookView()" />
         <area id="screen" shape="rect" coords="670,0,705,45" alt="screenView" onclick="screenView()" />
-        <area id="ladder" shape="rect" coords="715,0,750,45" alt="ladder" onclick="ladderView()" />
+        <area id="ladder" shape="rect" coords="800,0,835,45" alt="ladder" onclick="ladderView()" />
     </map>
     <img th:src="@{static/images/doorView_nav.png}" id="navigation" alt="导航" usemap="#navigation_map">
     <form class="form-signin" th:action="@{/user/upload}" method="post" enctype="multipart/form-data" style="display: none">
@@ -136,8 +137,8 @@
         //init();
         function init() {
             //加载两个小屏幕
-            initImage(55, 80, 90, 124, 96, "static/images/pactera.jpg");
-            initImage(55, 80, 90, 42, 96, "static/images/teamLogo1.jpg");
+            initVideo(55, 80, 90, 124, 96, "video");
+            initVideo(55, 80, 90, 42, 96, "video");
             initControls();
             //加载主屏幕及控制按钮
             initVideo(200,150,-38.5,77,96,"video");
@@ -147,7 +148,7 @@
             //默认桌子视角
             doorView();
             loadGLTF(hdrPath,gltfPath,60,60,60);
-            loadLadder(5,5,5,160,82,450,"static/models/gltf/component/ladder3.gltf");
+            loadLadder(10,10,10,25,45,-24,"static/models/gltf/component/ladder.gltf");
 
             //加一块黑幕在屏幕后面
             var darkMesh=new THREE.Mesh(
@@ -158,8 +159,8 @@
             darkMesh.rotation.x=Math.PI;
             scene.add(darkMesh);
 
-            loadMark("mark1",0.5,0.5,0.5,160,92,472);
-            loadMark("mark2",0.5,0.5,0.5,160,92,472);
+            loadMark("mark1",0.5,0.5,0.5,84,88,32);
+            //loadMark("mark2",0.5,0.5,0.5,84,88,32);
         }
 
 
@@ -233,23 +234,6 @@
             });
         }
 
-        //加载贴图
-        function initImage(width,height,x,y,z,imageUrl) {
-            //添加立方体
-            var geometry = new THREE.PlaneBufferGeometry(width,height);
-            //加载贴图
-            var texture = new THREE.ImageUtils.loadTexture(imageUrl,function(){
-            });
-            texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;//使用平铺，因为视频尺寸不一定都是标准的
-            texture.minFilter = THREE.LinearFilter;
-            material = new THREE.MeshBasicMaterial( { map: texture } );
-            var mainScreen = new THREE.Mesh(geometry, material); //网格模型对象Mesh
-
-            mainScreen.rotation.y=Math.PI;
-            mainScreen.position.set(x,y,z);
-            scene.add(mainScreen);
-        }
-
         //加载视频
         function initVideo(width,height,x,y,z,videoTag) {
             //添加立方体
@@ -264,6 +248,14 @@
             texture.minFilter = THREE.LinearFilter;
             material = new THREE.MeshBasicMaterial( { map: texture } );
             var mainScreen = new THREE.Mesh(geometry, material); //网格模型对象Mesh
+
+            mainScreen.addEventListener('click', function () {
+                video = document.getElementById(videoTag);
+                video.play();
+                mainScreen.addEventListener('click', function () {
+                    video.pause();
+                })
+            });
 
             mainScreen.rotation.y=Math.PI;
             mainScreen.position.set(x,y,z);
@@ -307,7 +299,21 @@
             pause.rotation.x=Math.PI;
             scene.add(pause);
 
-            var selectTexture = new THREE.ImageUtils.loadTexture("static/images/upload.png",function(){
+            var submitTexture = new THREE.ImageUtils.loadTexture("static/images/submit.png",function(){
+            });
+            var submit=new THREE.Mesh(
+                new THREE.PlaneBufferGeometry(10,10),
+                new THREE.MeshBasicMaterial({
+                    map:submitTexture
+                    //color:0xff0000
+                })
+            )
+            submit.name = 'submit';
+            submit.position.set(selectx,selecty,selectz);
+            submit.rotation.x=Math.PI;
+            scene.add(submit);
+
+            var selectTexture = new THREE.ImageUtils.loadTexture("static/images/select.png",function(){
             });
             var select=new THREE.Mesh(
                 new THREE.PlaneBufferGeometry(10,10),
@@ -317,23 +323,9 @@
                 })
             )
             select.name = 'select';
-            select.position.set(selectx,selecty,selectz);
+            select.position.set(uploadx,uploady,uploadz);
             select.rotation.x=Math.PI;
             scene.add(select);
-
-            var uploadTexture = new THREE.ImageUtils.loadTexture("static/images/accept.png",function(){
-            });
-            var upload=new THREE.Mesh(
-                new THREE.PlaneBufferGeometry(10,10),
-                new THREE.MeshBasicMaterial({
-                    map:uploadTexture
-                    //color:0xff0000
-                })
-            )
-            upload.name = 'upload';
-            upload.position.set(uploadx,uploady,uploadz);
-            upload.rotation.x=Math.PI;
-            scene.add(upload);
         }
 
         function loadGLTF(hdrPath,gltfPath,scalex, scaley, scalez) {
@@ -419,7 +411,7 @@
             stats.update();
 
             meshes["mark1"].rotation.y+=Math.PI/15;
-            meshes["mark2"].rotation.y+=Math.PI/15;
+            //meshes["mark2"].rotation.y+=Math.PI/15;
 
             requestAnimationFrame(animate);
             //mesh.rotation.x += 0.01;
@@ -528,6 +520,8 @@
                 if(data.toString() === "ok")
                 {
                     //接受成功
+                    var reminder = new Reminder({content:"接受成功"});
+                    reminder.openLayer();
 
                     //重置视频标志与上传作业标志
                     video_flag = 0;
@@ -549,6 +543,9 @@
                     }
                 }
             }})
+
+
+
         }
 
         //鼠标点击事件
@@ -580,7 +577,8 @@
                             url: "/user/completeSubMission", async: false, success: function (data) {
                                 if(data === "ok"){
                                     //视频任务完成，提示用户到我的任务查看新的子任务
-
+                                    var reminder = new Reminder({content:"子任务1完成！"});
+                                    reminder.openLayer();
                                 }
                             }
                         })
@@ -591,12 +589,12 @@
                     video.pause();
                 }
                 else if(intersects[0].object.name === 'select'){
+                    document.getElementById("choosefile").click();
+                }
+                else if(intersects[0].object.name === 'submit'){
                     document.getElementById("upload").click();
                 }
-                else if(intersects[0].object.name === 'upload'){
-                    document.getElementById("choosefile").click();
 
-                }
                 else if(intersects[0].object.name === 'BMan0003-Se'){
                     var main_mission = "";
                     $.ajax({url:"/ajax/getMission", async:false ,success: function(data) {
@@ -608,11 +606,15 @@
                         function:acceptMission
                     });
                     layer.openLayer();
+
+
                 }
                 else if(intersects[0].object.name === 'Text002'){
 
                 }
             }
+
+
         }
 
 

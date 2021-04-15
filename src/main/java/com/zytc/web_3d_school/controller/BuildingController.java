@@ -13,11 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class BuildingController {
     @RequestMapping("/Internet")
     public String Internet(){
-        return "Internet";
+        return "redirect:Internet";
     }
 
     @RequestMapping("/Design")
     public String Design(){
-        return "Design";
+        return "redirect:Design";
     }
+
 }
