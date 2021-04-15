@@ -80,34 +80,34 @@
 		camera.position.x = 104;
 		camera.position.y = 80;
 		camera.position.z = 16;
-		camera.lookAt(-50, 8, 80);
+		camera.lookAt(-20, 8, 30);
 		scene.add(camera);
 	}
 	function cssView(){
 		alert("css");
 		$("#navigation").attr('src', "/static/images/InternetCssView.png");
-		camera.position.x = 104;
-		camera.position.y = 80;
-		camera.position.z = 0;
-		camera.lookAt(-50, 8, 50);
+		camera.position.x = 91;
+		camera.position.y = 8;
+		camera.position.z = 25;
+		camera.lookAt(78, 7, 25);
 		scene.add(camera);
 	}
 	function JavaView(){
 		alert("Java");
 		$("#navigation").attr('src', "/static/images/InternetJavaView.png");
-		camera.position.x = 104;
-		camera.position.y = 80;
-		camera.position.z = 16;
-		camera.lookAt(-50, 8, 80);
+		camera.position.x = 67;
+		camera.position.y = 8;
+		camera.position.z = -10;
+		camera.lookAt(65, 6, -11.9);
 		scene.add(camera);
 	}
 	function BigDataView(){
 		alert("Big");
 		$("#navigation").attr('src', "/static/images/InternetBigDataView.png");
-		camera.position.x = 104;
-		camera.position.y = 80;
-		camera.position.z = 16;
-		camera.lookAt(-50, 8, 80);
+		camera.position.x =103;
+		camera.position.y = 8;
+		camera.position.z = 4;
+		camera.lookAt(96, 10, 0);
 		scene.add(camera);
 	}
 
@@ -137,6 +137,10 @@
 	function displayRain(){
 		$("#navigation").attr('src', "/static/images/InternetRain.png");
 		alert("rain");
+		if(weather.snow) {
+			scene.remove(meshes["group2"]);
+			weather.snow=0;
+		}
 			weather.rain = 1;
 			onloadRain();
 			renderRain();
@@ -145,16 +149,20 @@
 		$("#navigation").attr('src', "/static/images/InternetCloudy.png");
 		alert("cloudy");
 		weather.cloudy=1;
-		scene.remove("skybox");
+		scene.remove(meshes["group3"]);
 		initSkyBox();
 		renderer.render(scene, camera);
 	}
 	function displaySnow(){
 		$("#navigation").attr('src', "/static/images/InternetSnow.png");
 		alert("snow");
-			weather.snow = 1;
-			onloadSnow();
-			renderSnow();
+		if(weather.rain) {
+			scene.remove(meshes["group1"]);
+			weather.rain=0;
+		}
+		weather.snow = 1;
+		onloadSnow();
+		renderSnow();
 	}
 
 	function progressBar(progress){
@@ -195,13 +203,13 @@
 		var format = '.jpg';   //图像后缀
 		//生成图像地址数组
 		var urls;
-		if(weather.sunny||weather.snow)
+		if(weather.sunny)
 		urls = [
 		path + 'px' + format, path + 'nx' + format,
 		path + 'py' + format, path + 'ny' + format,
 		path + 'pz' + format, path + 'nz' + format
 		];
-		else
+		else if(weather.cloudy)
 		urls = [
 		path + 'px1' + format, path + 'nx1' + format,
 		path + 'py1' + format, path + 'ny1' + format,
@@ -222,16 +230,19 @@
 			depthWrite: false,
 			side: THREE.DoubleSide
 			});
-		//    创建天空之盒
+		//天空之盒
 		var skybox = new THREE.Mesh(new THREE.BoxGeometry(500, 300, 300), material);
+
 		//scene.background = createCubeMap();
-		skybox.name = "skybox";
+		//skybox.name = "skybox";
 		skybox.rotation.x = -0.15 * Math.PI;
 		skybox.position.x=0;
 		skybox.position.y=1;
 		skybox.position.z=2;
 		skybox.receiveShadow=true;
 		skybox.castShadow=true;
+		group3.add(skybox);
+		//meshes["group3"]=group3;
 		scene.add(skybox);
 		console.log(scene);
 		//  环境样式
@@ -324,9 +335,10 @@
 		 var k2 = Math.random() - 0.5;
 		// 设置精灵模型位置，在空间中随机分布
 		sprite.position.set(1000 * k1, 300 * Math.random(), 1000 * k2)
-		group.add(sprite);
+		group1.add(sprite);
 		}
-		scene.add(group);//雨滴群组插入场景中
+		meshes["group1"]=group1;
+		scene.add(group1);//雨滴群组插入场景中
 	}
 
 	/*
@@ -374,9 +386,11 @@
 	// 点云
 	for (var i = 0; i < typeNum; i++) {
 		var points = new THREE.Points(geoms[i], materials[i]);
-		clouds.push(points)
-		scene.add(points);
+		clouds.push(points);
+		group2.add(points);
 	    }
+		meshes["group2"]=group2;
+	    scene.add(group2);
 	}
 
 	//窗口随浏览器变化而变化
@@ -406,7 +420,7 @@
 	function renderRain() {
 		// 每次渲染遍历雨滴群组，刷新频率30~60FPS，两帧时间间隔16.67ms~33.33ms
 		// 每次渲染都会更新雨滴的位置，进而产生动画效果
-		group.children.forEach(sprite => {
+		group1.children.forEach(sprite => {
 			// 雨滴的y坐标每次减1
 			sprite.position.y -= 2;
 			if (sprite.position.y < -19) {
@@ -610,7 +624,9 @@
 		rain:0,
 		snow:0,
 	};
-	var group = new THREE.Group();//创建雨滴数组
+	var group1 = new THREE.Group();//创建雨滴数组
+	var group2=new THREE.Group();//创建雪花数组
+	var group3=new THREE.Group();//创建天空纸盒
 	var clouds = []; //点云
 	var range = 500; // 雪花出现范围
 	var Stats;
