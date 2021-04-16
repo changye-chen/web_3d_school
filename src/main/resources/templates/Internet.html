@@ -148,6 +148,8 @@
 	function displayCloudy(){
 		$("#navigation").attr('src', "/static/images/InternetCloudy.png");
 		alert("cloudy");
+		if(weather.sunny)
+			weather.sunny=0;
 		weather.cloudy=1;
 		scene.remove(meshes["group3"]);
 		initSkyBox();
@@ -232,17 +234,19 @@
 			});
 		//天空之盒
 		var skybox = new THREE.Mesh(new THREE.BoxGeometry(500, 300, 300), material);
-
+		group3.add(skybox);
 		//scene.background = createCubeMap();
-		//skybox.name = "skybox";
+		skybox.name = "skybox";
 		skybox.rotation.x = -0.15 * Math.PI;
 		skybox.position.x=0;
 		skybox.position.y=1;
 		skybox.position.z=2;
 		skybox.receiveShadow=true;
 		skybox.castShadow=true;
-		group3.add(skybox);
-		//meshes["group3"]=group3;
+		//group3.add(skybox);
+		window.onload=function() {
+			meshes["group3"] = group3;
+		};
 		scene.add(skybox);
 		console.log(scene);
 		//  环境样式
