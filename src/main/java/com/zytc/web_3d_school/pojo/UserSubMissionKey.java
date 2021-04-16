@@ -19,6 +19,7 @@ public class UserSubMissionKey implements Serializable {
      */
     private Integer subMissionId;
 
+    private Integer mainMissionId;
     /**
      * 用户id
      */

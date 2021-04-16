@@ -66,6 +66,28 @@
     </form>
 
     <script>
+        function loadTxt(){
+
+            $.ajax({
+                url:"/ajax/load",
+                dataType: "json",
+                type: "post",
+                async: "false",
+                data:{addr:"C:\\服务外包\\web_3d_school\\src\\main\\resources\\static\\book\\test.txt"},
+                success: function (data){
+                    txtContext = data.responseText.toString();
+                    console.log(txtContext);
+                    var reminder = new Reminder({content:data.responseText.toString()});
+                    reminder.openLayer();
+                },
+                error: function (data){
+                    txtContext = data.responseText.toString();
+                    console.log(txtContext);
+                    var reminder = new Reminder({content:data.responseText.toString()});
+                    reminder.openLayer();
+                }
+            })
+        }
         //光源
         function initLight(){
             ambientLight=new THREE.AmbientLight(0xfffffff,0.5);//浅蓝色
@@ -117,7 +139,8 @@
         //阶梯视角
         function ladderView(ladderUrl,scalex, scaley, scalez,x,y,z){
             $("#navigation").attr('src', "/static/images/ladderView_nav.png");
-            meshes["ladder"].scale.set(10, 10, 10);
+            deskView();
+            meshes["ladder"].scale.set(20, 20, 20);
         }
 
         //init();
@@ -147,7 +170,7 @@
 
             //加载感叹号
             loadMark("mark1",0.5,0.5,0.5,84,88,32);
-            //loadMark("mark2",0.5,0.5,0.5,84,88,32);
+
         }
 
 
@@ -162,7 +185,7 @@
                 });
                 console.log(gltf.scene);
                 scene.add(gltf.scene);
-                gltf.scene.scale.set(20, 20, 20);
+                gltf.scene.scale.set(scalex, scaley, scalez);
                 gltf.scene.position.set(x, y, z);
                 meshes["ladder"]=gltf.scene;
                 //roughnessMipmapper.dispose();
@@ -397,8 +420,14 @@
             //controls.update();
             stats.update();
 
-            meshes["mark1"].rotation.y+=Math.PI/15;
-            //meshes["mark2"].rotation.y+=Math.PI/15;
+            if(symbol_flag === 0)
+            {
+                meshes["mark1"].rotation.y+=Math.PI/15;
+            }
+            else if(symbol_flag === 1)
+            {
+                meshes["mark2"].rotation.y+=Math.PI/15;
+            }
 
             requestAnimationFrame(animate);
             //mesh.rotation.x += 0.01;
@@ -506,8 +535,13 @@
             $.ajax({url:"/user/acceptMission",async:false, success:function (data){
                 if(data.toString() === "ok")
                 {
+                    var background_layer = document.getElementById("background_layer");
+                    var open_layer = document.getElementById("open_layer");
+                    open_layer.style.display = "none" ;
+                    background_layer.style.display = "none";
+
                     //接受成功
-                    var reminder = new Reminder({content:"接受成功"});
+                    var reminder = new Reminder({content:"接受成功！请在底部导航栏点击我的任务查看子任务1！"});
                     reminder.openLayer();
 
                     //重置视频标志与上传作业标志
@@ -530,10 +564,7 @@
                     }
                 }
             }})
-            var background_layer = document.getElementById("background_layer");
-            var open_layer = document.getElementById("open_layer");
-            open_layer.style.display = "none" ;
-            background_layer.style.display = "none";
+
         }
 
         //鼠标点击事件
@@ -565,7 +596,7 @@
                             url: "/user/completeSubMission", async: false, success: function (data) {
                                 if(data === "ok"){
                                     //视频任务完成，提示用户到我的任务查看新的子任务
-                                    var reminder = new Reminder({content:"子任务1完成！"});
+                                    var reminder = new Reminder({content:"子任务1完成！请在底部导航栏点击我的任务查看子任务2！"});
                                     reminder.openLayer();
                                 }
                             }
@@ -587,8 +618,13 @@
                             url: "/user/completeSubMission", async: false, success: function (data) {
                                 if(data === "ok"){
                                     //上传任务完成
-                                    var reminder = new Reminder({content:"子任务2完成！您可查看个人中心以及学习阶梯情况！"});
+                                    var reminder = new Reminder({content:"子任务2完成！请点击人物上方问号提交主任务！"});
                                     reminder.openLayer();
+
+                                    //加载问号，去除感叹号
+                                    loadMark("mark2",0.5,0.5,0.5,84,88,32);
+                                    scene.remove(meshes["mark1"]);
+                                    symbol_flag = 1;
                                 }
                             }
                         })
@@ -612,6 +648,21 @@
                     layer.openLayer();
 
                 }
+                //问号
+                else if(intersects[0].object.name === 'Text001'){
+                    var reminder = new Reminder({content:"恭喜你完成主任务！点击确认后可以接受新任务！此外，您可以随时点击个人中心查看徽章获得情况，以及在导航栏点击阶梯图标查看学习阶梯增长情况！"});
+                    reminder.openLayer();
+
+                    //加载感叹号，去除问号
+                    loadMark("mark1",0.5,0.5,0.5,84,88,32);
+                    scene.remove(meshes["mark2"]);
+
+                    symbol_flag = 0;
+                }
+                else if(intersects[0].object.name === '网格.187_0'){
+                    loadTxt();
+
+                }
             }
 
 
@@ -626,8 +677,9 @@
             v2.style.display = "block";
 
             //第一次进入后提示用户点击人物上方感叹号接受任务
-            var reminder = new Reminder({content:"欢迎来到”钟糖+雨尘“工作室开发的web3D短视频教育平台！点击人物上方感叹号即可接受任务开启学习之旅！"});
-            reminder.openLayer();
+            var reminder1 = new Reminder({content:"欢迎来到”钟糖+雨尘“工作室开发的web3D短视频教育平台！点击人物上方感叹号即可接受任务开启学习之旅！"});
+            reminder1.openLayer();
+
         }
         //打开个人中心
         function openPersonal_center(){
@@ -685,7 +737,7 @@
         var progress;
         var viewer=1;
         var ladderUrl;//阶梯的路径
-
+        var txtContext;//文本内容
         var scene= new THREE.Scene();
         var camera= new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight,0.1, 1000);
         var renderer=new THREE.WebGLRenderer({antialias:true});//防锯齿
@@ -705,6 +757,8 @@
         //document.body.appendChild(renderer.domElement);
         var loadingManager=null,Resource_Loaded=false;
 
+        //人物上方感叹号&问号标志，0为感叹号，1为问号
+        var symbol_flag = 0;
 
         //实例化加载管理器
         loadingManager=new THREE.LoadingManager();

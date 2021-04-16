@@ -63,24 +63,26 @@ public class UserServiceImpl implements UserService {
     @Override
     public int acceptMission(SecurityUser user) {
         //获取主任务表
-        MainMission mainmission = mainMissionMapper.selectByPrimaryKey(user.getMain_mission_id());
+        SecurityUser userWithPwd = userDetailsServiceMapper.loadUserByUsername(user.getUsername());
+        MainMission mainmission = mainMissionMapper.selectByPrimaryKey(userWithPwd.getMain_mission_id());
         //主任务添加到用户主任务表
+        System.out.println(mainmission.toString());
         UserMainMission userMainMission = new UserMainMission();
         userMainMission.setAcceptTime(new Date());
         userMainMission.setMainMissionDetail(mainmission.getMainMissionDetail());
         userMainMission.setMainMissionId(mainmission.getMainMissionId());
         userMainMission.setSubMissionNum(mainmission.getSubMissionNum());
-        userMainMission.setUserId(user.getUser_id());
+        userMainMission.setUserId(userWithPwd.getUser_id());
         userMainMission.setCompletedNum(0);
         //获取子任务表
         List<SubMission> subMissions= subMissionMapper.selectByMainMissionId(mainmission.getMainMissionId());
         //更新用户表
-        SecurityUser userWithPwd = userDetailsServiceMapper.loadUserByUsername(user.getUsername());
         userWithPwd.setSub_mission_id(subMissions.get(0).getSubMissionId());
         userDetailsServiceMapper.updateUser(userWithPwd);
         //子任务添加到用户子任务表
         //应该由触发器完成，在此反省
         for(SubMission subMission : subMissions){
+            System.out.println(subMission.toString());
             UserSubMission userSubMission = new UserSubMission();
             userSubMission.setUserId(user.getUser_id());
             userSubMission.setSubMissionDetail(subMission.getSubMissionDetail());
@@ -89,7 +91,7 @@ public class UserServiceImpl implements UserService {
             userSubMission.setCompletedFlag(0);
             userSubMission.setVideoUrl(subMission.getVideoUrl());
             userSubMission.setSubMissionId(subMission.getSubMissionId());
-            if(userSubMissionMapper.selectByPrimaryKey(new UserSubMissionKey(userSubMission.getSubMissionId(),userMainMission.getUserId()))==null){
+            if(userSubMissionMapper.selectByPrimaryKey(new UserSubMissionKey(userSubMission.getSubMissionId(),userMainMission.getMainMissionId(),userMainMission.getUserId()))==null){
                 userSubMissionMapper.insert(userSubMission);
             }
         }
@@ -111,16 +113,16 @@ public class UserServiceImpl implements UserService {
     public int completeSubMission(SecurityUser user) {
         SecurityUser userWithPwd = userDetailsServiceMapper.loadUserByUsername(user.getUsername());
         System.out.println(userWithPwd.toString());
-        UserSubMission userSubMission = userSubMissionMapper.selectByPrimaryKey(new UserSubMissionKey(userWithPwd.getSub_mission_id(),userWithPwd.getUser_id()));
+        UserSubMission userSubMission = userSubMissionMapper.selectByPrimaryKey(new UserSubMissionKey(userWithPwd.getSub_mission_id(),userWithPwd.getMain_mission_id(),userWithPwd.getUser_id()));
         userSubMission.setCompletedFlag(1);
         userSubMission.setCompletedTime(new Date());
 
-        if(userSubMissionMapper.selectByPrimaryKey(new UserSubMissionKey(userWithPwd.getSub_mission_id()+1,userWithPwd.getUser_id()))!=null)
+        if(userSubMissionMapper.selectByPrimaryKey(new UserSubMissionKey(userWithPwd.getSub_mission_id()+1,userWithPwd.getMain_mission_id(),userWithPwd.getUser_id()))!=null)
             userWithPwd.setSub_mission_id(userWithPwd.getSub_mission_id()+1);
 
         UserMainMission userMainMission = userMainMissionMapper.selectByPrimaryKey(new UserMainMissionKey(userWithPwd.getMain_mission_id(),userWithPwd.getUser_id()));
         userMainMission.setCompletedNum(userMainMission.getCompletedNum()+1);
-        if(userMainMission.getCompletedNum()==userMainMission.getSubMissionNum()) {
+        if(userMainMission.getCompletedNum()>=userMainMission.getSubMissionNum()) {
             userMainMission.setCompletedFlag(1);
             userMainMission.setCompletedTime(new Date());
             userWithPwd.setMain_mission_id(userWithPwd.getMain_mission_id() + 1);
@@ -138,7 +140,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserSubMission getSubMission(SecurityUser user) {
         SecurityUser userWithPwd = userDetailsServiceMapper.loadUserByUsername(user.getUsername());
-        return userSubMissionMapper.selectByPrimaryKey(new UserSubMissionKey(userWithPwd.getSub_mission_id(),userWithPwd.getUser_id()));
+        return userSubMissionMapper.selectByPrimaryKey(new UserSubMissionKey(userWithPwd.getSub_mission_id(),userWithPwd.getMain_mission_id(),userWithPwd.getUser_id()));
     }
 
     @Override

@@ -34,7 +34,7 @@ Reminder.prototype.openLayer = function () {
     // open_layer.style.left = this.options.left === undefined ? "10%" :this.options.left;
     // open_layer.style.width = this.options.width === undefined ? "80%" : this.options.width;
     // open_layer.style.height = this.options.height === undefined ? "80%" : this.options.height;
-    open_layer.style.width = "300px";
+    open_layer.style.width = "298px";
     open_layer.style.height = "223px";
     open_layer.style.border = "1px solid";
     open_layer.style.borderRadius = "15px" ;
@@ -48,9 +48,10 @@ Reminder.prototype.openLayer = function () {
     var span_confirm = document.createElement("img");
     span_confirm.src = "static/images/confirm.png";
     span_confirm.style.position="absolute";
-    span_confirm.style.width = "54px";
-    span_confirm.style.height = "23px";
+    span_confirm.style.width = "60px";
+    span_confirm.style.height = "26px";
     span_confirm.style.right = "0";
+    span_confirm.style.bottom = "0";
     span_confirm.onmouseover = function(){
         //提示信息
 
@@ -84,7 +85,6 @@ Reminder.prototype.openLayer = function () {
     div_content.style.textAlign = "center";
     div_content.style.fontSize = "16px";
     div_content.style.color = "white";
-    div_content.appendChild(document.createElement("br"));
     div_content.appendChild(document.createElement("br"));
     div_content.appendChild(document.createElement("br"));
     div_content.appendChild(document.createElement("br"));

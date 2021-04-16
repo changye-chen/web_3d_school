@@ -10,6 +10,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+
 /**
  * @program: web_3d_school
  * @description: ajax
@@ -39,6 +44,32 @@ public class AjaxController {
             return "注册成功";
         }
         return "该用户名已存在";
+    }
+
+    @RequestMapping("/load")
+    @ResponseBody
+    public String loadFile(String addr){
+        try {
+            File file = new File(addr);
+            if(file.isFile() && file.exists()) {
+                InputStreamReader isr = new InputStreamReader(new FileInputStream(file), "utf-8");
+                BufferedReader br = new BufferedReader(isr);
+                StringBuilder context = new StringBuilder();
+                String lineTxt;
+                while ((lineTxt = br.readLine()) != null) {
+                    System.out.println(lineTxt);
+                    context.append(lineTxt);
+                }
+                br.close();
+                return context.toString();
+            } else {
+                System.out.println("文件不存在!");
+                return "文件不存在";
+            }
+        } catch (Exception e) {
+            System.out.println("文件读取错误!");
+            return "文件读取错误";
+        }
     }
 
 }
