@@ -84,7 +84,6 @@
 		scene.add(camera);
 	}
 	function cssView(){
-		alert("css");
 		$("#navigation").attr('src', "/static/images/InternetCssView.png");
 		camera.position.x = 91;
 		camera.position.y = 8;
@@ -93,7 +92,6 @@
 		scene.add(camera);
 	}
 	function JavaView(){
-		alert("Java");
 		$("#navigation").attr('src', "/static/images/InternetJavaView.png");
 		camera.position.x = 67;
 		camera.position.y = 8;
@@ -102,7 +100,6 @@
 		scene.add(camera);
 	}
 	function BigDataView(){
-		alert("Big");
 		$("#navigation").attr('src', "/static/images/InternetBigDataView.png");
 		camera.position.x =103;
 		camera.position.y = 8;
@@ -128,7 +125,6 @@
 
 	function displaySunny(){
 		$("#navigation").attr('src', "/static/images/InternetSunny.png");
-		alert("sunny");
 		weather.sunny=1;
 		scene.remove("skybox");
 		initSkyBox();
@@ -136,7 +132,6 @@
 	}
 	function displayRain(){
 		$("#navigation").attr('src', "/static/images/InternetRain.png");
-		alert("rain");
 		if(weather.snow) {
 			scene.remove(meshes["group2"]);
 			weather.snow=0;
@@ -147,7 +142,6 @@
 	}
 	function displayCloudy(){
 		$("#navigation").attr('src', "/static/images/InternetCloudy.png");
-		alert("cloudy");
 		if(weather.sunny)
 			weather.sunny=0;
 		weather.cloudy=1;
@@ -157,7 +151,6 @@
 	}
 	function displaySnow(){
 		$("#navigation").attr('src', "/static/images/InternetSnow.png");
-		alert("snow");
 		if(weather.rain) {
 			scene.remove(meshes["group1"]);
 			weather.rain=0;
@@ -651,7 +644,7 @@
 	var clouds = []; //点云
 	var range = 500; // 雪花出现范围
 	var Stats;
-	var progress;
+	var progress = "0";
 
 	var scene= new THREE.Scene();
 	var camera= new THREE.PerspectiveCamera(90,window.innerWidth / window.innerHeight,0.1, 1000);

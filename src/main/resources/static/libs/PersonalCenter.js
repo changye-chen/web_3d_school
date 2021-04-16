@@ -83,8 +83,14 @@ PersonalCenter.prototype.openLayer = function () {
     div_content.appendChild(document.createElement("br"));
     div_content.appendChild(document.createElement("br"));
     div_content.appendChild(document.createElement("br"));
-    var content_area = document.createTextNode(this.options.content === undefined ? "" : this.options.content);
-    div_content.appendChild(content_area);
+    var content_area1 = document.createTextNode(this.options.content1 === undefined ? "" : this.options.content1);
+    div_content.appendChild(content_area1);
+    div_content.appendChild(document.createElement("br"));
+    var content_area2 = document.createTextNode(this.options.content2 === undefined ? "" : this.options.content2);
+    div_content.appendChild(content_area2);
+    div_content.appendChild(document.createElement("br"));
+    var content_area3 = document.createTextNode(this.options.content3 === undefined ? "" : this.options.content3);
+    div_content.appendChild(content_area3);
     open_layer.appendChild(div_content);
     document.body.appendChild(open_layer);
     document.body.appendChild(background_layer);

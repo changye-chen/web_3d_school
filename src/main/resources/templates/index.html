@@ -1,340 +1,887 @@
-<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>china-3D</title>
-  <style>
-    html body {
-      height: 100%;
-      width: 100%;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-    }
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>Web3D 短视频学习教育平台 WSVTP</title>
 
-    #provinceInfo {
-      position: absolute;
-      z-index: 2;
-      background: white;
-      padding: 10px;
-      visibility: hidden;
-    }
-  </style>
-  <script type="text/javascript" th:src="@{../static/js/three.js}"></script>
-  <script type="text/javascript" th:src="@{../static/js/OrbitControls.js}"></script>
-  <script type="text/javascript" th:src="@{../static/js/d3-array.v1.min.js}"></script>
-  <script type="text/javascript" th:src="@{../static/js/d3-geo.v1.min.js}"></script>
-</head>
-<body>
-  <a th:href="@{/user/login}">登录</a>
-  <a th:href="@{/user/logout}">注销</a>
-
-
-  <div id="provinceInfo"></div>
-  
-</body>
-<script>
-  class lineMap {
-    constructor(container) {
-      this.container = container ? container : document.body;
-    }
-
-    init() {
-      this.provinceInfo = document.getElementById('provinceInfo');
-      // 渲染器
-      this.renderer = new THREE.WebGLRenderer();
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.container.appendChild(this.renderer.domElement);
-
-      // 场景
-      this.scene = new THREE.Scene();
-
-      // 相机 透视相机
-      this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-      this.camera.position.set(0, -70, 150);
-      this.camera.lookAt(0, 0, 0);
-
-      this.setController(); // 设置控制
-
-      this.setLight(); // 设置灯光
-
-      //this.setRaycaster();
-
-      this.animate();
-
-      // this.loadFont(); // 加载字体
-      
-      this.loadMapData();
-
-      this.setResize(); // 绑定浏览器缩放事件
-	  
-	  //
-	  document.body.addEventListener('mousemove', this.mouseMoveEvent.bind(this));
-	  document.body.addEventListener('click', this.mouseClickEvent.bind(this));
-    }
-
-    setResize() {
-      let _this = this;
-      window.addEventListener('resize', function () {
-        _this.renderer.setSize(window.innerWidth, window.innerHeight);
-      })
-    }
-
-    loadMapData() {
-      let _this = this;
-
-      // 加载json文件
-      let loader = new THREE.FileLoader();
-      loader.load('../static/json/china.json', function (data) {
-        let jsonData = JSON.parse(data);
-        _this.initMap(jsonData);
-      });
-    }
-
-    loadFont() { //加载中文字体
-      var loader = new THREE.FontLoader();
-      var _this = this;
-      loader.load('../fonts/chinese.json', function (response) {
-        _this.font = response;
-        _this.loadMapData();
-      });
-
-    }
-
-    createText(text, position) {
-      var shapes = this.font.generateShapes(text, 1);
-
-      var geometry = new THREE.ShapeBufferGeometry(shapes);
-
-      var material = new THREE.MeshBasicMaterial();
-
-      var textMesh = new THREE.Mesh(geometry, material);
-      textMesh.position.set(position.x, position.y, position.z);
-
-      this.scene.add(textMesh);
-    }
-
-    initMap(chinaJson) {
-      // 建一个空对象存放对象
-      this.map = new THREE.Object3D();
-
-      let _this = this;
-
-      // 墨卡托投影转换
-      const projection = d3.geoMercator().center([104.0, 37.5]).scale(80).translate([0, 0]);
-
-      chinaJson.features.forEach(elem => {
-        // 定一个省份3D对象
-        const province = new THREE.Object3D();
-        // 每个的 坐标 数组
-        const coordinates = elem.geometry.coordinates;
-        // 循环坐标数组
-        coordinates.forEach(multiPolygon => {
-
-          multiPolygon.forEach(polygon => {
-            const shape = new THREE.Shape();
-            const lineMaterial = new THREE.LineBasicMaterial({
-              color: 'white',
-              opacity: 0.6
-            });
-            const lineGeometry = new THREE.Geometry();
-
-            for (let i = 0; i < polygon.length; i++) {
-              const [x, y] = projection(polygon[i]);
-              if (i === 0) {
-                shape.moveTo(x, -y);
-              }
-              shape.lineTo(x, -y);
-              lineGeometry.vertices.push(new THREE.Vector3(x, -y, 4.01));
-            }
-
-            const extrudeSettings = {
-              depth: 4,
-              bevelEnabled: false
-            };
-
-            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-            const material = new THREE.MeshBasicMaterial({
-              color: '#02a1e2',
-              transparent: true,
-              opacity: 0.6
-            });
-            const material1 = new THREE.MeshBasicMaterial({
-              color: '#3480C4',
-              transparent: true,
-              opacity: 0.5
-            });
-            /* const material = new THREE.MeshBasicMaterial({ color: '#dedede', transparent: false, opacity: 0.6 });
-            const material1 = new THREE.MeshBasicMaterial({ color: '#dedede', transparent: false, opacity: 0.5 }); */
-            const mesh = new THREE.Mesh(geometry, [material, material1]);
-            const line = new THREE.Line(lineGeometry, lineMaterial);
-            province.add(mesh);
-            province.add(line)
-
-          })
-
-        })
-
-        // 将geo的属性放到省份模型中
-        province.properties = elem.properties;
-        if (elem.properties.contorid) {
-          const [x, y] = projection(elem.properties.contorid);
-          province.properties._centroid = [x, y];
-        }
-
-        //绘制光柱
-        if(province.properties.center){
-          const texture = new THREE.TextureLoader().load("../static/images/lightray_yellow.jpg");
-
-          const [x, y] = projection(province.properties.center);
-          const planegeomentry = new THREE.PlaneGeometry(1, 10);
-          var planematerial = new THREE.MeshBasicMaterial({
-            //map: texture,
-            map: texture, ////颜色贴图
-            color: '#ffff00',
-            transparent: true,
-            opacity: 0.7,
-            depthTest: false, //深度测试属性
-            blending: THREE.AdditiveBlending, //滤镜选择
-            side: THREE.DoubleSide
-          })
-          var plane = new THREE.Mesh(planegeomentry, planematerial);
-          plane.position.set(x, -y, 8);
-          plane.rotation.x = Math.PI / 2;
-          province.add(plane);
-          var plane2 = plane.clone();
-          plane2.rotation.y = Math.PI / 2;
-          province.add(plane2);
-        }
-
-
-        _this.map.add(province);
-
-      })
-
-      this.scene.add(this.map);
-    }
-
-	//鼠标移动事件
-    mouseMoveEvent(event) {
-		this.eventOffset = {};
-	    if (!this.raycaster)
-			this.raycaster = new THREE.Raycaster();
-		if (!this.mouse)
-			this.mouse = new THREE.Vector2();
-
-		// 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
-		this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-		this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-
-        this.eventOffset.x = event.clientX;
-        this.eventOffset.y = event.clientY;
-        this.provinceInfo.style.left = this.eventOffset.x + 2 + 'px';
-        this.provinceInfo.style.top = this.eventOffset.y + 2 + 'px';
-		
-		// 通过摄像机和鼠标位置更新射线
-		this.raycaster.setFromCamera(this.mouse, this.camera);
-
-		// 计算物体和射线的焦点
-		const intersects = this.raycaster.intersectObjects(this.scene.children, true);
-		
-		if (this.activeInstersect && this.activeInstersect.length > 0) { // 将上一次选中的恢复颜色
-		  this.activeInstersect.forEach(element => {
-		    element.object.material[0].color.set('#02A1E2');
-		    element.object.material[1].color.set('#3480C4');
-		  });
-		}
-		
-		this.activeInstersect = []; // 设置为空
-		
-		for (var i = 0; i < intersects.length; i++) {
-			if (intersects[i].object.material && intersects[i].object.material.length === 2) {
-			    this.activeInstersect.push(intersects[i]);
-			    intersects[i].object.material[0].color.set(0xff0000);
-			    intersects[i].object.material[1].color.set(0xff0000);
-			    break; // 只取第一个
-			   }
-		}
-		
-		//显示省份信息
-		this.createProvinceInfo();
-
-    }
+		<script type="text/javascript" th:src="@{static/js/three.js}"></script>
+		<script type="text/javascript" th:src="@{static/js/OrbitControls.js}"></script>
+		<script type="text/javascript" th:src="@{static/js/d3-array.v1.min.js}"></script>
+		<script type="text/javascript" th:src="@{static/js/d3-geo.v1.min.js}"></script>
+		<script type="text/javascript" th:src="@{static/js/echarts.js}"></script>
+		<script th:src="@{static/js/echarts.min.js}"></script>
+	</head>
+	<body>
+		<script>			
+			var boyNum=700;
+			var girlNum=700;
+			var allStudyNum=boyNum+girlNum;
+			var designNum=700;
+			var internetNum=300;
+			var studioNum=5;
+			var studioClassData=[20,30,40,20,30]; //三角形数据
+			var numColor=['#205fee','#b620ee','#ee206e','#d98a00','#bcebf8'];
+		</script>
+        <div id="container">
+			<div id="content">
+				<div id="title" style="background-color: #205FEE;">
+					<img src="static/images/titlePactera.png" class="titleImg1" />
+					<img src="static/images/用户.png" class="titleImg2" />
+					<img src="static/images/logo.png" class="titlelogo"/>
+					<div id="log" style="width: 150px;position:fixed; right:30px;top:60px;background-color: #FFFFFF;z-index:10;visibility: hidden;cursor:pointer;">
+						<div style="height:40px;line-height:40px;font-size: 20px;border-bottom: 1px solid #DCDCDC;cursor:pointer;" onclick="login()">登录</div>
+						<div style="height:40px;line-height:40px;font-size: 20px;cursor:pointer;">注销</div>
+					</div>
+					<img src="static/images/矩形%201.png" class="titleImg3" onclick="log()"/>
+				</div>
+				<script>
+					function login(){
+						window.location.assign("user/login");
+					}
+					function log(){
+						var logPop=document.getElementById("log");
+						if(logPop.style.visibility=="hidden"){
+							logPop.style.visibility="visible";
+						}
+						else{
+							logPop.style.visibility="hidden";
+						}
+					}
+				</script>
+				<div id="line1">
+					<div style="width:27%;height:700px">
+						<div id="information">
+							<div class="title1">
+								<img src="static/images/titleRectangle.png"/ style="height:20px;margin-left: 20px;">
+								<p style="margin-left: 10px; font-size: 15px;">品牌形象</p>
+							</div>
+								<div class="infoImgLump">
+									<div class="infoImgLine">
+										<img src="static/images/infoIcon1.png" class="infoIcon1" style="padding-bottom: 10px;"/>
+										<img src="static/images/infoIcon2.png" class="infoIcon2" style="padding-bottom: 10px;"/>
+									</div>
+									<div id="wire"></div>
+									<div class="infoImgLine">
+										<img src="static/images/infoIcon3.png" class="infoIcon1" style="padding-top: 10px;"/>
+										<img src="static/images/infoIcon4.png" class="infoIcon2" style="padding-top: 10px;"/>
+									</div>
+									<div id="wire" style="width: 100%; margin-top: 10px;"></div>
+								</div>
+						</div>
+						
+						<div id="numberOfPeople">
+							<div class="title1">
+								<img src="static/images/titleRectangle.png"/ style="height:20px;margin-left: 20px;">
+								<p style="margin-left: 10px; font-size: 15px;">人数统计</p>
+							</div>
+							<div id="num">
+								<div style="display: flex;flex-direction: column;width:60%;margin-top:-30px">
+									<div style="width:100%; display: flex; flex-direction: row; margin-top: 20px;">
+										<p style="font-size: 10px;font-weight: bold;margin-left: 20px;">当前学习人数</p>
+										<p id="allNum" style="font-size: 20px;font-weight: bold;color:#205fee;margin-left: 20px;margin-top: 5px;"></p>
+									</div>
+									<div id="numImg" style="margin-top: -10px;">
+										<div style="display: flex;flex-direction: column;align-items: center;width:40%;margin-left: 10px;">
+											<div id="boyNum"></div>
+											<div id="boys" style="width:80%;height:70px;display:flex;flex-direction: row;justify-content: center;">
 	
-	//鼠标点击事件
-	mouseClickEvent(event){
-		if (!this.raycaster)
-		    this.raycaster = new THREE.Raycaster();
-		if (!this.mouse)
-		    this.mouse = new THREE.Vector2();
-		
-		// 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
-		this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-		this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-		
-		// 通过摄像机和鼠标位置更新射线
-		this.raycaster.setFromCamera(this.mouse, this.camera);
-		
-		// 计算物体和射线的焦点
-		const intersects = this.raycaster.intersectObjects(this.scene.children,true);
-		if (intersects.length !== 0 && intersects[0].object.parent.properties.name) {
-		  var properties = intersects[0].object.parent.properties;
-		  if(properties.name === '辽宁省'){
-			  window.location.assign("Internet");
-			 }
+											</div>
+											<img src="static/images/blueBrace.png" style="width:60px;margin-top: 20px;"/>
+											<p style="font-size: 3px;font-weight: 300;">男生人数</p>
+										</div>
+										<div style="display: flex;flex-direction: column;align-items: center;width:40%;margin-left: 10px;">
+											<div id="girlNum"></div>
+											<div id="girls" style="width:80%;height:70px ;display:flex;flex-direction: row;justify-content: center;">
+												
+											</div>
+											<img src="static/images/redBrace.png" style="width:60px;margin-top: 20px;"/>
+											<p style="font-size: 3px;font-weight: 300;">女生人数</p>
+										</div>
+										<script>
+												var _boyNum=this.boyNum/(this.boyNum+this.girlNum)*10;
+												var _girlNum=this.girlNum/(this.boyNum+this.girlNum)*10;
+												for(var i=0;i<_boyNum;i++)
+												{
+													var img = document.createElement('img');
+													img.setAttribute('src','static/images/boys.png');
+													img.setAttribute('style','height:70px;margin-top: 10px;margin-right: 5px;');
+													document.getElementById('boys').appendChild(img);
+												}
+											    for(var j=0;j<_girlNum;j++)
+											    {
+											    	var img = document.createElement('img');
+											    	img.setAttribute('src','static/images/girls.png');
+											    	img.setAttribute('style','height:70px;margin-top: 10px;margin-right: 5px;');
+											    	document.getElementById('girls').appendChild(img);
+											    }
+										</script>
+									</div>
+								</div>
+								<div style="display: flex;flex-direction: row;width:100px;margin-left: 10px;margin-top: -40px;">
+									<div style="display: flex;flex-direction: column;width:50px;align-items: center;">
+										<p id="designNum" style="font-size: 10px;"></p>
+										<div style="display: flex;flex-direction: row; height: 120px;width: 15px;position:relative">
+											<img id="bar1" src="static/images/b1.png" style="width: 5px;position:absolute;bottom:0;margin-left: -30%;" />
+											<img src="static/images/bar.png" style="width:50%;height: 100%;"/>
+										</div>
+										<p style="font-size: 3px;font-weight: 800;margin-top: 10px;width:100%">设计学院学习人数</p>
+									</div>
+									<div style="display: flex;flex-direction: column;width:50px;align-items: center;margin-left: 10px;">
+										<p id="internetNum" style="font-size: 10px;"></p>
+										<div style="display: flex;flex-direction: row; height: 120px;width: 15px;position:relative">
+											<img id="bar2" src="static/images/b2.png" style="width: 5px;position:absolute;bottom:0;margin-left: -30%;" />
+											<img src="static/images/bar.png" style="width:50%;height: 100%;"/>
+										</div>
+										<p style="font-size: 3px;font-weight: 800;margin-top: 10px;width:100%">互联网学院学习人数</p>
+									</div>
+								</div>
+							</div>
+						</div>
+						<script>
+							document.getElementById("allNum").innerHTML = this.allStudyNum;
+							document.getElementById("boyNum").innerHTML = this.boyNum;
+							document.getElementById("girlNum").innerHTML = this.girlNum;
+							document.getElementById("designNum").innerHTML = this.designNum;
+							document.getElementById("internetNum").innerHTML = this.internetNum;
+							
+							var bar1 = document.getElementById("bar1");
+							bar1.style.height=this.designNum/(this.designNum+this.internetNum)*100+'%';
+							var bar2 = document.getElementById("bar2");
+							bar2.style.height=this.internetNum/(this.designNum+this.internetNum)*100+'%';
+						</script>
+					</div>
+					<div id="line2">
+						<div id="line2Border1" style="position: relative;">
+							<div class="title1">
+								<img src="static/images/titleRectangle.png" style="height:20px;margin-left: 20px;" />
+								<p style="margin-left: 10px; font-size: 15px;">课程统计</p>
+							</div>
+							<div id="triangles" style="display: flex;flex-direction: row;height=300px;width:85%;margin-left: 9%;position:absolute;bottom:80px">
+<!-- 								<div id="square">
+									<p id="num1" style="position: absolute;top:-50px; font-weight: bold;color:#205fee;"></p>
+									<img src="static/images/triangle1.png" id="triangle1" style="width: 100%; height: 90px;position: absolute;bottom:0" />
+								</div>
+								<div id="square">
+									<p id="num2" style="position: absolute;top:-50px;font-weight: bold;color:#b620ee"></p>
+									<img src="static/images/triangle2.png" id="triangle2" style="width: 100%; height: 50px;position: absolute;bottom:0" />
+								</div>
+								<div id="square">
+									<p id="num3" style="position: absolute;top:-50px;font-weight: bold;color:#ee206e"></p>
+									<img src="static/images/triangle3.png" id="triangle3" style="width: 100%; height: 50px;position: absolute;bottom:0" />
+								</div>
+								<div id="square">
+									<p id="num4" style="position: absolute;top:-50px; font-weight: bold;color:#d98a00"></p>
+									<img src="static/images/triangle4.png" id="triangle4" style="width: 100%; height: 50px;position: absolute;bottom:0" />
+								</div>
+								<div id="square">
+									<p id="num5" style="position: absolute;top:-50px; font-weight: bold;color:#bcebf8"></p>
+									<img src="static/images/triangle5.png" id="triangle5" style="width: 100%; height: 50px;position: absolute;bottom:0" />
+								</div> -->
+							</div>
+							<div id="echartsContainer" style="width: 27% ;height:240px;margin-top:-50px"></div>
+							<script type="text/javascript">
+							    // 基于准备好的dom，初始化echarts实例
+							    var myChart = echarts.init(document.getElementById('echartsContainer'));
+							    // 使用刚指定的配置项和数据显示图表。
+							    myChart.setOption(option);
+							</script>
+							<script>
+									var _studioNum=this.studioNum;
+									var squareWidth=100/_studioNum-5;
+									var _color=this.numColor;
+									var _data=this.studioClassData;
+									console.log(_studioNum);
+									for(var i=1;i<=_studioNum;i++){
+										var square = document.createElement('div');
+										square.setAttribute('style','height:70px;margin-top: 10px;margin-right: 5px;width:'+squareWidth+'%');
+										square.setAttribute('id','square');
+										document.getElementById('triangles').appendChild(square);
+										
+										var num = document.createElement('p');
+										num.setAttribute('style','position: absolute;top:-58px; font-weight: bold;color:'+_color[i%5]);
+										num.innerHTML=_data[i-1];
+										square.appendChild(num);
+										
+										var triangleHeight=_data[i-1]*2.5;
+										var triangle = document.createElement('img');
+										triangle.setAttribute('src','static/images/triangle'+(i%5+1)+'.png');
+										triangle.setAttribute('style','width: 100%;position: absolute;bottom:0;height:'+triangleHeight+'px');
+										square.appendChild(triangle);
+									}
+							</script>
+						</div>
+						
+						<div id="line2Border2" style="margin-top: 20px;">
+							<div class="title1">
+								<img src="static/images/titleRectangle.png"/ style="height:20px;margin-left: 20px;">
+								<p style="margin-left: 10px; font-size: 15px;">学院介绍</p>
+							</div>
+							<div id="introduce" style="width: 100%;position:relative">
+								<img id="frame1" onclick="changeFrame1()" src="static/images/frame1.png" style="width:100px; height:30px; margin-top: 50px;margin-left:20%;" />
+								<img id="frame2" onclick="changeFrame2()" src="static/images/frame2.png" style="width:100px; height:30px; margin-top: 50px; position:absolute;right:20%"/>
+							</div>
+						</div>
+						<script>
+							var flag1=1;
+							var flag2=1;
+							var frame1 = document.getElementById("frame1");
+							var frame2 = document.getElementById("frame2");
+							function changeFrame1(){
+								if(flag1){
+									frame1.src="static/images/frame3.png"
+									frame1.style="width:175px; height:150px; margin-top: 10px;margin-left: 10%;"
+									frame2.src="static/images/frame2.png"
+									frame2.style="width:100px; height:30px; margin-top: 50px; position:absolute;right:15%"
+								}
+							}
+							function changeFrame2(){
+								if(flag2){
+									frame1.src="static/images/frame1.png"
+									frame1.style="width:100px; height:30px; margin-top: 50px; margin-left: 20%;"
+									frame2.src="static/images/frame4.png"
+									frame2.style="width:140px; height:150px; margin-top: 10px;position:absolute;right:20%"
+								}
+							}
+						</script>
+					</div>
+					<div id="line1Right">
+						<div id="titlenew">
+							<div class="title1">
+							<img src="static/images/titleRectangle.png"/ style="height:20px;margin-left: 20px;">
+							<p style="margin-left: 10px; font-size: 15px;">地图信息</p>
+							</div>
+							<div id="map" style="margin-left: 10px;margin-top: 15px;align-items: center;"></div>
+						</div>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+		<div id="provinceInfo"></div>
+
+	</body>
+	<style>
+		html body {
+			height: 100%;
+			width: 100%;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
 		}
-	
-	}
+		/*整个容器*/
+		#container{
+			width:100%;
+			height:1000px;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			background-color: #FFFFFF;
+		}
+		/* 显示内容 */
+		#content{
+			width:100%;
+			height: 800px;
+			margin:0 auto;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			background-color: #f7f6f2;
+		}
+		/* 标题 */
+		#title{
+			position: relative;
+			height:80px;
+			width:100%;
+			background-color: #205fee;
+			display: flex;
+			align-items: center;
+			text-align: center;
+		}
+		#line1{
+			position:relative;
+			display: flex;
+			flex-direction: row;
+			width:100%;
+			margin-top: 5%;
+			margin-left: 30px;
+			margin-bottom: 20px;
+		}
+		
+		/* 信息内容 */
+		#information{
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			background-image: url(static/images/border1.png);
+			background-size: 100% 270px;
+			height:270px;
+			width:100%;
+		}
+		.title1{
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			width: 100%;
+			height:30px;
+			padding-top: 20px;
+			padding-left: 20px;
+		}
+		#titlenew{
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			width: 100%;
+			height:10px;
+			padding-top: 20px;
+			padding-left: 20px;
+		}
+		#wire{
+			height:1px;
+			width: 250px;
+			background-color:#DCDCDC;
+		}
+		.infoImgLump{
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			width: 80%;
+			height:auto;
+		}
+		.infoImgLine{
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			justify-content: center;
+			height: auto;
+			width:100%;
+		}
+		.infoIcon1{
+			width:40%;
+			height: auto;
+			padding-right: 10px;
+			border-right: 1px solid#dcdcdc;
+		}
+		.infoIcon2{
+			width: 40%;
+			height: auto;
+			padding-left: 10px;
+		}
+		/* 人数统计 */
+		#numberOfPeople{
+			background-image: url(static/images/border1.png);
+			background-size: 100% 250px;
+			height:250px;
+			width:100%;
+			margin-top: 20px;
+		}
+		#num{
+			display: flex;
+			flex-direction: row;
+			margin-top: 10px;
+			margin-left:20px;
+		}
+		#numImg{ 
+			display: flex; 
+			flex-direction: row; 
+			width:100%;
+			margin-top: 20px;
+		}
+		#boyNum{
+			width:40px;
+			height:12px;
+			color:#FFFFFF;
+			font-size: 3px;
+			line-height: 12px;
+			text-align: center;
+			border-radius: 20px;
+			background-color: #6ad5c5;
+		}
+		#girlNum{
+			width:40px;
+			height:12px;
+			color:#FFFFFF;
+			font-size: 3px;
+			line-height: 12px;
+			text-align: center;
+			border-radius: 20px;
+			background-color: #d81e06;
+		}
+		#boyExactNum{
+			font-size: 3px;
+			height: 8px;
+		}
+		#girlExactNum{
+			font-size: 3px;
+			height: 8px;
+		}
+		/* 地图信息 */
+		#line1Right{
+			background-image: url(static/images/border2.png);
+			background-size: 100% 540px;
+			height:540px;
+			width:37%;
+			margin-left:20px;
+		}
+		
+		
+		/* 下半部分 */
+		#line2{
+			position:absolute;
+			right: 50px;
+			display: flex;
+			flex-direction: column;
+			width:30%;
+		}
+		#line2Border1{
+			background-image: url(static/images/border3.png);
+			background-size: 100% 260px;
+			position: relative;
+			height:260px;
+			width:100%;
+		}
+		#line2Border2{
+			background-image: url(static/images/border4.png);
+			background-size: 100% 260px;
+			height:260px;
+			width:100%;
+		}
+		#square{
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			position: relative;
+			width:18%;
+			height:100px;
+		}
+		
+		/* 学院介绍 */
+		#introduce{
+			display: flex;
+			flex-direction: row;
+			position:relative;
+			margin-top: 3px;
+			height: 100%;
+			width:100%;
+		}
+		#frame1{
+			width:165px; 
+			height:140px; 
+			margin-top: 10px;
+			margin-left: 50px;
+		}
+		#frame2{
+			width:165px; 
+			height:140px; 
+			margin-top: 50px; 
+			margin-left: 50px;
+		}
+		#provinceInfo {
+			position: absolute;
+			z-index: 2;
+			padding: 10px;
+			visibility: hidden;
+		}
+		.titleImg1{
+			height:60px;
+			margin-left: 30px;
+		}
+		.titlelogo{
+			height:50px;
+			margin-left: 30px;
+		}
+		.titleImg2{
+			height:30px;
+			position:absolute;
+			right:130px;
+		}
+		.titleImg3{
+			height:20px;
+			position:absolute;
+			right:60px;
+		}
+	</style>
+	<script>
+		function getElementViewLeft(element){
+		　　　　var actualLeft = element.offsetLeft;
+		　　　　var current = element.offsetParent;
+		
+		　　　　while (current !== null){
+		　　　　　　actualLeft += current.offsetLeft;
+		　　　　　　current = current.offsetParent;
+		　　　　}
+		
+		　　　　if (document.compatMode == "BackCompat"){
+		　　　　　　var elementScrollLeft=document.body.scrollLeft;
+		　　　　} else {
+		　　　　　　var elementScrollLeft=document.documentElement.scrollLeft;
+		　　　　}
+		
+		　　　　return actualLeft-elementScrollLeft;
+		　　}
+		
+		　　function getElementViewTop(element){
+		　　　　var actualTop = element.offsetTop;
+		　　　　var current = element.offsetParent;
+		
+		　　　　while (current !== null){
+		　　　　　　actualTop += current. offsetTop;
+		　　　　　　current = current.offsetParent;
+		　　　　}
+		
+		　　　　 if (document.compatMode == "BackCompat"){
+		　　　　　　var elementScrollTop=document.body.scrollTop;
+		　　　　} else {
+		　　　　　　var elementScrollTop=document.documentElement.scrollTop;
+		　　　　}
+		
+		　　　　return actualTop-elementScrollTop;
+		　　}
+		
+		class lineMap {
+			constructor(container) {
+				this.container = document.getElementById('map');
+			}
 
-    setLight() {
-      let ambientLight = new THREE.AmbientLight(0xffffff); // 环境光
-      this.scene.add(ambientLight);
-    }
+			init() {
+				this.provinceInfo = document.getElementById('provinceInfo');
+				// 渲染器
+				this.renderer = new THREE.WebGLRenderer();
+				this.renderer.setSize(350, 350);
+				this.renderer.setClearColor(0xffffff, 1); //设置背景颜色
+				//this.renderer.set
+				this.container.appendChild(this.renderer.domElement);
 
-    setController() {
-      this.controller = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-      /* this.controller.enablePan = false; // 禁止右键拖拽
+				// 场景
+				this.scene = new THREE.Scene();
 
-      this.controller.enableZoom = true; // false-禁止右键缩放
+				// 相机 透视相机
+				this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+				this.camera.position.set(0, -70, 150);
+				this.camera.lookAt(0, 0, 0);
+
+				this.setController(); // 设置控制
+
+				this.setLight(); // 设置灯光
+
+				//this.setRaycaster();
+
+				this.animate();
+
+				// this.loadFont(); // 加载字体
+
+				this.loadMapData();
+
+				this.setResize(); // 绑定浏览器缩放事件
+
+				//
+				document.body.addEventListener('mousemove', this.mouseMoveEvent.bind(this));
+				document.body.addEventListener('click', this.mouseClickEvent.bind(this));
+			}
+
+			setResize() {
+				let _this = this;
+				window.addEventListener('resize', function() {
+					_this.renderer.setSize(window.innerWidth, window.innerHeight);
+				})
+			}
+
+			loadMapData() {
+				let _this = this;
+
+				// 加载json文件
+				let loader = new THREE.FileLoader();
+				loader.load('static/json/china.json', function(data) {
+					let jsonData = JSON.parse(data);
+					_this.initMap(jsonData);
+				});
+			}
+
+			loadFont() { //加载中文字体
+				var loader = new THREE.FontLoader();
+				var _this = this;
+				loader.load('static/fonts/chinese.json', function(response) {
+					_this.font = response;
+					_this.loadMapData();
+				});
+
+			}
+
+			createText(text, position) {
+				var shapes = this.font.generateShapes(text, 1);
+
+				var geometry = new THREE.ShapeBufferGeometry(shapes);
+
+				var material = new THREE.MeshBasicMaterial();
+
+				var textMesh = new THREE.Mesh(geometry, material);
+				textMesh.position.set(position.x, position.y, position.z);
+
+				this.scene.add(textMesh);
+			}
+
+			initMap(chinaJson) {
+				// 建一个空对象存放对象
+				this.map = new THREE.Object3D();
+
+				let _this = this;
+
+				// 墨卡托投影转换
+				const projection = d3.geoMercator().center([110.0, 37.5]).scale(150).translate([0, 0]);
+
+				chinaJson.features.forEach(elem => {
+					var flag = 1;
+					if(elem.properties.name == "辽宁省" || elem.properties.name == "四川省"){
+						flag = 2;
+					}
+
+					// 定一个省份3D对象
+					const province = new THREE.Object3D();
+					// 每个的 坐标 数组
+					const coordinates = elem.geometry.coordinates;
+					// 循环坐标数组
+					coordinates.forEach(multiPolygon => {
+
+						multiPolygon.forEach(polygon => {
+
+							const shape = new THREE.Shape();
+							const lineMaterial = new THREE.LineBasicMaterial({
+								color: 'white',
+								opacity: 0.6
+							});
+							const lineGeometry = new THREE.Geometry();
+
+							for (let i = 0; i < polygon.length; i++) {
+								const [x, y] = projection(polygon[i]);
+								if (i === 0) {
+									shape.moveTo(x, -y);
+								}
+								shape.lineTo(x, -y);
+								lineGeometry.vertices.push(new THREE.Vector3(x, -y, 4.01));
+							}
+
+							const extrudeSettings = {
+								depth: 4,
+								bevelEnabled: false
+							};
+
+							const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+							var material = new THREE.MeshBasicMaterial({
+								color: '#02a1e2',
+								transparent: true,
+								opacity: 0.6
+							});
+							var material1 = new THREE.MeshBasicMaterial({
+								color: '#3480C4',
+								transparent: true,
+								opacity: 0.5
+							});
+
+							if(flag == 2){
+								material = new THREE.MeshBasicMaterial({
+									color: '#0f1de2',
+									transparent: true,
+									opacity: 0.6
+								});
+								material1 = new THREE.MeshBasicMaterial({
+									color: '#0f1de2',
+									transparent: true,
+									opacity: 0.5
+								});
+							}
+							/* const material = new THREE.MeshBasicMaterial({ color: '#dedede', transparent: false, opacity: 0.6 });
+							const material1 = new THREE.MeshBasicMaterial({ color: '#dedede', transparent: false, opacity: 0.5 }); */
+							const mesh = new THREE.Mesh(geometry, [material, material1]);
+							const line = new THREE.Line(lineGeometry, lineMaterial);
+							province.add(mesh);
+							province.add(line)
+
+						})
+
+					})
+
+					// 将geo的属性放到省份模型中
+					province.properties = elem.properties;
+					if (elem.properties.contorid) {
+						const [x, y] = projection(elem.properties.contorid);
+						province.properties._centroid = [x, y];
+					}
+
+					//绘制光柱
+					if (province.properties.center) {
+						const texture = new THREE.TextureLoader().load("images/lightray_yellow.jpg");
+
+						const [x, y] = projection(province.properties.center);
+						const planegeomentry = new THREE.PlaneGeometry(1, 10);
+						var planematerial = new THREE.MeshBasicMaterial({
+							//map: texture,
+							map: texture, ////颜色贴图
+							color: '#ffff00',
+							transparent: true,
+							opacity: 0.7,
+							depthTest: false, //深度测试属性
+							blending: THREE.AdditiveBlending, //滤镜选择
+							side: THREE.DoubleSide
+						})
+						var plane = new THREE.Mesh(planegeomentry, planematerial);
+						plane.position.set(x, -y, 8);
+						plane.rotation.x = Math.PI / 2;
+						province.add(plane);
+						var plane2 = plane.clone();
+						plane2.rotation.y = Math.PI / 2;
+						province.add(plane2);
+					}
+
+
+					_this.map.add(province);
+
+				})
+
+				this.scene.add(this.map);
+			}
+
+			//鼠标移动事件
+			mouseMoveEvent(event) {
+				this.eventOffset = {};
+				if (!this.raycaster)
+					this.raycaster = new THREE.Raycaster();
+				if (!this.mouse)
+					this.mouse = new THREE.Vector2();
+
+				// 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
+				var thisWindow=document.getElementById('map')
+				this.mouse.x = (event.clientX-getElementViewLeft(thisWindow)) /(thisWindow.offsetHeight) * 2 - 1;
+				this.mouse.y = -(event.clientY-getElementViewTop(thisWindow))/ (thisWindow.offsetWidth) * 2 + 1;
+
+
+				this.eventOffset.x = event.clientX;
+				this.eventOffset.y = event.clientY;
+				this.provinceInfo.style.left = this.eventOffset.x + 2 + 'px';
+				this.provinceInfo.style.top = this.eventOffset.y + 2 + 'px';
+
+				// 通过摄像机和鼠标位置更新射线
+				this.raycaster.setFromCamera(this.mouse, this.camera);
+
+				// 计算物体和射线的焦点
+				const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+
+				if (this.activeInstersect && this.activeInstersect.length > 0) { // 将上一次选中的恢复颜色
+					this.activeInstersect.forEach(element => {
+						var properties = element.object.parent.properties;
+						if (properties.name !== '辽宁省' && properties.name !== '四川省'){
+							element.object.material[0].color.set('#02A1E2');
+							element.object.material[1].color.set('#3480C4');
+						}
+					});
+				}
+
+				this.activeInstersect = []; // 设置为空
+
+				for (var i = 0; i < intersects.length; i++) {
+					if (intersects[i].object.material && intersects[i].object.material.length === 2) {
+						this.activeInstersect.push(intersects[i]);
+						var properties = intersects[0].object.parent.properties;
+						if (properties.name !== '辽宁省' && properties.name !== '四川省'){
+							intersects[i].object.material[0].color.set('#1a57ff');
+							intersects[i].object.material[1].color.set('#1a57ff');
+							break; // 只取第一个
+						}
+					}
+				}
+
+				//显示省份信息
+				this.createProvinceInfo();
+
+			}
+
+			//鼠标点击事件
+			mouseClickEvent(event) {
+				if (!this.raycaster)
+					this.raycaster = new THREE.Raycaster();
+				if (!this.mouse)
+					this.mouse = new THREE.Vector2();
+
+				// 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
+				var thisWindow=document.getElementById('map')
+				this.mouse.x = (event.clientX-getElementViewLeft(thisWindow)) /(thisWindow.offsetHeight) * 2 - 1;
+				this.mouse.y = -(event.clientY-getElementViewTop(thisWindow))/ (thisWindow.offsetWidth) * 2 + 1;
+
+				// 通过摄像机和鼠标位置更新射线
+				this.raycaster.setFromCamera(this.mouse, this.camera);
+
+				// 计算物体和射线的焦点
+				const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+				if (intersects.length !== 0 && intersects[0].object.parent.properties.name) {
+					var properties = intersects[0].object.parent.properties;
+					if (properties.name === '辽宁省') {
+						window.location.assign("Internet");
+					}
+					else if (properties.name === '四川省') {
+						window.location.assign("Design");
+					}
+				}
+
+			}
+			setLight() {
+				let ambientLight = new THREE.AmbientLight(0xffffff); // 环境光
+				this.scene.add(ambientLight);
+			}
+
+			setController() {
+				this.controller = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+				/* this.controller.enablePan = false; // 禁止右键拖拽
+
+				this.controller.enableZoom = true; // false-禁止右键缩放
       
-      this.controller.maxDistance = 200; // 最大缩放 适用于 PerspectiveCamera
-      this.controller.minDistance = 50; // 最大缩放
+				this.controller.maxDistance = 200; // 最大缩放 适用于 PerspectiveCamera
+				this.controller.minDistance = 50; // 最大缩放
 
-      this.controller.enableRotate = true; // false-禁止旋转 */
+				this.controller.enableRotate = true; // false-禁止旋转 */
 
-      /* this.controller.minZoom = 0.5; // 最小缩放 适用于OrthographicCamera
-      this.controller.maxZoom = 2; // 最大缩放 */
+				/* this.controller.minZoom = 0.5; // 最小缩放 适用于OrthographicCamera
+				this.controller.maxZoom = 2; // 最大缩放 */
 
-    }
+			}
 
-    animate() {
-      requestAnimationFrame(this.animate.bind(this));
+			animate() {
+				requestAnimationFrame(this.animate.bind(this));
 
-      this.renderer.render(this.scene, this.camera);
-    }
+				this.renderer.render(this.scene, this.camera);
+			}
 
-    createProvinceInfo() { // 显示省份的信息      
-      if (this.activeInstersect.length !== 0 && this.activeInstersect[0].object.parent.properties.name) {
-        var properties = this.activeInstersect[0].object.parent.properties;
+			createProvinceInfo() { // 显示省份的信息      
+				if (this.activeInstersect.length !== 0 && this.activeInstersect[0].object.parent.properties.name) {
+					var properties = this.activeInstersect[0].object.parent.properties;
 
-        this.provinceInfo.textContent = properties.name;
+					if(properties.name=="四川省"){
+						this.provinceInfo.textContent="互联网学院";
+					}
+					else if(properties.name=="辽宁省"){
+						this.provinceInfo.textContent="设计学院";
+					}
+					else{
+						this.provinceInfo.textContent = properties.name;
+					}
+					
 
-        this.provinceInfo.style.visibility = 'visible';
-      } else {
-        this.provinceInfo.style.visibility = 'hidden';
-      }
+					this.provinceInfo.style.visibility = 'visible';
+				} else {
+					this.provinceInfo.style.visibility = 'hidden';
+				}
 
 
-    }
-  }
-</script>
-<script>
-  let line = new lineMap();
-  line.init();
-</script>
+			}
+		}
+	</script>
+	<script>
+		const sheet = document.getElementById('line1Right');
+		let line = new lineMap(sheet);
+		line.init();
+	</script>
 
 </html>

@@ -295,7 +295,7 @@
             texture.minFilter = THREE.LinearFilter;
             material = new THREE.MeshBasicMaterial( { map: texture } );
             var mainScreen = new THREE.Mesh(geometry, material); //网格模型对象Mesh
-
+            video.pause();
             mainScreen.addEventListener('click', function () {
                 video = document.getElementById(videoTag);
                 video.play();
@@ -776,8 +776,15 @@
         }
         //打开个人中心
         function openPersonal_center(){
+            var personal_info;
+            $.ajax({url:"/user/getUsername", async:false ,success: function(data) {
+                    personal_info = data.toString();
+                }})
+
             $.ajax({url:"/user/getCompletedNum", async:false ,success: function(data) {
-                    var personal = new PersonalCenter({content: "",
+                    var personal = new PersonalCenter({content1: "用户名："+ personal_info,
+                        content2:"所在学院：互联网学院",
+                        content3:"所在工作室：大数据工作室",
                         completed_num:data});
                     personal.openLayer();
                 }})
@@ -827,7 +834,7 @@
         var player={height:1.8,speed:2,turnSpeed:Math.PI*0.01};
         var control;
         var stats;
-        var progress;
+        var progress = "0";
         var viewer=1;
         var ladderUrl;//阶梯的路径
         var txtContext;//文本内容

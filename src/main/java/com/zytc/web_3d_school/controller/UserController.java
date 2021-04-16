@@ -102,6 +102,16 @@ public class UserController {
         return "failed";
     }
 
+    @RequestMapping("/getUsername")
+    @ResponseBody
+    public String getUsername(){
+        SecurityUser user = (SecurityUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (user != null)
+            return user.getUsername();
+        return "未登录";
+    }
+
+
      @RequestMapping("/upload")
      @ResponseBody
      public String upload(@RequestParam("myfile")MultipartFile multipartFile){
