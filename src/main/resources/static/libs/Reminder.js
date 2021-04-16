@@ -10,7 +10,7 @@ function Reminder(options) {
  */
 Reminder.prototype.openLayer = function () {
     var background_layer = document.createElement("div");
-
+    background_layer.id = "reminder_back";
     background_layer.style.display = "none";
     background_layer.style.position = "absolute";
     background_layer.style.top =  "0px";
@@ -23,6 +23,7 @@ Reminder.prototype.openLayer = function () {
 
 
     var open_layer = document.createElement("div");
+    open_layer.id = "reminder_open";
     open_layer.style.background = "url(static/images/reminder.png) no-repeat";
     open_layer.style.display = "none";
     open_layer.style.position = "fixed";
@@ -59,6 +60,8 @@ Reminder.prototype.openLayer = function () {
     span_confirm.onclick = function () {
         open_layer.style.display = "none";
         background_layer.style.display = "none";
+        // open_layer.parentNode.removeChild(open_layer);
+        // background_layer.parentNode.removeChild(background_layer);
     };
 
     open_layer.appendChild(span_confirm);

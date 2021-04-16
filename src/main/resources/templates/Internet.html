@@ -23,7 +23,7 @@
 				position: absolute;
 				right:0;
 				top:0;
-				display: block;
+				display: none;
 			}
 			#navigation{
 				width:1100px;
@@ -31,7 +31,7 @@
 				position: absolute;
 				left:0;
 				bottom:0;
-				display: block;
+				display: none;
 			}
 		</style>
 	</head>
@@ -80,7 +80,7 @@
 		camera.position.x = 38;
 		camera.position.y = 70;
 		camera.position.z = 0;
-		camera.lookAt(38, 20, 20);
+		camera.lookAt(38, 20, 0);
 		scene.add(camera);
 	}
 	function cssView(){
@@ -572,7 +572,24 @@
 		// 计算物体和射线的焦点
 		const intersects = this.raycaster.intersectObjects(this.scene.children,true);
 
-		//window.location.assign("room");
+		console.log(intersects);
+
+		if (intersects.length !== 0){
+			//css工作室
+			if(intersects[0].object.name === 'Obj3d66-588695-25-515') {
+				window.location.assign("cssStudio");
+			}
+			//java工作室
+			else if(intersects[0].object.name === 'Obj3d66-588695-25-516') {
+				window.location.assign("Internet");
+			}
+			//大数据工作室
+			else if(intersects[0].object.name === 'Obj3d66-588695-25-517') {
+				window.location.assign("BigDataStudio");
+			}
+
+
+		}
 
 	}
 
@@ -674,6 +691,8 @@
 		Resource_Loaded=true;
 		document.body.appendChild(renderer.domElement);
 		document.getElementById('wrapper').style.display = 'none';
+		//加载完成后加载导航栏和退出
+		displayIcon();
 		animate();
 		// onResourceLoaded(); //记得给所有loader加上（loadingManager）
 	}
