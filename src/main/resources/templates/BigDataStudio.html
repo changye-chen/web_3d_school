@@ -47,7 +47,7 @@
 
     <input id="reminder" style="border: none; background:transparent; display: none">
     <video id="video" autoplay controls style="display:none"><!--loop crossOrigin="anonymous" playsinline style="display:none"-->
-        <source id="video_source" src="static/video/2.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+        <source id="video_source" src="static/video/0.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
     </video>
     <a href="Internet"><img th:src="@{static/images/exit.png}" id="exit" alt="退出"></a>
     <map id="navigation_map" name="navigation_map">
@@ -73,7 +73,7 @@
                 dataType: "json",
                 type: "post",
                 async: "false",
-                data:{addr:"C:\\服务外包\\web_3d_school\\src\\main\\resources\\static\\book\\test.txt"},
+                data:{addr:"C:\\Users\\12637\\IdeaProjects\\web_3d_school\\src\\main\\resources\\static\\book"},
                 success: function (data){
                     txtContext = data.responseText.toString();
                     console.log(txtContext);
@@ -295,7 +295,7 @@
             texture.minFilter = THREE.LinearFilter;
             material = new THREE.MeshBasicMaterial( { map: texture } );
             var mainScreen = new THREE.Mesh(geometry, material); //网格模型对象Mesh
-            video.pause();
+            //video.pause();
             mainScreen.addEventListener('click', function () {
                 video = document.getElementById(videoTag);
                 video.play();
