@@ -46,7 +46,7 @@
 
 	<input id="reminder" style="border: none; background:transparent; display: none">
 	<video id="video" autoplay controls style="display:none"><!--loop crossOrigin="anonymous" playsinline style="display:none"-->
-		<source id="video_source" src="static/video/0h.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+		<source id="video_source" src="static/video/0.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
 	</video>
 	<a href="Internet"><img th:src="@{static/images/exit.png}" id="exit" alt="退出"></a>
 	<map id="navigation_map" name="navigation_map">
@@ -133,14 +133,14 @@
 	function init(x,y,z){
 		initLight();
 		initImage(55, 80, 90+x, 124+y, 96+z, "static/images/pactera.jpg");
-		initImage(55, 80, 90+x, 42+y, 96+z, "static/images/teamLogo.jpg");
+		initImage(55, 80, 90+x, 42+y, 96+z, "static/images/teamLogo.png");
 		//initControls();
 		//加载主屏幕及控制按钮
 		initVideo(200,150,-38.5+x,77+y,96+z,"video");
 		mainVideoControl(-115+x,158+y,96+z,-130+x,158+y,96+z,-100+x,158+y,96+z,-85+x,158+y,96+z,"video");
 		loadLadder(5,5,5,284,60,411,"static/models/gltf/component/ladder0.gltf");
 
-		initStats();
+		//initStats();
 		loadGLTF(hdrPath,gltfPath,60,60,60,-800,0,-1000);
 		doorView();
 
@@ -155,6 +155,9 @@
 
 		loadMark("mark1",0.5,0.5,0.5,161,82,470);
 		//loadMark("mark2",0.5,0.5,0.5,161,82,470);
+
+		var video = document.getElementById("video");
+		video.play();
 	}
 
 	//加载贴图
@@ -266,7 +269,7 @@
 				video.pause();
 			})
 		});
-
+		video.play();
 		mainScreen.rotation.y=Math.PI;
 		mainScreen.position.set(x,y,z);
 		scene.add(mainScreen);
@@ -309,7 +312,7 @@
 		pause.rotation.x=Math.PI;
 		scene.add(pause);
 
-		var selectTexture = new THREE.ImageUtils.loadTexture("static/images/select.png",function(){
+		var selectTexture = new THREE.ImageUtils.loadTexture("static/images/submit.png",function(){
 		});
 		var select=new THREE.Mesh(
 				new THREE.PlaneBufferGeometry(10,10),
@@ -323,7 +326,7 @@
 		select.rotation.x=Math.PI;
 		scene.add(select);
 
-		var uploadTexture = new THREE.ImageUtils.loadTexture("static/images/submit.png",function(){
+		var uploadTexture = new THREE.ImageUtils.loadTexture("static/images/select.png",function(){
 		});
 		var upload=new THREE.Mesh(
 				new THREE.PlaneBufferGeometry(10,10),
@@ -408,7 +411,7 @@
 
 		//更新鼠标控制
 		//controls.update();
-		stats.update();
+		//stats.update();
 
 		meshes["mark1"].rotation.y+=Math.PI/15;
 		//meshes["mark2"].rotation.y+=Math.PI/15;

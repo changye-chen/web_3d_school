@@ -168,7 +168,7 @@
             initVideo(200,150,-38.5,77,96,"video");
             mainVideoControl(-115,158,96,-130,158,96,-100,158,96,-85,158,96,"video");
             //加载性能插件
-            initStats();
+            //initStats();
             //默认桌子视角
             doorView();
             loadGLTF(hdrPath,gltfPath,60,60,60);
@@ -207,6 +207,8 @@
             //加载感叹号
             loadMark("mark1",0.5,0.5,0.5,84,88,32);
 
+            var video = document.getElementById("video");
+            video.play();
         }
 
 
@@ -295,7 +297,7 @@
             texture.minFilter = THREE.LinearFilter;
             material = new THREE.MeshBasicMaterial( { map: texture } );
             var mainScreen = new THREE.Mesh(geometry, material); //网格模型对象Mesh
-            //video.pause();
+
             mainScreen.addEventListener('click', function () {
                 video = document.getElementById(videoTag);
                 video.play();
@@ -303,7 +305,6 @@
                     video.pause();
                 })
             });
-
             mainScreen.rotation.y=Math.PI;
             mainScreen.position.set(x,y,z);
             scene.add(mainScreen);
@@ -473,7 +474,7 @@
 
             //更新鼠标控制
             //controls.update();
-            stats.update();
+            //stats.update();
 
             if(symbol_flag === 0)
             {

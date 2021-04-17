@@ -140,7 +140,7 @@
         initVideo(200,150,-38.5+x,77+y,96+z,"video");
         mainVideoControl(-115+x,158+y,96+z,-130+x,158+y,96+z,-100+x,158+y,96+z,-85+x,158+y,96+z,"video");
         //加载性能插件
-        initStats();
+        //initStats();
         //默认桌子视角
         doorView();
         loadGLTF(hdrPath,gltfPath,60,60,60);
@@ -155,8 +155,12 @@
         darkMesh.rotation.x=Math.PI;
         scene.add(darkMesh);
 
-        loadMark("mark1",0.5,0.5,0.5,84,88,32);
-        loadMark("mark2",0.5,0.5,0.5,84,88,32);
+        //loadMark("mark1",0.5,0.5,0.5,84,88,32);
+
+        //loadMark("mark2",0.5,0.5,0.5,84,88,32);
+
+        var video = document.getElementById("video");
+        video.play();
     }
 
     function loadMark(mark,scalex,scaley,scalez,x,y,z) {
@@ -260,7 +264,7 @@
         texture.minFilter = THREE.LinearFilter;
         material = new THREE.MeshBasicMaterial( { map: texture } );
         var mainScreen = new THREE.Mesh(geometry, material); //网格模型对象Mesh
-
+        video.play();
         mainScreen.rotation.y=Math.PI;
         mainScreen.position.set(x,y,z);
         scene.add(mainScreen);
@@ -409,7 +413,7 @@
 
         //更新鼠标控制
         //controls.update();
-        stats.update();
+        //stats.update();
 
         requestAnimationFrame(animate);
         renderer.render(scene,camera);
@@ -418,8 +422,8 @@
         //     loadLadder(3,3,3,93,49,0,"ladder0");
         //     //meshes[ladder]
         // });
-        meshes["mark1"].rotation.y+=Math.PI/15;
-        meshes["mark2"].rotation.y+=Math.PI/15;
+        //meshes["mark1"].rotation.y+=Math.PI/15;
+        //meshes["mark2"].rotation.y+=Math.PI/15;
 
         requestAnimationFrame(animate);
         renderer.render(scene,camera);
