@@ -26,7 +26,7 @@ MyMission.prototype.openLayer = function () {
     open_layer.style.background = "url(static/images/my_mission.png) no-repeat";
     open_layer.style.display = "none";
     open_layer.style.position = "fixed";
-    open_layer.style.top="10%";
+    open_layer.style.top="20%";
     open_layer.style.left="0";
     open_layer.style.right="0";
     open_layer.style.margin="0 auto";
@@ -34,8 +34,8 @@ MyMission.prototype.openLayer = function () {
     // open_layer.style.left = this.options.left === undefined ? "10%" :this.options.left;
     // open_layer.style.width = this.options.width === undefined ? "80%" : this.options.width;
     // open_layer.style.height = this.options.height === undefined ? "80%" : this.options.height;
-    open_layer.style.width = "400px";
-    open_layer.style.height = "298px";
+    open_layer.style.width = "500px";
+    open_layer.style.height = "372px";
     open_layer.style.border = "1px solid";
     open_layer.style.borderRadius = "15px" ;
     open_layer.style.boxShadow = "4px 4px 10px #171414";;

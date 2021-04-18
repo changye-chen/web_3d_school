@@ -37,7 +37,7 @@ PersonalCenter.prototype.openLayer = function () {
     }
     open_layer.style.display = "none";
     open_layer.style.position = "fixed";
-    open_layer.style.top="10%";
+    open_layer.style.top="20%";
     open_layer.style.left="0";
     open_layer.style.right="0";
     open_layer.style.margin="0 auto";
